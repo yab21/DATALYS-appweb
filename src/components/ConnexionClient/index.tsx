@@ -8,21 +8,32 @@ const ConnexionClient: React.FC = () => {
   return (
     <>
       <main className="flex w-full">
-        <div className="relative hidden h-screen flex-1 items-center justify-center bg-gray-900 lg:flex">
-          <div className="absolute inset-0 my-auto h-screen bg-[url('/images/logo/Image-de-connexion-GMA.svg')] bg-cover bg-center bg-no-repeat"></div>
+        <div className="relative hidden h-screen flex-1 items-center justify-center bg-[#001614] lg:flex">
+          <div className="relative z-10 -mt-7 w-full max-w-md">
+            <img src="/images/logo/logo.png" alt="" width={180} height={120} />
+            <div className=" mt-16 space-y-3">
+              <h3 className="text-3xl font-bold text-white">
+                Infrastructure et analyse des données
+              </h3>
+              <p className="text-gray-300">
+                La donnée est aujourd'hui un moteur de croissance pour beaucoup
+                d'entreprises.
+              </p>
+            </div>
+          </div>
         </div>
         <div className="flex h-screen flex-1 items-center justify-center">
           <div className="w-full max-w-2xl space-y-8 px-3 text-gray-600 md:px-6">
             <div className="">
-              <Image
-                src="/images/logo/logo-icon.svg"
+              <img
+                src="/images/logo/logo-2.png"
                 width={150}
                 height={150}
                 className="lg:hidden"
                 alt=""
               />
               <div className="mt-5 space-y-2">
-                <h3 className="text-2xl font-bold text-gray-800 sm:text-3xl">
+                <h3 className="text-2xl font-bold text-[#002925] sm:text-3xl">
                   Connexion
                 </h3>
               </div>
@@ -31,68 +42,48 @@ const ConnexionClient: React.FC = () => {
               <div>
                 <Input
                   type="email"
-                  color="warning"
+                  color="primary"
                   label="Nom d'utilisateur"
                   variant="flat"
-                  defaultValue="edmond@gma.com"
+                  placeholder="Entrer le nom d'utilisateur"
                   className="max-w-sm"
                 />
-                {/* <label className="font-thin">Nom d'utilisateur</label>
-                <input
-                  type="text"
-                  placeholder="Entrer votre nom d'utilisateur"
-                  required
-                  className="mt-2 w-full rounded-lg border bg-transparent px-3 py-2 text-gray-500 shadow-sm outline-none focus:border-orange-400"
-                /> */}
               </div>
               <div>
                 <Input
                   type="password"
-                  color="warning"
+                  color="primary"
                   label="Mot de passe"
                   variant="flat"
-                  defaultValue="edmond@gma.com"
+                  placeholder="Entrer votre mot de passe"
                   className="max-w-sm"
                 />
-                {/* <label className="font-thin">Mot de passe</label>
-                <input
-                  type="password"
-                  placeholder="Entrer votre mot de passe"
-                  required
-                  className="mt-2 w-full rounded-lg border bg-transparent px-3 py-2 text-gray-500 shadow-sm outline-none focus:border-orange-400"
-                /> */}
               </div>
               <Button
                 as={Link}
-                href="/dashboardclient"
-                color="warning"
-                variant="faded"
+                href="/tableaudebordclient"
+                color="primary"
+                variant="solid"
               >
                 Connexion
               </Button>
-              {/* <button className="w-full rounded-lg bg-orange-400 px-4 py-2 font-medium text-white duration-150 hover:bg-orange-300 active:bg-orange-400">
-                Connexion
-              </button> */}
+              <Link
+                className="flex justify-start font-thin text-dark"
+                href="/creeruncompte"
+              >
+                Créer un compte.
+              </Link>
             </form>
-            <Link
-              className="mt-1 flex justify-start font-thin text-orange-400"
-              href="/"
-            >
+            <Link className="flex justify-start font-thin text-dark" href="/">
               Accéder aux différents utilisateurs.
             </Link>
             <div className="flex justify-center px-3 pb-4 pt-5">
-              <p className="text-sm">
+              <p className="text-primary">
                 All Rights Reserved by
-                <span className="font-medium">
-                  {" "}
-                  LES GRANDS MOULINS D'ABIDJAN
-                </span>
-                . Designed and Developed by{" "}
-                <Link
-                  className="font-medium text-orange-400"
-                  href="javascript:;"
-                >
-                  African Digit Consulting
+                <span className="font-medium"> DATALYS Consulting</span>.
+                Designed and Developed by{" "}
+                <Link className="text-dark" href="javascript:;">
+                  LA VICTOIRE
                 </Link>
                 .
               </p>
