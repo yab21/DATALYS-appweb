@@ -20,14 +20,15 @@ const DataCenter = () => {
             <table className="w-full table-auto text-left text-sm">
               <thead className="border-b bg-gray-1 font-medium text-dark dark:bg-gray-dark dark:text-white">
                 <tr>
-                  <th className="px-3 py-3">Nom</th>
+                  <th className="px-3 py-3">Nom de l'entreprise</th>
+                  <th className="px-3 py-3">Nom du client</th>
                   <th className="px-3 py-3">Département</th>
                   <th className="px-3 py-3">Pays</th>
                   <th className="px-3 py-3">Ville</th>
                   <th className="px-3 py-3"></th>
                 </tr>
               </thead>
-              <tbody className="divide-y text-gray-600">
+              <tbody className="mb-3 divide-y text-gray-600">
                 <tr>
                   <td className="flex items-center gap-x-3 whitespace-nowrap px-3 py-3">
                     <img
@@ -41,7 +42,10 @@ const DataCenter = () => {
                     </div>
                   </td>
                   <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
-                    ITCloud
+                    Arnaud charles
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
+                    Service informatique
                   </td>
                   <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
                     Côte d'Ivoire
@@ -80,7 +84,10 @@ const DataCenter = () => {
                     </div>
                   </td>
                   <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
-                    Data center & energie
+                    Yves Armand
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
+                    Service informatique
                   </td>
                   <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
                     Guinée
@@ -119,7 +126,10 @@ const DataCenter = () => {
                     </div>
                   </td>
                   <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
-                    ITCloud
+                    Yvette Darno
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
+                    Service informatique
                   </td>
                   <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
                     Côte d'Ivoire
@@ -158,13 +168,384 @@ const DataCenter = () => {
                     </div>
                   </td>
                   <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
-                    Data center & energie
+                    Gilbert etien
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
+                    Service informatique
                   </td>
                   <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
                     Guinée
                   </td>
                   <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
                     Conakry
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4">
+                    <Button
+                      isIconOnly
+                      size="sm"
+                      color="danger"
+                      aria-label="supprimer"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="30"
+                        height="30"
+                        viewBox="0 0 24 24"
+                      >
+                        <path fill="#fff" d="M5 13v-2h14v2z" />
+                      </svg>
+                    </Button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div className="mt-5 overflow-x-auto rounded-lg border shadow-sm">
+            <table className="w-full table-auto text-left text-sm">
+              <thead className="border-b bg-gray-1 font-medium text-dark dark:bg-gray-dark dark:text-white">
+                <tr>
+                  <th className="px-3 py-3">Nom de l'entreprise</th>
+                  <th className="px-3 py-3">Nom du client</th>
+                  <th className="px-3 py-3">Département</th>
+                  <th className="px-3 py-3">Pays</th>
+                  <th className="px-3 py-3">Ville</th>
+                  <th className="px-3 py-3"></th>
+                </tr>
+              </thead>
+              <tbody className="mb-3 divide-y text-gray-600">
+                <tr>
+                  <td className="flex items-center gap-x-3 whitespace-nowrap px-3 py-3">
+                    <img
+                      src="/images/fav.PNG"
+                      className="h-10 w-10 rounded-full"
+                    />
+                    <div>
+                      <span className="block text-sm font-medium text-dark dark:text-white">
+                        DATALYS Consulting
+                      </span>
+                    </div>
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
+                    Gilbert etien
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
+                    Service des moyens généraux
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
+                    Guinée
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
+                    Conakry
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4">
+                    <Button
+                      isIconOnly
+                      size="sm"
+                      color="danger"
+                      aria-label="supprimer"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="30"
+                        height="30"
+                        viewBox="0 0 24 24"
+                      >
+                        <path fill="#fff" d="M5 13v-2h14v2z" />
+                      </svg>
+                    </Button>
+                  </td>
+                </tr>
+                <tr>
+                  <td className="flex items-center gap-x-3 whitespace-nowrap px-3 py-3">
+                    <img
+                      src="/images/fav.PNG"
+                      className="h-10 w-10 rounded-full"
+                    />
+                    <div>
+                      <span className="block text-sm font-medium text-dark dark:text-white">
+                        DATALYS Consulting
+                      </span>
+                    </div>
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
+                    Yves Armand
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
+                    Service des moyens généraux
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
+                    Guinée
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
+                    Conakry
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4">
+                    <Button
+                      isIconOnly
+                      size="sm"
+                      color="danger"
+                      aria-label="supprimer"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="30"
+                        height="30"
+                        viewBox="0 0 24 24"
+                      >
+                        <path fill="#fff" d="M5 13v-2h14v2z" />
+                      </svg>
+                    </Button>
+                  </td>
+                </tr>
+                <tr>
+                  <td className="flex items-center gap-x-3 whitespace-nowrap px-3 py-3">
+                    <img
+                      src="/images/fav.PNG"
+                      className="h-10 w-10 rounded-full"
+                    />
+                    <div>
+                      <span className="block text-sm font-medium text-dark dark:text-white">
+                        DATALYS Consulting
+                      </span>
+                    </div>
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
+                    Yvette Darno
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
+                    Service des moyens généraux
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
+                    Côte d'Ivoire
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
+                    Abidjan
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4">
+                    <Button
+                      isIconOnly
+                      size="sm"
+                      color="danger"
+                      aria-label="supprimer"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="30"
+                        height="30"
+                        viewBox="0 0 24 24"
+                      >
+                        <path fill="#fff" d="M5 13v-2h14v2z" />
+                      </svg>
+                    </Button>
+                  </td>
+                </tr>
+                <tr>
+                  <td className="flex items-center gap-x-3 whitespace-nowrap px-3 py-3">
+                    <img
+                      src="/images/fav.PNG"
+                      className="h-10 w-10 rounded-full"
+                    />
+                    <div>
+                      <span className="block text-sm font-medium text-dark dark:text-white">
+                        DATALYS Consulting
+                      </span>
+                    </div>
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
+                    Arnaud charles
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
+                    Service des moyens généraux
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
+                    Côte d'Ivoire
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
+                    Abidjan
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4">
+                    <Button
+                      isIconOnly
+                      size="sm"
+                      color="danger"
+                      aria-label="supprimer"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="30"
+                        height="30"
+                        viewBox="0 0 24 24"
+                      >
+                        <path fill="#fff" d="M5 13v-2h14v2z" />
+                      </svg>
+                    </Button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div className="mt-5 overflow-x-auto rounded-lg border shadow-sm">
+            <table className="w-full table-auto text-left text-sm">
+              <thead className="border-b bg-gray-1 font-medium text-dark dark:bg-gray-dark dark:text-white">
+                <tr>
+                  <th className="px-3 py-3">Nom de l'entreprise</th>
+                  <th className="px-3 py-3">Nom du client</th>
+                  <th className="px-3 py-3">Département</th>
+                  <th className="px-3 py-3">Pays</th>
+                  <th className="px-3 py-3">Ville</th>
+                  <th className="px-3 py-3"></th>
+                </tr>
+              </thead>
+              <tbody className="mb-3 divide-y text-gray-600">
+                <tr>
+                  <td className="flex items-center gap-x-3 whitespace-nowrap px-3 py-3">
+                    <img
+                      src="/images/fav.PNG"
+                      className="h-10 w-10 rounded-full"
+                    />
+                    <div>
+                      <span className="block text-sm font-medium text-dark dark:text-white">
+                        DATALYS Consulting
+                      </span>
+                    </div>
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
+                    Gilbert etien
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
+                    Équipe projet
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
+                    Guinée
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
+                    Conakry
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4">
+                    <Button
+                      isIconOnly
+                      size="sm"
+                      color="danger"
+                      aria-label="supprimer"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="30"
+                        height="30"
+                        viewBox="0 0 24 24"
+                      >
+                        <path fill="#fff" d="M5 13v-2h14v2z" />
+                      </svg>
+                    </Button>
+                  </td>
+                </tr>
+                <tr>
+                  <td className="flex items-center gap-x-3 whitespace-nowrap px-3 py-3">
+                    <img
+                      src="/images/fav.PNG"
+                      className="h-10 w-10 rounded-full"
+                    />
+                    <div>
+                      <span className="block text-sm font-medium text-dark dark:text-white">
+                        DATALYS Consulting
+                      </span>
+                    </div>
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
+                    Yves Armand
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
+                    Équipe projet
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
+                    Guinée
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
+                    Conakry
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4">
+                    <Button
+                      isIconOnly
+                      size="sm"
+                      color="danger"
+                      aria-label="supprimer"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="30"
+                        height="30"
+                        viewBox="0 0 24 24"
+                      >
+                        <path fill="#fff" d="M5 13v-2h14v2z" />
+                      </svg>
+                    </Button>
+                  </td>
+                </tr>
+                <tr>
+                  <td className="flex items-center gap-x-3 whitespace-nowrap px-3 py-3">
+                    <img
+                      src="/images/fav.PNG"
+                      className="h-10 w-10 rounded-full"
+                    />
+                    <div>
+                      <span className="block text-sm font-medium text-dark dark:text-white">
+                        DATALYS Consulting
+                      </span>
+                    </div>
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
+                    Yvette Darno
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
+                    Équipe projet
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
+                    Côte d'Ivoire
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
+                    Abidjan
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4">
+                    <Button
+                      isIconOnly
+                      size="sm"
+                      color="danger"
+                      aria-label="supprimer"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="30"
+                        height="30"
+                        viewBox="0 0 24 24"
+                      >
+                        <path fill="#fff" d="M5 13v-2h14v2z" />
+                      </svg>
+                    </Button>
+                  </td>
+                </tr>
+                <tr>
+                  <td className="flex items-center gap-x-3 whitespace-nowrap px-3 py-3">
+                    <img
+                      src="/images/fav.PNG"
+                      className="h-10 w-10 rounded-full"
+                    />
+                    <div>
+                      <span className="block text-sm font-medium text-dark dark:text-white">
+                        DATALYS Consulting
+                      </span>
+                    </div>
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
+                    Arnaud charles
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
+                    Équipe projet
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
+                    Côte d'Ivoire
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
+                    Abidjan
                   </td>
                   <td className="whitespace-nowrap px-3 py-4">
                     <Button

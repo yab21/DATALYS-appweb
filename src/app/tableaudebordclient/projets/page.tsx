@@ -1,17 +1,17 @@
 import React from "react";
-import PremierProjet from "@/components/TableauDeBordClient/PremierProjet";
+import Projet from "@/components/TableauDeBordClient/Projet";
 import { Metadata } from "next";
 import DefaultLayout from "@/components/TableauDeBordClient/Layouts/DefaultLaout";
 
 export const metadata: Metadata = {
-  title: "Premier projet | DATALYS Consulting",
-  description: "La page de 1st projet de DATALYS Consulting",
+  title: "Liste des projets | DATALYS Consulting",
+  description: "La page de la liste des projets de DATALYS Consulting",
 };
 
 const Page = () => {
   return (
     <DefaultLayout>
-      <PremierProjet />
+      <Projet />
     </DefaultLayout>
   );
 };

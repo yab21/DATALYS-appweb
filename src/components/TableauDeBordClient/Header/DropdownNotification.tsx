@@ -5,19 +5,19 @@ import Image from "next/image";
 
 const notificationList = [
   {
-    image: "/images/user/user.png",
-    title: "Relation client",
-    subTitle: "Un nouveau message",
+    image: "/images/logo-datalys-rvb.jpg",
+    title: "Mr. Ronald",
+    subTitle: "Merci de nous faire un devis sur mesure pour une commande... ",
   },
   {
-    image: "/images/user/user.png",
-    title: "Roland",
-    subTitle: "Un nouveau message",
+    image: "/images/logo-datalys-rvb.jpg",
+    title: "Mme. Yvette",
+    subTitle: "Merci de nous faire un devis sur mesure pour une commande... ",
   },
   {
-    image: "/images/user/user.png",
-    title: "Arnaud",
-    subTitle: "Un nouveau message",
+    image: "/images/logo-datalys-rvb.jpg",
+    title: "Mr. Arnaud",
+    subTitle: "La creation d'un nouveau compte",
   },
 ];
 
@@ -37,7 +37,7 @@ const DropdownNotification = () => {
             setDropdownOpen(!dropdownOpen);
           }}
           href="#"
-          className="relative flex h-12 w-12 items-center justify-center rounded-full border border-stroke bg-gray-2 text-dark hover:text-orange-400 dark:border-dark-4 dark:bg-dark-3 dark:text-white dark:hover:text-white"
+          className="relative flex h-12 w-12 items-center justify-center rounded-full border border-stroke bg-gray-2 text-dark hover:text-primary dark:border-dark-4 dark:bg-dark-3 dark:text-white dark:hover:text-white"
         >
           <span className="relative">
             <svg
@@ -57,11 +57,11 @@ const DropdownNotification = () => {
             </svg>
 
             <span
-              className={`absolute -top-0.5 right-0 z-1 h-2.5 w-2.5 rounded-full border-2 border-gray-2 bg-red-light dark:border-dark-3 ${
+              className={`absolute -top-0.5 right-0 z-1 h-2.5 w-2.5 rounded-full border-2 border-gray-2 bg-primary dark:border-dark-3 ${
                 !notifying ? "hidden" : "inline"
               }`}
             >
-              <span className="absolute -z-1 inline-flex h-full w-full animate-ping rounded-full bg-red-light opacity-75"></span>
+              <span className="absolute -z-1 inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75"></span>
             </span>
           </span>
         </Link>
@@ -74,22 +74,23 @@ const DropdownNotification = () => {
               <h5 className="text-lg font-medium text-dark dark:text-white">
                 Notifications
               </h5>
-              <span className="rounded-md bg-orange-400 px-2 py-0.5 text-body-xs font-medium text-white">
+              <span className="rounded-md bg-primary px-2 py-0.5 text-body-xs font-medium text-white">
                 3 nouveaux
               </span>
             </div>
 
-            <ul className="no-scrollbar mb-5 flex h-auto flex-col gap-1 overflow-y-auto">
+            <ul className="no-scrollbar flex h-auto flex-col gap-1 overflow-y-auto">
               {notificationList.map((item, index) => (
                 <li key={index}>
                   <Link
                     className="flex items-center gap-4 rounded-[10px] p-2.5 hover:bg-gray-2 dark:hover:bg-dark-3"
                     href="javascript:;"
                   >
-                    <span className="block h-14 w-14 rounded-full">
+                    <span className="block h-10 w-14 rounded-full">
                       <Image
                         width={112}
                         height={112}
+                        className="rounded-full"
                         src={item.image}
                         style={{
                           width: "auto",
@@ -112,12 +113,12 @@ const DropdownNotification = () => {
               ))}
             </ul>
 
-            <Link
+            {/* <Link
               className="flex items-center justify-center rounded-[7px] border border-orange-400 p-2.5 font-medium text-orange-400 hover:bg-orange-100 dark:border-dark-4 dark:text-dark-6 dark:hover:border-orange-400 dark:hover:bg-blue-light-3 dark:hover:text-orange-400"
               href="/dashboardclient/mail/mailenvoye"
             >
               Voir toutes les notifications
-            </Link>
+            </Link> */}
           </div>
         )}
       </li>

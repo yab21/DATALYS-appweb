@@ -2,7 +2,6 @@ import Link from "next/link";
 import DarkModeSwitcher from "./DarkModeSwitcher";
 import DropdownNotification from "./DropdownNotification";
 import DropdownUser from "./DropdownUser";
-import Image from "next/image";
 
 const Header = (props: {
   sidebarOpen: string | boolean | undefined;
@@ -80,7 +79,7 @@ const Header = (props: {
             <h1 className="mb-0.5 text-heading-5 font-bold text-dark dark:text-white">
               Tableau de bord
             </h1>
-            <p className="font-medium">Tableau de bord des administrateurs</p>
+            <p className="font-medium">Tableau de bord de Mr. Kouassi roland</p>
           </div>
         </div>
 
@@ -91,7 +90,7 @@ const Header = (props: {
             {/* <!-- Dark Mode Toggle --> */}
 
             {/* <!-- Notification Menu Area --> */}
-            {/* <DropdownNotification /> */}
+            <DropdownNotification />
             {/* <!-- Notification Menu Area --> */}
           </ul>
 

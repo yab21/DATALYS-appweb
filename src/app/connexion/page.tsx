@@ -3,8 +3,8 @@ import Connexion from "@/components/Connexion";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Connexion Administrateur | DATALYS Consulting",
-  description: "Le page de connexion",
+  title: "Connexion administrateur | DATALYS Consulting",
+  description: "Le page de connexion de l'administrateur",
 };
 
 const Page = () => {

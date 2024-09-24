@@ -8,7 +8,7 @@ const Breadcrumb = ({ pageName }: BreadcrumbProps) => {
   return (
     <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <h2 className="text-[22px] font-bold leading-[30px] text-dark dark:text-white">
-        Bienvenue <span className="font-thin">Mr l'administrateur</span>
+        Bienvenue <span className="font-thin">Mr. Kouassi roland</span>
       </h2>
 
       <nav>

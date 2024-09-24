@@ -10,7 +10,7 @@ const TableauDeBord: React.FC = () => {
         Les différents secteurs de DATALYS Consulting
       </h4>
       <DataStatsOne />
-      <Fichier />
+      {/* <Fichier /> */}
     </>
   );
 };

@@ -5,7 +5,7 @@ const DataStatsOne: React.FC = () => {
   return (
     <>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-6 xl:grid-cols-3 2xl:gap-7.5">
-        <Link href="/tableaudebordclient/premierprojet">
+        <Link href="/tableaudebordclient/dossier">
           <div className="rounded-[10px] bg-white p-6 shadow-1 dark:bg-gray-dark">
             <div className="flex h-14.5 w-14.5 items-center justify-center rounded-full bg-[#4aa9b8]">
               <svg
@@ -34,7 +34,7 @@ const DataStatsOne: React.FC = () => {
             </div>
           </div>
         </Link>
-        <Link href="/tableaudebordclient/deuxiemeprojet">
+        <Link href="/tableaudebordclient/dossier">
           <div className="rounded-[10px] bg-white p-6 shadow-1 dark:bg-gray-dark">
             <div className="flex h-14.5 w-14.5 items-center justify-center rounded-full bg-[#f9c954]">
               <svg
@@ -63,7 +63,7 @@ const DataStatsOne: React.FC = () => {
             </div>
           </div>
         </Link>
-        <Link href="/tableaudebordclient/troisiemeprojet">
+        <Link href="/tableaudebordclient/dossier">
           <div className="rounded-[10px] bg-white p-6 shadow-1 dark:bg-gray-dark">
             <div className="flex h-14.5 w-14.5 items-center justify-center rounded-full bg-[#3183ba]">
               <svg
