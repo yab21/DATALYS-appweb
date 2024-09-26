@@ -1,10 +1,73 @@
-import React from "react";
+"use client"; // Ceci est un composant client
+
+import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Input } from "@nextui-org/react";
 import { Button } from "@nextui-org/button";
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth"; // Firebase Auth
+import { doc, setDoc } from "firebase/firestore"; // Firestore
+import { db } from "@/firebase/firebaseConfig"; // Importer la configuration Firebase
 
 const CreerUnCompteAdmi: React.FC = () => {
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    // Vérifier si le mot de passe correspond à la confirmation
+    if (formData.password !== formData.confirmPassword) {
+      setError("Les mots de passe ne correspondent pas.");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const auth = getAuth();
+      // Créer l'utilisateur avec email et mot de passe
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        formData.email,
+        formData.password
+      );
+
+      const user = userCredential.user;
+
+      // Enregistrer les informations de l'admin dans Firestore
+      await setDoc(doc(db, "users", user.uid), {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        username: formData.username,
+        email: formData.email,
+        isAdmin: true, // Marquer l'utilisateur comme admin
+      });
+
+      // Rediriger vers la page de connexion admin
+      window.location.href = "/connexion";
+    } catch (error) {
+      setError("Erreur lors de la création du compte : " + (error as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <>
       <main className="flex w-full">
@@ -34,11 +97,11 @@ const CreerUnCompteAdmi: React.FC = () => {
               />
               <div className="mt-5 space-y-2">
                 <h3 className="text-2xl font-bold text-[#002925] sm:text-3xl">
-                  Créer un compte
+                  Créer un compte admin
                 </h3>
               </div>
             </div>
-            <form className="space-y-5">
+            <form className="space-y-5" onSubmit={handleSubmit}>
               <div className="flex w-full flex-col gap-4 md:flex-row">
                 <Input
                   type="text"
@@ -47,6 +110,9 @@ const CreerUnCompteAdmi: React.FC = () => {
                   variant="flat"
                   placeholder="Entrer votre nom"
                   className="max-w-xs"
+                  name="lastName"
+                  onChange={handleChange}
+                  required
                 />
                 <Input
                   type="text"
@@ -55,6 +121,9 @@ const CreerUnCompteAdmi: React.FC = () => {
                   variant="flat"
                   placeholder="Entrer votre prénom"
                   className="max-w-xs"
+                  name="firstName"
+                  onChange={handleChange}
+                  required
                 />
               </div>
               <div className="flex w-full flex-col gap-4 md:flex-row">
@@ -65,14 +134,20 @@ const CreerUnCompteAdmi: React.FC = () => {
                   variant="flat"
                   placeholder="Entrer le nom d'utilisateur"
                   className="max-w-xs"
+                  name="username"
+                  onChange={handleChange}
+                  required
                 />
                 <Input
-                  type="text"
+                  type="email"
                   color="primary"
                   label="Adresse e-mail"
                   variant="flat"
                   placeholder="Entrer l'adresse e-mail"
                   className="max-w-xs"
+                  name="email"
+                  onChange={handleChange}
+                  required
                 />
               </div>
               <div className="flex w-full flex-col gap-4 md:flex-row">
@@ -83,15 +158,30 @@ const CreerUnCompteAdmi: React.FC = () => {
                   variant="flat"
                   placeholder="Entrer le mot de passe"
                   className="max-w-xs"
+                  name="password"
+                  onChange={handleChange}
+                  required
+                />
+                <Input
+                  type="password"
+                  color="primary"
+                  label="Confirmer le mot de passe"
+                  variant="flat"
+                  placeholder="Confirmer le mot de passe"
+                  className="max-w-xs"
+                  name="confirmPassword"
+                  onChange={handleChange}
+                  required
                 />
               </div>
+              {error && <p className="text-red-500">{error}</p>}
               <Button
-                as={Link}
-                href="javascript:;"
+                type="submit"
                 color="primary"
                 variant="solid"
+                disabled={loading}
               >
-                Valider
+                {loading ? "Création..." : "Valider"}
               </Button>
               <Link
                 className="mt-1 flex justify-start font-thin text-dark"

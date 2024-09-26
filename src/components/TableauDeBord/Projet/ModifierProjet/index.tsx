@@ -1,11 +1,46 @@
 "use client";
-import React from "react";
-import Breadcrumb from "@/components/TableauDeBord/Breadcrumbs/Breadcrumb";
-import { Button } from "@nextui-org/button";
+import React, { useEffect, useState } from "react";
+import { db } from "@/firebase/firebaseConfig";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { Input } from "@nextui-org/react";
-import { Select, SelectItem } from "@nextui-org/react";
+import { Button } from "@nextui-org/button";
+import Breadcrumb from "@/components/TableauDeBord/Breadcrumbs/Breadcrumb";
 
 const ModifierProjet = () => {
+  const [projectData, setProjectData] = useState({
+    intitule: "",
+    societe: "",
+    chefDeProjet: "",
+  });
+
+  const projectId = window.location.pathname.split("/").pop(); // Récupérer l'ID du projet depuis l'URL
+
+  useEffect(() => {
+    const fetchProject = async () => {
+      if (projectId) {
+        const docRef = doc(db, "projects", projectId);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setProjectData(docSnap.data() as typeof projectData);
+        } else {
+          console.log("Projet non trouvé");
+        }
+      }
+    };
+    fetchProject();
+  }, [projectId]);
+
+  const handleUpdate = async () => {
+    const docRef = doc(db, "projects", projectId);
+    await updateDoc(docRef, projectData);
+    window.location.href = "/tableaudebord/projet/gerer"; // Redirection après modification
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setProjectData({ ...projectData, [name]: value });
+  };
+
   return (
     <>
       <Breadcrumb pageName="Modifier le projet" />
@@ -23,7 +58,9 @@ const ModifierProjet = () => {
                 label="Intitulé du projet"
                 variant="bordered"
                 color="primary"
-                placeholder="Entrer l'Intitulé du projet"
+                name="intitule"
+                value={projectData.intitule}
+                onChange={handleChange}
                 className="text-sm font-medium md:text-base"
               />
               <Input
@@ -31,7 +68,9 @@ const ModifierProjet = () => {
                 label="Nom de la société"
                 variant="bordered"
                 color="primary"
-                placeholder="Entrer le nom de la société"
+                name="societe"
+                value={projectData.societe}
+                onChange={handleChange}
                 className="text-sm font-medium md:text-base"
               />
             </div>
@@ -41,7 +80,9 @@ const ModifierProjet = () => {
                 label="Nom du chef de projet"
                 variant="bordered"
                 color="primary"
-                placeholder="Entrer le nom du chef de projet"
+                name="chefDeProjet"
+                value={projectData.chefDeProjet}
+                onChange={handleChange}
                 className="text-sm font-medium md:text-base"
               />
             </div>
@@ -51,6 +92,7 @@ const ModifierProjet = () => {
                 className="w-64 flex-none"
                 variant="solid"
                 size="md"
+                onPress={handleUpdate}
               >
                 Modifier
               </Button>

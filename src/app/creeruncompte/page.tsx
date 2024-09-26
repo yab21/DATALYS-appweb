@@ -1,14 +1,13 @@
 import React from "react";
-import CreerUnCompte from "@/components/CreerUnCompte";
-import { Metadata } from "next";
+import CreerUnCompte from "@/components/CreerUnCompte"; // Le composant client
 
-export const metadata: Metadata = {
+export const metadata = {
   title: "Créer un compte | DATALYS Consulting",
   description: "Le page de création de compte",
 };
 
 const Page = () => {
-  return <CreerUnCompte />;
+  return <CreerUnCompte />; // Rend le composant client ici
 };
 
 export default Page;

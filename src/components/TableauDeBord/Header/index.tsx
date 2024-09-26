@@ -2,11 +2,40 @@ import Link from "next/link";
 import DarkModeSwitcher from "./DarkModeSwitcher";
 import DropdownNotification from "./DropdownNotification";
 import DropdownUser from "./DropdownUser";
+import { useEffect, useState } from "react";
+import { auth, db } from "@/firebase/firebaseConfig"; // Assurez-vous d'importer Firebase correctement
+import { doc, getDoc } from "firebase/firestore";
 
 const Header = (props: {
   sidebarOpen: string | boolean | undefined;
   setSidebarOpen: (arg0: boolean) => void;
 }) => {
+  const [userName, setUserName] = useState({ firstName: "", lastName: "" });
+
+  // Fonction pour récupérer les informations utilisateur depuis Firestore
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const user = auth.currentUser;
+      if (user) {
+        try {
+          const userDocRef = doc(db, "users", user.uid); // Assurez-vous que la collection est correcte
+          const userDoc = await getDoc(userDocRef);
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            setUserName({
+              firstName: userData.firstName,
+              lastName: userData.lastName,
+            });
+          }
+        } catch (error) {
+          console.error("Erreur lors de la récupération des données utilisateur :", error);
+        }
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
   return (
     <header className="sticky top-0 z-999 flex w-full border-b border-stroke bg-white dark:border-stroke-dark dark:bg-gray-dark">
       <div className="flex flex-grow items-center justify-between px-4 py-5 shadow-2 md:px-5 2xl:px-10">
@@ -79,7 +108,10 @@ const Header = (props: {
             <h1 className="mb-0.5 text-heading-5 font-bold text-dark dark:text-white">
               Tableau de bord
             </h1>
-            <p className="font-medium">Tableau de bord de Mr. Kouassi roland</p>
+            {/* Afficher M. suivi du prénom et nom de l'utilisateur */}
+            <p className="font-medium">
+              Tableau de bord de M. {userName.firstName} {userName.lastName}
+            </p>
           </div>
         </div>
 
