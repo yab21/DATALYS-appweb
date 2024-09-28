@@ -50,6 +50,31 @@ const menuGroups = [
           >
             <path
               fill="fill-current"
+              d="M4 20q-.825 0-1.412-.587T2 18V6q0-.825.588-1.412T4 4h6l2 2h8q.825 0 1.413.588T22 8v10q0 .825-.587 1.413T20 20zm0-2h16V8h-8.825l-2-2H4zm0 0V6z"
+            />
+          </svg>
+        ),
+        label: "Dossier",
+        route: "#",
+        children: [
+          { label: "Ajouter", route: "/tableaudebord/lesdossiers/ajouter" },
+          {
+            label: "Gérer",
+            route: "/tableaudebord/lesdossiers",
+          },
+        ],
+      },
+      {
+        icon: (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="fill-current"
+            width="30"
+            height="30"
+            viewBox="0 0 24 24"
+          >
+            <path
+              fill="fill-current"
               d="M7.25 6a.75.75 0 0 0-.75.75v7.5a.75.75 0 0 0 1.5 0v-7.5A.75.75 0 0 0 7.25 6M12 6a.75.75 0 0 0-.75.75v4.5a.75.75 0 0 0 1.5 0v-4.5A.75.75 0 0 0 12 6m4 .75a.75.75 0 0 1 1.5 0v9.5a.75.75 0 0 1-1.5 0z"
             />
             <path

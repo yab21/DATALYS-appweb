@@ -40,6 +40,7 @@ const VoirDossier = () => {
                 <tr>
                   <th className="px-3 py-3">Nom du fichier</th>
                   <th className="px-3 py-3">Format</th>
+                  <th className="px-3 py-3">Action</th>
                 </tr>
               </thead>
               <tbody className="mb-3 divide-y text-gray-600">
@@ -57,12 +58,24 @@ const VoirDossier = () => {
                       color="primary"
                       onPress={() => handleOpen(size)}
                     >
-                      Voir{" "}
                       <img
                         src="/images/icon/file-button.svg"
                         width={15}
                         height={15}
                       />
+                    </Button>
+                    <Button size="sm" variant="solid" color="primary">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="30"
+                        height="30"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          fill="#fff"
+                          d="m12 15.577l-3.539-3.538l.708-.72L11.5 13.65V5h1v8.65l2.33-2.33l.709.719zM6.616 19q-.691 0-1.153-.462T5 17.384v-2.423h1v2.423q0 .231.192.424t.423.192h10.77q.23 0 .423-.192t.192-.424v-2.423h1v2.423q0 .691-.462 1.153T17.384 19z"
+                        />
+                      </svg>
                     </Button>
                     {/* <Button
                       as={Link}
@@ -118,12 +131,24 @@ const VoirDossier = () => {
                       color="primary"
                       onPress={() => handleOpen(size)}
                     >
-                      Voir{" "}
                       <img
                         src="/images/icon/file-button.svg"
                         width={15}
                         height={15}
                       />
+                    </Button>
+                    <Button size="sm" variant="solid" color="primary">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="30"
+                        height="30"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          fill="#fff"
+                          d="m12 15.577l-3.539-3.538l.708-.72L11.5 13.65V5h1v8.65l2.33-2.33l.709.719zM6.616 19q-.691 0-1.153-.462T5 17.384v-2.423h1v2.423q0 .231.192.424t.423.192h10.77q.23 0 .423-.192t.192-.424v-2.423h1v2.423q0 .691-.462 1.153T17.384 19z"
+                        />
+                      </svg>
                     </Button>
                     {/* <Button
                       as={Link}
@@ -179,12 +204,24 @@ const VoirDossier = () => {
                       color="primary"
                       onPress={() => handleOpen(size)}
                     >
-                      Voir{" "}
                       <img
                         src="/images/icon/file-button.svg"
                         width={15}
                         height={15}
                       />
+                    </Button>
+                    <Button size="sm" variant="solid" color="primary">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="30"
+                        height="30"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          fill="#fff"
+                          d="m12 15.577l-3.539-3.538l.708-.72L11.5 13.65V5h1v8.65l2.33-2.33l.709.719zM6.616 19q-.691 0-1.153-.462T5 17.384v-2.423h1v2.423q0 .231.192.424t.423.192h10.77q.23 0 .423-.192t.192-.424v-2.423h1v2.423q0 .691-.462 1.153T17.384 19z"
+                        />
+                      </svg>
                     </Button>
                     {/* <Button
                       as={Link}

@@ -23,7 +23,11 @@ const Connexion: React.FC = () => {
     try {
       const auth = getAuth();
       // Connexion de l'utilisateur
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password,
+      );
       const user = userCredential.user;
 
       // Vérifier si l'utilisateur est admin
@@ -97,9 +101,9 @@ const Connexion: React.FC = () => {
                 <Input
                   type="email"
                   color="primary"
-                  label="Nom d'utilisateur"
+                  label="Adresse email"
                   variant="flat"
-                  placeholder="Entrer le nom d'utilisateur"
+                  placeholder="Entrer votre adresse email"
                   className="max-w-sm"
                   onChange={(e) => setEmail(e.target.value)}
                   value={email}

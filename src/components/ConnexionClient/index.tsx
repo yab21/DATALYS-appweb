@@ -25,7 +25,6 @@ const ConnexionClient: React.FC = () => {
 
       // Redirection vers le tableau de bord après connexion réussie
       window.location.href = "/tableaudebordclient";
-      
     } catch (error: any) {
       handleFirebaseError(error);
     } finally {
@@ -37,19 +36,27 @@ const ConnexionClient: React.FC = () => {
   const handleFirebaseError = (error: any) => {
     switch (error.code) {
       case "auth/invalid-email":
-        setError("L'adresse e-mail n'est pas valide. Veuillez vérifier votre saisie.");
+        setError(
+          "L'adresse e-mail n'est pas valide. Veuillez vérifier votre saisie.",
+        );
         break;
       case "auth/user-not-found":
-        setError("Aucun utilisateur trouvé pour cet e-mail. Veuillez créer un compte.");
+        setError(
+          "Aucun utilisateur trouvé pour cet e-mail. Veuillez créer un compte.",
+        );
         break;
       case "auth/wrong-password":
         setError("Le mot de passe est incorrect. Veuillez réessayer.");
         break;
       case "auth/too-many-requests":
-        setError("Trop de tentatives infructueuses. Veuillez réessayer plus tard.");
+        setError(
+          "Trop de tentatives infructueuses. Veuillez réessayer plus tard.",
+        );
         break;
       default:
-        setError("Erreur lors de la connexion. Veuillez vérifier vos informations.");
+        setError(
+          "Erreur lors de la connexion. Veuillez vérifier vos informations.",
+        );
     }
   };
 
@@ -63,7 +70,8 @@ const ConnexionClient: React.FC = () => {
               Infrastructure et analyse des données
             </h3>
             <p className="text-gray-300">
-              La donnée est aujourd'hui un moteur de croissance pour beaucoup d'entreprises.
+              La donnée est aujourd'hui un moteur de croissance pour beaucoup
+              d'entreprises.
             </p>
           </div>
         </div>
@@ -89,9 +97,9 @@ const ConnexionClient: React.FC = () => {
               <Input
                 type="email"
                 color="primary"
-                label="Nom d'utilisateur"
+                label="Adresse email"
                 variant="flat"
-                placeholder="Entrer le nom d'utilisateur"
+                placeholder="Entrer votre adresse email"
                 className="max-w-sm"
                 onChange={(e) => setEmail(e.target.value)}
                 value={email}
@@ -122,7 +130,7 @@ const ConnexionClient: React.FC = () => {
             {error && <p className="text-red-500">{error}</p>}
             <Link
               className="flex justify-start font-thin text-dark"
-              href="/creeruncompte"
+              href="/creeruncompteclient"
             >
               Créer un compte.
             </Link>
@@ -133,8 +141,8 @@ const ConnexionClient: React.FC = () => {
           <div className="flex justify-center px-3 pb-4 pt-5">
             <p className="text-primary">
               All Rights Reserved by
-              <span className="font-medium"> DATALYS Consulting</span>.
-              Designed and Developed by{" "}
+              <span className="font-medium"> DATALYS Consulting</span>. Designed
+              and Developed by{" "}
               <Link className="text-dark" href="javascript:;">
                 LA VICTOIRE
               </Link>

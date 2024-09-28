@@ -82,7 +82,6 @@ const Header = (props: {
             <h1 className="mb-0.5 text-heading-5 font-bold text-dark dark:text-white">
               Tableau de bord
             </h1>
-            <p className="font-medium">Tableau de bord du client</p>
           </div>
         </div>
 

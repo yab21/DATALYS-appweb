@@ -10,7 +10,7 @@ import { doc, setDoc } from "firebase/firestore"; // Pour enregistrer dans Fires
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth"; // Importer Firebase auth
 import { db } from "@/firebase/firebaseConfig"; // Importer la configuration Firestore et Firebase
 
-const CreerUnCompte: React.FC = () => {
+const CreerUnCompteClient: React.FC = () => {
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -280,4 +280,4 @@ const CreerUnCompte: React.FC = () => {
   );
 };
 
-export default CreerUnCompte;
+export default CreerUnCompteClient;

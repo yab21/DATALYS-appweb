@@ -28,7 +28,10 @@ const Header = (props: {
             });
           }
         } catch (error) {
-          console.error("Erreur lors de la récupération des données utilisateur :", error);
+          console.error(
+            "Erreur lors de la récupération des données utilisateur :",
+            error,
+          );
         }
       }
     };
