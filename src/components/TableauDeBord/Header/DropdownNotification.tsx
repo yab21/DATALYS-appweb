@@ -5,17 +5,25 @@ import Image from "next/image";
 
 const notificationList = [
   {
-    image: "/images/logo-datalys-rvb.jpg",
+    // image: "/images/logo-datalys-rvb.jpg",
     title: "Mr. Ronald",
     subTitle: "Merci de nous faire un devis sur mesure pour une commande... ",
   },
   {
-    image: "/images/logo-datalys-rvb.jpg",
+    // image: "/images/logo-datalys-rvb.jpg",
     title: "Mme. Yvette",
     subTitle: "Merci de nous faire un devis sur mesure pour une commande... ",
   },
   {
-    image: "/images/logo-datalys-rvb.jpg",
+    // image: "/images/logo-datalys-rvb.jpg",
+    title: "Mr. Arnaud",
+    subTitle: "La creation d'un nouveau compte",
+  },
+  {
+    title: "Mr. Arnaud",
+    subTitle: "La creation d'un nouveau compte",
+  },
+  {
     title: "Mr. Arnaud",
     subTitle: "La creation d'un nouveau compte",
   },
@@ -68,14 +76,14 @@ const DropdownNotification = () => {
 
         {dropdownOpen && (
           <div
-            className={`absolute -right-27 mt-7.5 flex h-[420px] w-75 flex-col rounded-xl border-[0.5px] border-stroke bg-white px-5.5 pb-5.5 pt-5 shadow-default dark:border-dark-3 dark:bg-gray-dark sm:right-0 sm:w-[364px]`}
+            className={`absolute -right-27 mt-7.5 flex h-[350px] w-75 flex-col rounded-xl border-[0.5px] border-stroke bg-white px-5.5 pb-5.5 pt-5 shadow-default dark:border-dark-3 dark:bg-gray-dark sm:right-0 sm:w-[364px]`}
           >
             <div className="mb-5 flex items-center justify-between">
               <h5 className="text-lg font-medium text-dark dark:text-white">
                 Notifications
               </h5>
               <span className="rounded-md bg-primary px-2 py-0.5 text-body-xs font-medium text-white">
-                3 nouveaux
+                5 nouveaux
               </span>
             </div>
 
@@ -86,7 +94,7 @@ const DropdownNotification = () => {
                     className="flex items-center gap-4 rounded-[10px] p-2.5 hover:bg-gray-2 dark:hover:bg-dark-3"
                     href="javascript:;"
                   >
-                    <span className="block h-10 w-14 rounded-full">
+                    {/* <span className="block h-10 w-14 rounded-full">
                       <Image
                         width={112}
                         height={112}
@@ -98,7 +106,7 @@ const DropdownNotification = () => {
                         }}
                         alt="User"
                       />
-                    </span>
+                    </span> */}
 
                     <span className="block">
                       <span className="block font-medium text-dark dark:text-white">

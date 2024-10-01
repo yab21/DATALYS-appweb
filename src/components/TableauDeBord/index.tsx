@@ -45,8 +45,8 @@ const TableauDeBord: React.FC = () => {
                 <tr>
                   <th className="px-3 py-3">Intitulé du projet</th>
                   <th className="px-3 py-3">Entreprise</th>
-                  <th className="px-3 py-3">Chef de projet</th>
-                  <th className="px-3 py-3">Voir plus</th>
+                  <th className="px-3 py-3">Domaine</th>
+                  <th className="px-3 py-3">Voir</th>
                 </tr>
               </thead>
               <tbody className="mb-3 divide-y text-gray-600">
@@ -58,7 +58,7 @@ const TableauDeBord: React.FC = () => {
                     Vision technologie
                   </td>
                   <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
-                    Arnaud Serges
+                    ITCloud
                   </td>
                   <td className="whitespace-nowrap px-3 py-4">
                     <Button
@@ -95,7 +95,7 @@ const TableauDeBord: React.FC = () => {
                     DATALYS Consulting
                   </td>
                   <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
-                    Kouassi roland
+                    Data center & énergie
                   </td>
                   <td className="whitespace-nowrap px-3 py-4">
                     <Button
@@ -132,7 +132,7 @@ const TableauDeBord: React.FC = () => {
                     Vision technologie
                   </td>
                   <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
-                    Arnaud Serges
+                    Réseau sécurité
                   </td>
                   <td className="whitespace-nowrap px-3 py-4">
                     <Button
@@ -177,8 +177,8 @@ const TableauDeBord: React.FC = () => {
             <table className="w-full table-auto text-left text-sm">
               <thead className="border-b bg-gray-1 font-medium text-dark dark:bg-gray-dark dark:text-white">
                 <tr>
-                  <th className="px-3 py-3">Nom du fichier</th>
-                  <th className="px-3 py-3">Type fichier</th>
+                  <th className="px-3 py-3">Nom</th>
+                  <th className="px-3 py-3">Type</th>
                   <th className="px-3 py-3">Projet</th>
                   <th className="px-3 py-3">Consulter</th>
                 </tr>

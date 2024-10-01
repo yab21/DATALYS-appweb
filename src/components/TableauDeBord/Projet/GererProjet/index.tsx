@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { Select, SelectItem } from "@nextui-org/react";
 import { Button, Modal, Text } from "@nextui-org/react"; // Assurez-vous d'importer les composants nécessaires
+import Link from "next/link";
 import Breadcrumb from "@/components/TableauDeBord/Breadcrumbs/Breadcrumb";
 import { db } from "@/firebase/firebaseConfig";
 import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
@@ -49,8 +50,8 @@ const GestionProjet = () => {
     } else {
       setFilteredProjects(
         projects.filter((project) =>
-          project.domaine.toLowerCase().includes(selected.toLowerCase())
-        )
+          project.domaine.toLowerCase().includes(selected.toLowerCase()),
+        ),
       );
     }
   };
@@ -67,7 +68,7 @@ const GestionProjet = () => {
       try {
         await deleteDoc(doc(db, "projects", projectToDelete));
         setFilteredProjects(
-          filteredProjects.filter((project) => project.id !== projectToDelete)
+          filteredProjects.filter((project) => project.id !== projectToDelete),
         );
         setDeleteModalVisible(false); // Fermer le modal après suppression
         setProjectToDelete(null); // Réinitialiser l'ID du projet à supprimer
@@ -119,9 +120,9 @@ const GestionProjet = () => {
             <table className="w-full table-auto text-left text-sm">
               <thead className="border-b bg-gray-1 font-medium text-dark dark:bg-gray-dark dark:text-white">
                 <tr>
+                  <th className="px-3 py-3">Intitulé du projet</th>
                   <th className="px-3 py-3">Nom du chef de projet</th>
                   <th className="px-3 py-3">Nom de la société</th>
-                  <th className="px-3 py-3">Intitulé du projet</th>
                   <th className="px-3 py-3">Action</th>
                 </tr>
               </thead>
@@ -129,25 +130,41 @@ const GestionProjet = () => {
                 {filteredProjects.length > 0 ? (
                   filteredProjects.map((project) => (
                     <tr key={project.id}>
-                      <td className="flex items-center gap-x-3 whitespace-nowrap px-3 py-3">
-                        <div>
-                          <span className="block text-sm font-medium text-dark dark:text-white">
-                            {project.chefDeProjet}
-                          </span>
-                        </div>
+                      <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
+                        {project.intitule}
+                      </td>
+                      <td className="gap-x-3 whitespace-nowrap px-3 py-3 text-dark dark:text-white">
+                        {project.chefDeProjet}
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
                         {project.societe}
                       </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
-                        {project.intitule}
-                      </td>
                       <td className="flex items-center gap-2 whitespace-nowrap px-5 py-4">
+                        <Button
+                          as={Link}
+                          href="/tableaudebord/pageprojet"
+                          isIconOnly
+                          size="sm"
+                          color="primary"
+                          aria-label="voir"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="25"
+                            height="25"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              fill="#fff"
+                              d="M4 20q-.825 0-1.412-.587T2 18V6q0-.825.588-1.412T4 4h6l2 2h8q.825 0 1.413.588T22 8v10q0 .825-.587 1.413T20 20zm0-2h16V8h-8.825l-2-2H4zm0 0V6z"
+                            />
+                          </svg>
+                        </Button>
                         <Button
                           onPress={() => handleEdit(project.id)}
                           isIconOnly
                           size="sm"
-                          color="primary"
+                          color="warning"
                           aria-label="modifier"
                         >
                           <svg
@@ -186,7 +203,7 @@ const GestionProjet = () => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={4} className="text-center py-4">
+                    <td colSpan={4} className="py-4 text-center">
                       Aucun projet trouvé.
                     </td>
                   </tr>
@@ -210,7 +227,10 @@ const GestionProjet = () => {
           </Text>
         </Modal.Header>
         <Modal.Body>
-          <p>Êtes-vous sûr de vouloir supprimer ce projet ? Cette action est irréversible.</p>
+          <p>
+            Êtes-vous sûr de vouloir supprimer ce projet ? Cette action est
+            irréversible.
+          </p>
         </Modal.Body>
         <Modal.Footer>
           <Button auto flat color="error" onPress={confirmDelete}>
