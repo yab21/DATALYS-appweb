@@ -28,7 +28,10 @@ const Breadcrumb = ({ pageName }: BreadcrumbProps) => {
             });
           }
         } catch (error) {
-          console.error("Erreur lors de la récupération des données utilisateur :", error);
+          console.error(
+            "Erreur lors de la récupération des données utilisateur :",
+            error,
+          );
         }
       }
     };
@@ -38,8 +41,8 @@ const Breadcrumb = ({ pageName }: BreadcrumbProps) => {
 
   return (
     <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <h2 className="text-[22px] font-bold leading-[30px] text-dark dark:text-white">
-        Bienvenue <span className="font-thin">M. {userName.lastName} {userName.firstName}</span>
+      <h2 className="text-[22px] font-thin leading-[30px] text-dark dark:text-white">
+        M. {userName.lastName} {userName.firstName}
       </h2>
 
       <nav>
