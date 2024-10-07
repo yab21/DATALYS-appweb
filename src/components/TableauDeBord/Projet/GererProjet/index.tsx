@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Select, SelectItem } from "@nextui-org/react";
-import { Button, Modal, Text } from "@nextui-org/react"; // Assurez-vous d'importer les composants nécessaires
+import { Select, SelectItem, Button, Modal, ModalBody, ModalHeader, ModalFooter } from "@nextui-org/react";
 import Breadcrumb from "@/components/TableauDeBord/Breadcrumbs/Breadcrumb";
 import { db } from "@/firebase/firebaseConfig";
 import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
@@ -19,19 +18,27 @@ const GestionProjet = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);
   const [selectedDomaine, setSelectedDomaine] = useState<string>("all");
-  const [projectToDelete, setProjectToDelete] = useState<string | null>(null); // ID du projet à supprimer
-  const [isDeleteModalVisible, setDeleteModalVisible] = useState(false); // Pour contrôler l'affichage du modal
+  const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
+  const [isDeleteModalVisible, setDeleteModalVisible] = useState(false);
 
   // Récupérer les projets depuis Firestore
   const fetchProjects = async () => {
     try {
       const querySnapshot = await getDocs(collection(db, "projects"));
-      const projectList = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      })) as Project[];
+      const projectList = querySnapshot.docs
+        .map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }))
+        .filter(
+          (project) =>
+            project.chefDeProjet &&
+            project.societe &&
+            project.intitule &&
+            project.domaine
+        ); // Ensure 'domaine' exists
       setProjects(projectList);
-      setFilteredProjects(projectList); // Initialiser avec tous les projets
+      setFilteredProjects(projectList);
     } catch (error) {
       console.error("Erreur lors de la récupération des projets :", error);
     }
@@ -48,17 +55,18 @@ const GestionProjet = () => {
       setFilteredProjects(projects);
     } else {
       setFilteredProjects(
-        projects.filter((project) =>
-          project.domaine.toLowerCase().includes(selected.toLowerCase())
-        )
+        projects.filter((project) => {
+          const domaine = project.domaine || "";
+          return domaine.toLowerCase().includes(selected.toLowerCase());
+        })
       );
     }
   };
 
   // Ouvrir le modal pour confirmer la suppression
   const openDeleteModal = (projectId: string) => {
-    setProjectToDelete(projectId); // Enregistrer l'ID du projet à supprimer
-    setDeleteModalVisible(true); // Ouvrir le modal
+    setProjectToDelete(projectId);
+    setDeleteModalVisible(true);
   };
 
   // Confirmer la suppression
@@ -69,8 +77,8 @@ const GestionProjet = () => {
         setFilteredProjects(
           filteredProjects.filter((project) => project.id !== projectToDelete)
         );
-        setDeleteModalVisible(false); // Fermer le modal après suppression
-        setProjectToDelete(null); // Réinitialiser l'ID du projet à supprimer
+        setDeleteModalVisible(false);
+        setProjectToDelete(null);
       } catch (error) {
         console.error("Erreur lors de la suppression du projet :", error);
       }
@@ -79,8 +87,8 @@ const GestionProjet = () => {
 
   // Annuler la suppression
   const cancelDelete = () => {
-    setDeleteModalVisible(false); // Fermer le modal
-    setProjectToDelete(null); // Réinitialiser l'ID du projet à supprimer
+    setDeleteModalVisible(false);
+    setProjectToDelete(null);
   };
 
   const handleEdit = (projectId: string) => {
@@ -103,8 +111,8 @@ const GestionProjet = () => {
                 variant="underlined"
                 placeholder="Choisir un domaine"
                 className="max-w-sm text-sm font-medium md:text-base"
-                onSelectionChange={(key) => handleSelectChange(key.toString())}
-                selectedKeys={selectedDomaine}
+                onSelectionChange={(key) => handleSelectChange(key as string)}
+                selectedKeys={[selectedDomaine]}
               >
                 <SelectItem key="all">Tous les domaines</SelectItem>
                 <SelectItem key="itcloud">ITCloud</SelectItem>
@@ -126,7 +134,7 @@ const GestionProjet = () => {
                 </tr>
               </thead>
               <tbody className="mb-3 divide-y text-gray-600">
-                {filteredProjects.length > 0 ? (
+                {filteredProjects && filteredProjects.length > 0 ? (
                   filteredProjects.map((project) => (
                     <tr key={project.id}>
                       <td className="flex items-center gap-x-3 whitespace-nowrap px-3 py-3">
@@ -144,42 +152,22 @@ const GestionProjet = () => {
                       </td>
                       <td className="flex items-center gap-2 whitespace-nowrap px-5 py-4">
                         <Button
-                          onPress={() => handleEdit(project.id)}
+                          onClick={() => handleEdit(project.id)}
                           isIconOnly
                           size="sm"
                           color="primary"
                           aria-label="modifier"
                         >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="25"
-                            height="25"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              fill="#fff"
-                              d="M5 19h1.425L16.2 9.225L14.775 7.8L5 17.575zm-2 2v-4.25L16.2 3.575q.3-.275.663-.425t.762-.15t.775.15t.65.45L20.425 5q.3.275.438.65T21 6.4q0 .4-.137.763t-.438.662L7.25 21zM19 6.4L17.6 5zm-3.525 2.125l-.7-.725L16.2 9.225z"
-                            />
-                          </svg>
+                          Modifier
                         </Button>
                         <Button
-                          onPress={() => openDeleteModal(project.id)}
+                          onClick={() => openDeleteModal(project.id)}
                           isIconOnly
                           size="sm"
                           color="danger"
                           aria-label="supprimer"
                         >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="25"
-                            height="25"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              fill="#fff"
-                              d="M7 21q-.825 0-1.412-.587T5 19V6H4V4h5V3h6v1h5v2h-1v13q0 .825-.587 1.413T17 21zM17 6H7v13h10zM9 17h2V8H9zm4 0h2V8h-2zM7 6v13z"
-                            />
-                          </svg>
+                          Supprimer
                         </Button>
                       </td>
                     </tr>
@@ -198,28 +186,21 @@ const GestionProjet = () => {
       </div>
 
       {/* Modal pour confirmer la suppression */}
-      <Modal
-        closeButton
-        aria-labelledby="modal-title"
-        open={isDeleteModalVisible}
-        onClose={cancelDelete}
-      >
-        <Modal.Header>
-          <Text id="modal-title" size={18}>
-            Confirmation de suppression
-          </Text>
-        </Modal.Header>
-        <Modal.Body>
+      <Modal isOpen={isDeleteModalVisible} onClose={cancelDelete}>
+        <ModalHeader>
+          <h2 className="text-lg font-semibold">Confirmation de suppression</h2>
+        </ModalHeader>
+        <ModalBody>
           <p>Êtes-vous sûr de vouloir supprimer ce projet ? Cette action est irréversible.</p>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button auto flat color="error" onPress={confirmDelete}>
+        </ModalBody>
+        <ModalFooter>
+          <Button color="danger" onClick={confirmDelete}>
             Supprimer
           </Button>
-          <Button auto onPress={cancelDelete}>
+          <Button onClick={cancelDelete}>
             Annuler
           </Button>
-        </Modal.Footer>
+        </ModalFooter>
       </Modal>
     </>
   );

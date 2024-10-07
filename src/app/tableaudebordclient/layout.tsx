@@ -21,10 +21,8 @@ export default function RootLayout({
   }, []);
 
   return (
-    <html lang="en">
-      <body suppressHydrationWarning={true}>
-        {loading ? <Loader /> : children}
-      </body>
-    </html>
+    <div>
+      {loading ? <Loader /> : children}
+    </div>
   );
 }

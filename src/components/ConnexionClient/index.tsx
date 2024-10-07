@@ -1,11 +1,11 @@
 "use client"; // Assurez-vous que ce composant est bien un Client Component
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Input } from "@nextui-org/react";
 import { Button } from "@nextui-org/button";
-import { signInWithEmailAndPassword } from "firebase/auth"; // Importation du service d'authentification
+import { signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth"; // Importation du service d'authentification
 import { auth } from "@/firebase/firebaseConfig"; // Assurez-vous d'importer correctement Firebase
 
 const ConnexionClient: React.FC = () => {
@@ -13,6 +13,19 @@ const ConnexionClient: React.FC = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+
+  // Vérifier si l'utilisateur est déjà connecté
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // Si l'utilisateur est connecté, rediriger vers le tableau de bord
+        window.location.href = "/tableaudebordclient";
+      }
+    });
+
+    // Nettoyer l'abonnement pour éviter les fuites de mémoire
+    return () => unsubscribe();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,12 +50,12 @@ const ConnexionClient: React.FC = () => {
     switch (error.code) {
       case "auth/invalid-email":
         setError(
-          "L'adresse e-mail n'est pas valide. Veuillez vérifier votre saisie.",
+          "L'adresse e-mail n'est pas valide. Veuillez vérifier votre saisie."
         );
         break;
       case "auth/user-not-found":
         setError(
-          "Aucun utilisateur trouvé pour cet e-mail. Veuillez créer un compte.",
+          "Aucun utilisateur trouvé pour cet e-mail. Veuillez créer un compte."
         );
         break;
       case "auth/wrong-password":
@@ -50,12 +63,12 @@ const ConnexionClient: React.FC = () => {
         break;
       case "auth/too-many-requests":
         setError(
-          "Trop de tentatives infructueuses. Veuillez réessayer plus tard.",
+          "Trop de tentatives infructueuses. Veuillez réessayer plus tard."
         );
         break;
       default:
         setError(
-          "Erreur lors de la connexion. Veuillez vérifier vos informations.",
+          "Erreur lors de la connexion. Veuillez vérifier vos informations."
         );
     }
   };
