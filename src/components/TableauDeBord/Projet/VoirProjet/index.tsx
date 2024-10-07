@@ -7,7 +7,7 @@ import {
   ModalFooter,
   useDisclosure,
 } from "@nextui-org/modal";
-import { Input } from "@nextui-org/react";
+import { Chip } from "@nextui-org/chip";
 import React from "react";
 import Link from "next/link";
 import Iframe from "react-iframe";
@@ -38,42 +38,43 @@ const VoirProjet = () => {
           <div className="mt-4 rounded-lg px-2 py-6 shadow-sm md:py-4">
             <div className="mb-4 flex items-center gap-2">
               <h1 className="text-[15px] text-primary">Intitulé de projet:</h1>
-              <span className="text-sm font-bold md:text-base">
-                vérification du système infra
-              </span>
-              {/* <Input
-                type="text"
-                label="Intitulé de projet"
-                variant="flat"
-                color="primary"
-                labelPlacement="outside-left"
-                placeholder="vérification du système infra"
-                className="text-sm font-medium md:text-base"
-                name="intitule"
-                required
-              /> */}
+              <Chip color="default" variant="shadow">
+                <span className="text-sm font-bold md:text-base">
+                  vérification du système infra
+                </span>
+              </Chip>
             </div>
             <div className="mb-4 flex items-center gap-2">
               <h1 className="text-[15px] text-primary">Entreprise:</h1>
-              <span className="text-sm font-bold md:text-base">
-                DATALYS Consulting
-              </span>
+              <Chip color="default" variant="shadow">
+                <span className="text-sm font-bold md:text-base">
+                  DATALYS Consulting
+                </span>
+              </Chip>
             </div>
             <div className="mb-4 flex items-center gap-2">
               <h1 className="text-[15px] text-primary">Chef de projet:</h1>
-              <span className="text-sm font-bold md:text-base">
-                Arnaud serges
-              </span>
+              <Chip color="default" variant="shadow">
+                <span className="text-sm font-bold md:text-base">
+                  Arnaud serges
+                </span>
+              </Chip>
             </div>
             <div className="mb-4 flex items-center gap-2">
               <h1 className="text-[15px] text-primary">Domaine du projet:</h1>
-              <span className="text-sm font-bold md:text-base">ITCloud</span>
+              <Chip color="default" variant="shadow">
+                <span className="text-sm font-bold md:text-base">ITCloud</span>
+              </Chip>
             </div>
             <div className="mb-4 flex items-center gap-2">
               <h1 className="text-[15px] text-primary">
                 Date de création du projet:
               </h1>
-              <span className="text-sm font-bold md:text-base">29/09/2024</span>
+              <Chip color="default" variant="shadow">
+                <span className="text-sm font-bold md:text-base">
+                  29/09/2024
+                </span>
+              </Chip>
             </div>
           </div>
         </div>
@@ -82,7 +83,7 @@ const VoirProjet = () => {
         <div className="mt-8 rounded-[10px] bg-white shadow-1 dark:bg-gray-dark dark:shadow-card">
           <div className="w-full max-w-full p-2">
             <div className="flex w-full flex-col items-center justify-start gap-6 md:flex-row">
-              <h3 className="w-full pt-2 text-[22px] font-medium text-dark dark:text-white">
+              <h3 className="w-full pt-2 text-[22px] font-medium text-dark dark:text-white md:text-[27px]">
                 Explorateur fichiers
               </h3>
               <div
@@ -146,38 +147,30 @@ const VoirProjet = () => {
                   <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
                     25MB
                   </td>
-                  <td className="flex items-center whitespace-nowrap px-5 py-4">
+                  <td className="flex items-center gap-1 whitespace-nowrap px-5 py-4">
                     <Button
+                      isIconOnly
                       size="sm"
-                      variant="solid"
                       color="primary"
+                      aria-label="consulter"
                       onPress={() => handleOpen(size)}
                     >
-                      <img
-                        src="/images/icon/file-button.svg"
-                        width={15}
-                        height={15}
-                      />
-                    </Button>
-                    {/* <Button size="sm" variant="solid" color="primary">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        width="30"
-                        height="30"
+                        width="25"
+                        height="25"
                         viewBox="0 0 24 24"
                       >
                         <path
                           fill="#fff"
-                          d="m12 15.577l-3.539-3.538l.708-.72L11.5 13.65V5h1v8.65l2.33-2.33l.709.719zM6.616 19q-.691 0-1.153-.462T5 17.384v-2.423h1v2.423q0 .231.192.424t.423.192h10.77q.23 0 .423-.192t.192-.424v-2.423h1v2.423q0 .691-.462 1.153T17.384 19z"
+                          d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zm4 18H6V4h7v5h5z"
                         />
                       </svg>
-                    </Button> */}
-                    {/* <Button
-                      as={Link}
-                      href="/tableaudebord/projet/modifier"
+                    </Button>
+                    <Button
                       isIconOnly
                       size="sm"
-                      color="primary"
+                      color="warning"
                       aria-label="modifier"
                     >
                       <svg
@@ -191,8 +184,8 @@ const VoirProjet = () => {
                           d="M5 19h1.425L16.2 9.225L14.775 7.8L5 17.575zm-2 2v-4.25L16.2 3.575q.3-.275.663-.425t.762-.15t.775.15t.65.45L20.425 5q.3.275.438.65T21 6.4q0 .4-.137.763t-.438.662L7.25 21zM19 6.4L17.6 5zm-3.525 2.125l-.7-.725L16.2 9.225z"
                         />
                       </svg>
-                    </Button> */}
-                    {/* <Button
+                    </Button>
+                    <Button
                       isIconOnly
                       size="sm"
                       color="danger"
@@ -209,7 +202,7 @@ const VoirProjet = () => {
                           d="M7 21q-.825 0-1.412-.587T5 19V6H4V4h5V3h6v1h5v2h-1v13q0 .825-.587 1.413T17 21zM17 6H7v13h10zM9 17h2V8H9zm4 0h2V8h-2zM7 6v13z"
                         />
                       </svg>
-                    </Button> */}
+                    </Button>
                   </td>
                 </tr>
                 <tr>
@@ -222,38 +215,30 @@ const VoirProjet = () => {
                   <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
                     11 MB
                   </td>
-                  <td className="flex items-center gap-2 whitespace-nowrap px-5 py-4">
+                  <td className="flex items-center gap-1 whitespace-nowrap px-5 py-4">
                     <Button
+                      isIconOnly
                       size="sm"
-                      variant="solid"
                       color="primary"
+                      aria-label="consulter"
                       onPress={() => handleOpen(size)}
                     >
-                      <img
-                        src="/images/icon/file-button.svg"
-                        width={15}
-                        height={15}
-                      />
-                    </Button>
-                    {/* <Button size="sm" variant="solid" color="primary">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        width="30"
-                        height="30"
+                        width="25"
+                        height="25"
                         viewBox="0 0 24 24"
                       >
                         <path
                           fill="#fff"
-                          d="m12 15.577l-3.539-3.538l.708-.72L11.5 13.65V5h1v8.65l2.33-2.33l.709.719zM6.616 19q-.691 0-1.153-.462T5 17.384v-2.423h1v2.423q0 .231.192.424t.423.192h10.77q.23 0 .423-.192t.192-.424v-2.423h1v2.423q0 .691-.462 1.153T17.384 19z"
+                          d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zm4 18H6V4h7v5h5z"
                         />
                       </svg>
-                    </Button> */}
-                    {/* <Button
-                      as={Link}
-                      href="/tableaudebord/projet/modifier"
+                    </Button>
+                    <Button
                       isIconOnly
                       size="sm"
-                      color="primary"
+                      color="warning"
                       aria-label="modifier"
                     >
                       <svg
@@ -267,8 +252,8 @@ const VoirProjet = () => {
                           d="M5 19h1.425L16.2 9.225L14.775 7.8L5 17.575zm-2 2v-4.25L16.2 3.575q.3-.275.663-.425t.762-.15t.775.15t.65.45L20.425 5q.3.275.438.65T21 6.4q0 .4-.137.763t-.438.662L7.25 21zM19 6.4L17.6 5zm-3.525 2.125l-.7-.725L16.2 9.225z"
                         />
                       </svg>
-                    </Button> */}
-                    {/* <Button
+                    </Button>
+                    <Button
                       isIconOnly
                       size="sm"
                       color="danger"
@@ -285,7 +270,7 @@ const VoirProjet = () => {
                           d="M7 21q-.825 0-1.412-.587T5 19V6H4V4h5V3h6v1h5v2h-1v13q0 .825-.587 1.413T17 21zM17 6H7v13h10zM9 17h2V8H9zm4 0h2V8h-2zM7 6v13z"
                         />
                       </svg>
-                    </Button> */}
+                    </Button>
                   </td>
                 </tr>
                 <tr>
@@ -298,38 +283,30 @@ const VoirProjet = () => {
                   <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
                     6 MB
                   </td>
-                  <td className="flex items-center whitespace-nowrap px-5 py-4">
+                  <td className="flex items-center gap-1 whitespace-nowrap px-5 py-4">
                     <Button
+                      isIconOnly
                       size="sm"
-                      variant="solid"
                       color="primary"
+                      aria-label="consulter"
                       onPress={() => handleOpen(size)}
                     >
-                      <img
-                        src="/images/icon/file-button.svg"
-                        width={15}
-                        height={15}
-                      />
-                    </Button>
-                    {/* <Button size="sm" variant="solid" color="primary">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        width="30"
-                        height="30"
+                        width="25"
+                        height="25"
                         viewBox="0 0 24 24"
                       >
                         <path
                           fill="#fff"
-                          d="m12 15.577l-3.539-3.538l.708-.72L11.5 13.65V5h1v8.65l2.33-2.33l.709.719zM6.616 19q-.691 0-1.153-.462T5 17.384v-2.423h1v2.423q0 .231.192.424t.423.192h10.77q.23 0 .423-.192t.192-.424v-2.423h1v2.423q0 .691-.462 1.153T17.384 19z"
+                          d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zm4 18H6V4h7v5h5z"
                         />
                       </svg>
-                    </Button> */}
-                    {/* <Button
-                      as={Link}
-                      href="/tableaudebord/projet/modifier"
+                    </Button>
+                    <Button
                       isIconOnly
                       size="sm"
-                      color="primary"
+                      color="warning"
                       aria-label="modifier"
                     >
                       <svg
@@ -343,8 +320,8 @@ const VoirProjet = () => {
                           d="M5 19h1.425L16.2 9.225L14.775 7.8L5 17.575zm-2 2v-4.25L16.2 3.575q.3-.275.663-.425t.762-.15t.775.15t.65.45L20.425 5q.3.275.438.65T21 6.4q0 .4-.137.763t-.438.662L7.25 21zM19 6.4L17.6 5zm-3.525 2.125l-.7-.725L16.2 9.225z"
                         />
                       </svg>
-                    </Button> */}
-                    {/* <Button
+                    </Button>
+                    <Button
                       isIconOnly
                       size="sm"
                       color="danger"
@@ -361,7 +338,7 @@ const VoirProjet = () => {
                           d="M7 21q-.825 0-1.412-.587T5 19V6H4V4h5V3h6v1h5v2h-1v13q0 .825-.587 1.413T17 21zM17 6H7v13h10zM9 17h2V8H9zm4 0h2V8h-2zM7 6v13z"
                         />
                       </svg>
-                    </Button> */}
+                    </Button>
                   </td>
                 </tr>
               </tbody>
