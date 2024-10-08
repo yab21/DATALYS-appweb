@@ -31,8 +31,15 @@ const CreerProjet = () => {
   };
 
   const handleSubmit = async () => {
-    setLoading(true);
+    
     setError(null);
+    
+    // Vérifier que tous les champs sont remplis
+    if (!formData.intitule || !formData.societe || !formData.chefDeProjet || formData.domaine.length === 0) {
+      setError("Veuillez remplir tous les champs.");
+      return;
+    }
+    setLoading(true);
 
     try {
       // Enregistrer le projet dans Firestore
@@ -106,7 +113,7 @@ const CreerProjet = () => {
                 color="primary"
                 variant="bordered"
                 placeholder="Choisir le domaine de projet"
-                selectionMode="multiple"
+                selectionMode="single"
                 className="text-sm font-medium md:text-base"
                 onSelectionChange={handleSelectChange}
               >

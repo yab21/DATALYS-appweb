@@ -8,21 +8,66 @@ import {
   useDisclosure,
 } from "@nextui-org/modal";
 import { Chip } from "@nextui-org/chip";
-import React from "react";
-import Link from "next/link";
+import React, { useEffect, useState } from "react";
 import Iframe from "react-iframe";
 import { Button } from "@nextui-org/button";
 import Breadcrumb from "@/components/TableauDeBord/Breadcrumbs/Breadcrumb";
+import { doc, getDoc } from "firebase/firestore"; // Import Firestore methods
+import { db } from "@/firebase/firebaseConfig"; // Import Firestore config
+
+interface Project {
+  intitule: string;
+  societe: string;
+  chefDeProjet: string;
+  domaine: string[];
+  dateCreation: string;
+}
 
 const VoirProjet = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [size, setSize] = React.useState("2xl");
-  const sizes = "2xl";
+  const [project, setProject] = useState<Project | null>(null); // State to hold project info
+  const [loading, setLoading] = useState(true);
 
-  const handleOpen = (size) => {
-    setSize(size);
-    onOpen();
+  // Function to extract project ID from URL
+  const getProjectIdFromUrl = () => {
+    const path = window.location.pathname;
+    const segments = path.split("/");
+    return segments[segments.length - 1]; // Assumes project ID is the last part of the URL
   };
+
+  const projectId = getProjectIdFromUrl(); // Get the project ID
+
+  // Fetch project data from Firestore using the project ID
+  useEffect(() => {
+    const fetchProject = async () => {
+      try {
+        const docRef = doc(db, "projects", projectId); // Firestore reference to the project
+        const docSnap = await getDoc(docRef); // Get the project document
+
+        if (docSnap.exists()) {
+          setProject(docSnap.data() as Project); // Set the project data
+        } else {
+          console.error("No such project found!");
+        }
+      } catch (error) {
+        console.error("Error fetching project:", error);
+      } finally {
+        setLoading(false); // Data loading completed
+      }
+    };
+
+    fetchProject();
+  }, [projectId]);
+
+  if (loading) {
+    return <p>Loading project information...</p>;
+  }
+
+  if (!project) {
+    return <p>Project not found</p>;
+  }
+
   return (
     <>
       <Breadcrumb pageName="Page de projet" />
@@ -40,7 +85,7 @@ const VoirProjet = () => {
               <h1 className="text-[15px] text-primary">Intitulé de projet:</h1>
               <Chip color="default" variant="shadow">
                 <span className="text-sm font-bold md:text-base">
-                  vérification du système infra
+                  {project.intitule}
                 </span>
               </Chip>
             </div>
@@ -48,7 +93,7 @@ const VoirProjet = () => {
               <h1 className="text-[15px] text-primary">Entreprise:</h1>
               <Chip color="default" variant="shadow">
                 <span className="text-sm font-bold md:text-base">
-                  DATALYS Consulting
+                  {project.societe}
                 </span>
               </Chip>
             </div>
@@ -56,14 +101,16 @@ const VoirProjet = () => {
               <h1 className="text-[15px] text-primary">Chef de projet:</h1>
               <Chip color="default" variant="shadow">
                 <span className="text-sm font-bold md:text-base">
-                  Arnaud serges
+                  {project.chefDeProjet}
                 </span>
               </Chip>
             </div>
             <div className="mb-4 flex items-center gap-2">
               <h1 className="text-[15px] text-primary">Domaine du projet:</h1>
               <Chip color="default" variant="shadow">
-                <span className="text-sm font-bold md:text-base">ITCloud</span>
+                <span className="text-sm font-bold md:text-base">
+                  {project.domaine}
+                </span>
               </Chip>
             </div>
             <div className="mb-4 flex items-center gap-2">
@@ -72,13 +119,15 @@ const VoirProjet = () => {
               </h1>
               <Chip color="default" variant="shadow">
                 <span className="text-sm font-bold md:text-base">
-                  29/09/2024
+                  {project.dateCreation}
                 </span>
               </Chip>
             </div>
           </div>
         </div>
       </div>
+
+      {/* File Explorer Section */}
       <div className="mt-5 w-full max-w-full rounded-[10px]">
         <div className="mt-8 rounded-[10px] bg-white shadow-1 dark:bg-gray-dark dark:shadow-card">
           <div className="w-full max-w-full p-2">
@@ -137,6 +186,7 @@ const VoirProjet = () => {
                 </tr>
               </thead>
               <tbody className="mb-3 divide-y text-gray-600">
+                {/* Example file row */}
                 <tr>
                   <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
                     Revue du cahier de charge du projet 1
@@ -205,147 +255,13 @@ const VoirProjet = () => {
                     </Button>
                   </td>
                 </tr>
-                <tr>
-                  <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
-                    Planification du cahier de charge du projet 1
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
-                    WORD
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
-                    11 MB
-                  </td>
-                  <td className="flex items-center gap-1 whitespace-nowrap px-5 py-4">
-                    <Button
-                      isIconOnly
-                      size="sm"
-                      color="primary"
-                      aria-label="consulter"
-                      onPress={() => handleOpen(size)}
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="25"
-                        height="25"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          fill="#fff"
-                          d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zm4 18H6V4h7v5h5z"
-                        />
-                      </svg>
-                    </Button>
-                    <Button
-                      isIconOnly
-                      size="sm"
-                      color="warning"
-                      aria-label="modifier"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="25"
-                        height="25"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          fill="#fff"
-                          d="M5 19h1.425L16.2 9.225L14.775 7.8L5 17.575zm-2 2v-4.25L16.2 3.575q.3-.275.663-.425t.762-.15t.775.15t.65.45L20.425 5q.3.275.438.65T21 6.4q0 .4-.137.763t-.438.662L7.25 21zM19 6.4L17.6 5zm-3.525 2.125l-.7-.725L16.2 9.225z"
-                        />
-                      </svg>
-                    </Button>
-                    <Button
-                      isIconOnly
-                      size="sm"
-                      color="danger"
-                      aria-label="supprimer"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="25"
-                        height="25"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          fill="#fff"
-                          d="M7 21q-.825 0-1.412-.587T5 19V6H4V4h5V3h6v1h5v2h-1v13q0 .825-.587 1.413T17 21zM17 6H7v13h10zM9 17h2V8H9zm4 0h2V8h-2zM7 6v13z"
-                        />
-                      </svg>
-                    </Button>
-                  </td>
-                </tr>
-                <tr>
-                  <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
-                    Revue du cahier de charge du projet 2
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
-                    PDF
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
-                    6 MB
-                  </td>
-                  <td className="flex items-center gap-1 whitespace-nowrap px-5 py-4">
-                    <Button
-                      isIconOnly
-                      size="sm"
-                      color="primary"
-                      aria-label="consulter"
-                      onPress={() => handleOpen(size)}
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="25"
-                        height="25"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          fill="#fff"
-                          d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zm4 18H6V4h7v5h5z"
-                        />
-                      </svg>
-                    </Button>
-                    <Button
-                      isIconOnly
-                      size="sm"
-                      color="warning"
-                      aria-label="modifier"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="25"
-                        height="25"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          fill="#fff"
-                          d="M5 19h1.425L16.2 9.225L14.775 7.8L5 17.575zm-2 2v-4.25L16.2 3.575q.3-.275.663-.425t.762-.15t.775.15t.65.45L20.425 5q.3.275.438.65T21 6.4q0 .4-.137.763t-.438.662L7.25 21zM19 6.4L17.6 5zm-3.525 2.125l-.7-.725L16.2 9.225z"
-                        />
-                      </svg>
-                    </Button>
-                    <Button
-                      isIconOnly
-                      size="sm"
-                      color="danger"
-                      aria-label="supprimer"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="25"
-                        height="25"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          fill="#fff"
-                          d="M7 21q-.825 0-1.412-.587T5 19V6H4V4h5V3h6v1h5v2h-1v13q0 .825-.587 1.413T17 21zM17 6H7v13h10zM9 17h2V8H9zm4 0h2V8h-2zM7 6v13z"
-                        />
-                      </svg>
-                    </Button>
-                  </td>
-                </tr>
               </tbody>
             </table>
           </div>
         </div>
       </div>
+
+      {/* Modal for viewing file */}
       <Modal
         size={size}
         isOpen={isOpen}

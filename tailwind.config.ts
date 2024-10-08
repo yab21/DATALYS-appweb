@@ -22,6 +22,14 @@ const config: Config = {
     },
     extend: {
       colors: {
+        zIndex: {
+          '50': '50',
+          '60': '60',
+          '70': '70',
+          '80': '80',
+          '90': '90',
+          '100': '100',
+        },
         current: "currentColor",
         transparent: "transparent",
         white: "#FFFFFF",
