@@ -9,6 +9,7 @@ import { Button } from "@nextui-org/button";
 import { doc, setDoc } from "firebase/firestore"; // Pour enregistrer dans Firestore
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth"; // Importer Firebase auth
 import { db } from "@/firebase/firebaseConfig"; // Importer la configuration Firestore et Firebase
+import OneSignal from 'react-onesignal';
 
 const CreerUnCompteClient: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -60,7 +61,16 @@ const CreerUnCompteClient: React.FC = () => {
         email: formData.email,
       });
 
-      console.log("Utilisateur créé avec succès et informations enregistrées");
+      // Après avoir créé le compte avec succès, envoyez une notification
+      await OneSignal.init({ appId: 'da5a8e4c-ebc1-424a-af0f-9a386736940f' });
+      await OneSignal.sendNotification({
+        contents: {
+          'en': `Nouveau compte créé par ${formData.firstName} ${formData.lastName}`
+        },
+        include_player_ids: ['TEMPORARY_ADMIN_ID'] // Remplacer par l'ID réel de l'admin quand disponible
+      });
+
+      console.log("Utilisateur créé avec succès et notification envoyée");
 
       // Redirection vers la page de connexion
       window.location.href = "/connexionclient";

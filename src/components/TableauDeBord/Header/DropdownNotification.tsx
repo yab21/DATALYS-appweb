@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import ClickOutside from "@/components/ClickOutside";
 import Image from "next/image";
+import OneSignal from 'react-onesignal';
 
 const notificationList = [
   {
@@ -32,6 +33,29 @@ const notificationList = [
 const DropdownNotification = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notifying, setNotifying] = useState(true);
+  const [notifications, setNotifications] = useState([]);
+
+  useEffect(() => {
+    const initializeOneSignal = async () => {
+      await OneSignal.init({ appId: 'da5a8e4c-ebc1-424a-af0f-9a386736940f' });
+      console.log("OneSignal initialisé dans DropdownNotification");
+  
+      OneSignal.on('notificationDisplay', (event) => {
+        console.log("Nouvelle notification reçue:", event);
+        setNotifications(prevNotifications => [
+          {
+            title: event.heading,
+            subTitle: event.content,
+            time: new Date().toLocaleString()
+          },
+          ...prevNotifications
+        ]);
+        console.log("Notifications mises à jour:", notifications);
+      });
+    };
+  
+    initializeOneSignal();
+  }, []);
 
   return (
     <ClickOutside
@@ -88,32 +112,21 @@ const DropdownNotification = () => {
             </div>
 
             <ul className="no-scrollbar flex h-auto flex-col gap-1 overflow-y-auto">
-              {notificationList.map((item, index) => (
+              {notifications.map((item, index) => (
                 <li key={index}>
                   <Link
                     className="flex items-center gap-4 rounded-[10px] p-2.5 hover:bg-gray-2 dark:hover:bg-dark-3"
-                    href="javascript:;"
+                    href="#"
                   >
-                    {/* <span className="block h-10 w-14 rounded-full">
-                      <Image
-                        width={112}
-                        height={112}
-                        className="rounded-full"
-                        src={item.image}
-                        style={{
-                          width: "auto",
-                          height: "auto",
-                        }}
-                        alt="User"
-                      />
-                    </span> */}
-
                     <span className="block">
                       <span className="block font-medium text-dark dark:text-white">
                         {item.title}
                       </span>
                       <span className="block text-body-sm font-medium text-dark-5 dark:text-dark-6">
                         {item.subTitle}
+                      </span>
+                      <span className="block text-body-xs text-dark-5 dark:text-dark-6">
+                        {item.time}
                       </span>
                     </span>
                   </Link>

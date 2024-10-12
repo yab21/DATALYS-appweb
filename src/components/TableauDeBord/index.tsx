@@ -1,15 +1,31 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { Button } from "@nextui-org/button";
+import { Button, Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, getKeyValue } from "@nextui-org/react";
 import Link from "next/link";
-import { collection, query, orderBy, limit, getDocs } from "firebase/firestore"; // Import des méthodes Firestore
-import { db } from "@/firebase/firebaseConfig"; // Import Firestore config
+import { collection, query, orderBy, limit, getDocs, getDoc, doc } from "firebase/firestore";
+import { db } from "@/firebase/firebaseConfig";
+
+interface Project {
+  id: string;
+  intitule: string;
+  societe: string;
+  domaine: string[] | string;
+  createdAt: Date;
+}
+
+interface File {
+  id: string;
+  name: string;
+  projectId: string;
+  projectName: string;
+  createdAt: Date;
+}
 
 const TableauDeBord: React.FC = () => {
-  const [projects, setProjects] = useState<any[]>([]); // State pour stocker les projets
-  const [loading, setLoading] = useState(true); // State pour gérer le chargement
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [files, setFiles] = useState<File[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Fonction pour récupérer les projets récents
   const fetchRecentProjects = async () => {
     try {
       const projectsRef = collection(db, "projects");
@@ -18,100 +34,160 @@ const TableauDeBord: React.FC = () => {
 
       const projectList = querySnapshot.docs.map(doc => ({
         id: doc.id,
-        ...doc.data()
-      }));
+        ...doc.data(),
+        createdAt: doc.data().createdAt.toDate()
+      } as Project));
 
+      console.log("Projets récupérés:", projectList);
       setProjects(projectList);
-      setLoading(false);
     } catch (error) {
       console.error("Erreur lors de la récupération des projets :", error);
-      setLoading(false);
     }
   };
 
+  const fetchRecentFiles = async () => {
+    try {
+      const filesRef = collection(db, "files");
+      const recentFilesQuery = query(filesRef, orderBy("createdAt", "desc"), limit(10));
+      const querySnapshot = await getDocs(recentFilesQuery);
+
+      const fileList = await Promise.all(querySnapshot.docs.map(async fileDoc => {
+        const fileData = fileDoc.data();
+        const projectDocRef = doc(db, "projects", fileData.projectId);
+        const projectDocSnap = await getDoc(projectDocRef);
+        const projectName = projectDocSnap.exists() ? projectDocSnap.data().intitule : "Projet inconnu";
+        
+        let createdAtDate;
+        if (fileData.createdAt && typeof fileData.createdAt.toDate === 'function') {
+          createdAtDate = fileData.createdAt.toDate();
+        } else if (fileData.createdAt instanceof Date) {
+          createdAtDate = fileData.createdAt;
+        } else if (typeof fileData.createdAt === 'string') {
+          createdAtDate = new Date(fileData.createdAt);
+        } else {
+          createdAtDate = new Date();
+        }
+
+        return {
+          id: fileDoc.id,
+          ...fileData,
+          projectName,
+          createdAt: createdAtDate
+        } as File;
+      }));
+
+      console.log("Fichiers récupérés:", fileList);
+      setFiles(fileList);
+    } catch (error) {
+      console.error("Erreur lors de la récupération des fichiers :", error);
+    }
+  };
+
+  const truncateFileName = (fileName: string, maxLength: number = 15) => {
+    if (fileName.length <= maxLength) return fileName;
+    return `${fileName.substring(0, maxLength)}...`;
+  };
+
   useEffect(() => {
-    fetchRecentProjects();
+    Promise.all([fetchRecentProjects(), fetchRecentFiles()])
+      .then(() => {
+        setLoading(false);
+        console.log("Chargement terminé");
+      })
+      .catch(error => {
+        console.error("Erreur lors du chargement des données :", error);
+        setLoading(false);
+      });
   }, []);
 
   if (loading) {
-    return <p>Chargement des projets récents...</p>;
+    return <p>Chargement des données récentes...</p>;
   }
 
+  console.log("Rendu des tableaux avec:", { projects: projects.length, files: files.length });
+
+  const projectColumns = [
+    { key: "intitule", label: "Intitulé" },
+    { key: "societe", label: "Entreprise" },
+    { key: "domaine", label: "Domaine" },
+    { key: "action", label: "Action" },
+  ];
+
+  const fileColumns = [
+    { key: "name", label: "Nom du fichier" },
+    { key: "projectName", label: "Projet" },
+    { key: "createdAt", label: "Date d'ajout" },
+    { key: "action", label: "Action" },
+  ];
+
   return (
-    <>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-2 2xl:gap-7.5">
-        <div className="rounded-[10px] bg-white p-6 shadow-1 dark:bg-gray-dark">
-          <div className="w-full max-w-full p-2">
-            <div className="flex w-full justify-start">
-              <h3 className="pt-2 text-[22px] font-medium text-dark dark:text-white">
-                Projets récents
-              </h3>
-            </div>
-          </div>
-          <div className="mt-4 overflow-x-auto rounded-lg border shadow-sm">
-            <table className="w-full table-auto text-left text-sm">
-              <thead className="border-b bg-gray-1 font-medium text-dark dark:bg-gray-dark dark:text-white">
-                <tr>
-                  <th className="px-3 py-3">Intitulé du projet</th>
-                  <th className="px-3 py-3">Entreprise</th>
-                  <th className="px-3 py-3">Domaine</th>
-                  <th className="px-3 py-3">Voir</th>
-                </tr>
-              </thead>
-              <tbody className="mb-3 divide-y text-gray-600">
-                {projects.length > 0 ? (
-                  projects.map((project) => (
-                    <tr key={project.id}>
-                      <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
-                        {project.intitule}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
-                        {project.societe}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
-                        {Array.isArray(project.domaine) ? project.domaine.join(", ") : project.domaine || "Non spécifié"}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4">
-                        <Button
-                          as={Link}
-                          href={`/tableaudebord/projet/pageprojet/${project.id}`} // Utilisation correcte de project.id
-                          isIconOnly
-                          size="sm"
-                          color="primary"
-                          aria-label="voir"
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="24"
-                            height="24"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              fill="#fff"
-                              d="M7.25 6a.75.75 0 0 0-.75.75v7.5a.75.75 0 0 0 1.5 0v-7.5A.75.75 0 0 0 7.25 6M12 6a.75.75 0 0 0-.75.75v4.5a.75.75 0 0 0 1.5 0v-4.5A.75.75 0 0 0 12 6m4 .75a.75.75 0 0 1 1.5 0v9.5a.75.75 0 0 1-1.5 0z"
-                            />
-                            <path
-                              fill="#fff"
-                              d="M3.75 2h16.5c.966 0 1.75.784 1.75 1.75v16.5A1.75 1.75 0 0 1 20.25 22H3.75A1.75 1.75 0 0 1 2 20.25V3.75C2 2.784 2.784 2 3.75 2M3.5 3.75v16.5c0 .138.112.25.25.25h16.5a.25.25 0 0 0 .25-.25V3.75a.25.25 0 0 0-.25-.25H3.75a.25.25 0 0 0-.25.25"
-                            />
-                          </svg>
-                        </Button>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={4} className="text-center py-4">
-                      Aucun projet trouvé.
-                    </td>
-                  </tr>
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-2 2xl:gap-7.5">
+      <div>
+        <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">Projets récents</h4>
+        <Table aria-label="Projets récents">
+          <TableHeader columns={projectColumns}>
+            {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
+          </TableHeader>
+          <TableBody items={projects}>
+            {(project) => (
+              <TableRow key={project.id}>
+                {(columnKey) => (
+                  <TableCell>
+                    {columnKey === "action" ? (
+                      <Button
+                        as={Link}
+                        href={`/tableaudebord/projet/pageprojet/${project.id}`}
+                        color="primary"
+                        size="sm"
+                      >
+                        Voir
+                      </Button>
+                    ) : (
+                      getKeyValue(project, columnKey)
+                    )}
+                  </TableCell>
                 )}
-              </tbody>
-            </table>
-          </div>
-        </div>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
       </div>
-    </>
+
+      <div>
+        <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">Fichiers récents</h4>
+        <Table aria-label="Fichiers récents">
+          <TableHeader columns={fileColumns}>
+            {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
+          </TableHeader>
+          <TableBody items={files}>
+            {(file) => (
+              <TableRow key={file.id}>
+                {(columnKey) => (
+                  <TableCell>
+                    {columnKey === "name" ? (
+                      <span title={file.name}>{truncateFileName(file.name)}</span>
+                    ) : columnKey === "createdAt" ? (
+                      file.createdAt.toLocaleDateString()
+                    ) : columnKey === "action" ? (
+                      <Button
+                        as={Link}
+                        href={`/tableaudebord/projet/pageprojet/${file.projectId}`}
+                        color="primary"
+                        size="sm"
+                      >
+                        Voir le projet
+                      </Button>
+                    ) : (
+                      getKeyValue(file, columnKey)
+                    )}
+                  </TableCell>
+                )}
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
   );
 };
 

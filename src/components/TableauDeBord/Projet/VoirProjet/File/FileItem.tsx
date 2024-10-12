@@ -4,9 +4,7 @@ import Image from "next/image";
 import React, { useContext, useState } from "react";
 import { app } from "@/firebase/firebaseConfig";
 import { ShowToastContext } from "@/context/ShowToastContext";
-import { Modal, Button, Tooltip } from "@nextui-org/react";
-import { getStorage, ref, getDownloadURL } from "firebase/storage";
-import { FaDownload, FaTrash, FaEye } from 'react-icons/fa';
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, useDisclosure } from "@nextui-org/react";
 
 interface FileItemProps {
   file: {
@@ -24,8 +22,19 @@ const FileItem: React.FC<FileItemProps> = ({ file, onFileDeleted }) => {
   const db = getFirestore(app);
   const context = useContext(ShowToastContext);
   const setShowToastMsg = context ? context.setShowToastMsg : () => {};
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
+  const deleteFile = async () => {
+    try {
+      await deleteDoc(doc(db, "files", file.id.toString()));
+      setShowToastMsg('File Deleted!!!');
+      onFileDeleted();
+      onClose();
+    } catch (error) {
+      console.error("Error deleting file: ", error);
+      setShowToastMsg("Error deleting file");
+    }
+  };
 
   const getFileIcon = (fileName: string) => {
     const extension = fileName.split('.').pop()?.toLowerCase();
@@ -36,112 +45,61 @@ const FileItem: React.FC<FileItemProps> = ({ file, onFileDeleted }) => {
       'jpeg': '/images/jpg.png',
       'pptx': '/images/pptx.png',
       'docx': '/images/docx.png',
+      // Ajoutez d'autres extensions selon vos besoins
     };
     return iconMap[extension || ''] || '/images/file-icon.png';
   };
 
-  const deleteFile = async () => {
-    try {
-      await deleteDoc(doc(db, "files", file.id.toString()));
-      setShowToastMsg("File Deleted!");
-      onFileDeleted();
-      setIsDeleteModalOpen(false);
-    } catch (error) {
-      console.error("Error deleting file: ", error);
-      setShowToastMsg("Error deleting file");
-    }
-  };
-
-  const handleDownload = async () => {
-    try {
-      const storage = getStorage();
-      const fileRef = ref(storage, file.imageUrl);
-      const url = await getDownloadURL(fileRef);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = file.name;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } catch (error) {
-      console.error("Erreur lors du téléchargement du fichier:", error);
-      setShowToastMsg(`Erreur lors du téléchargement du fichier: ${error}`);
-    }
-  };
-
-  const handlePreview = () => {
-    setIsPreviewModalOpen(true);
-  };
-
-  const renderPreview = () => {
-    if (file.type.startsWith('image/')) {
-      return <img src={file.imageUrl} alt={file.name} style={{ maxWidth: '100%', maxHeight: '70vh' }} />;
-    } else if (file.type === 'application/pdf') {
-      return <iframe src={`${file.imageUrl}#view=FitH`} style={{ width: '100%', height: '70vh' }} />;
-    } else {
-      return <p>Aperçu non disponible pour ce type de fichier.</p>;
-    }
-  };
-
   return (
     <>
-      <div className="flex items-center justify-between hover:bg-gray-100 p-3 rounded-md">
-        <div className="flex gap-2 items-center flex-grow">
-          <Image src={getFileIcon(file.name)} alt="file-icon" width={26} height={20} />
+      <div className="grid grid-cols-1 md:grid-cols-2 justify-between cursor-pointer hover:bg-gray-100 p-3 rounded-md">
+        <div className="flex gap-2 items-center" onClick={() => window.open(file.imageUrl)}>
+          <Image
+            src={getFileIcon(file.name)}
+            alt="file-icon"
+            width={26}
+            height={20}
+          />
           <h2 className="text-[15px] truncate">{file.name}</h2>
         </div>
-        <div className="text-center hidden md:block">
+        <div className="grid grid-cols-3 place-content-start">
           <h2 className="text-[15px]">
             {moment(file.modifiedAt).format("MMMM DD, YYYY")}
           </h2>
-        </div>
-        <div className="text-center hidden md:block">
           <h2 className="text-[15px]">
             {(file.size / 1024 ** 2).toFixed(2) + " MB"}
           </h2>
-        </div>
-        <div className="flex gap-2">
-          <Tooltip content="Aperçu">
-            <FaEye className="cursor-pointer text-blue-500 hover:text-blue-700" onClick={handlePreview} size={18} />
-          </Tooltip>
-          <Tooltip content="Télécharger">
-            <FaDownload className="cursor-pointer text-green-500 hover:text-green-700" onClick={handleDownload} size={18} />
-          </Tooltip>
-          <Tooltip content="Supprimer">
-            <FaTrash className="cursor-pointer text-red-500 hover:text-red-700" onClick={() => setIsDeleteModalOpen(true)} size={18} />
-          </Tooltip>
+          <div className="flex justify-end">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              onClick={onOpen}
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="w-5 h-5 text-red-500 hover:scale-110 transition-all cursor-pointer"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+            </svg>
+          </div>
         </div>
       </div>
 
-      <Modal isOpen={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)}>
-        <Modal.Header>
-          <h3>Confirmer la suppression</h3>
-        </Modal.Header>
-        <Modal.Body>
-          <p>Êtes-vous sûr de vouloir supprimer le fichier "{file.name}" ?</p>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button color="danger" onPress={deleteFile}>
-            Supprimer
-          </Button>
-          <Button onPress={() => setIsDeleteModalOpen(false)}>
-            Annuler
-          </Button>
-        </Modal.Footer>
-      </Modal>
-
-      <Modal isOpen={isPreviewModalOpen} onClose={() => setIsPreviewModalOpen(false)} size="xl">
-        <Modal.Header>
-          <h3>Aperçu de {file.name}</h3>
-        </Modal.Header>
-        <Modal.Body>
-          {renderPreview()}
-        </Modal.Body>
-        <Modal.Footer>
-          <Button onPress={() => setIsPreviewModalOpen(false)}>
-            Fermer
-          </Button>
-        </Modal.Footer>
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalContent>
+          <ModalHeader>Confirmer la suppression</ModalHeader>
+          <ModalBody>
+            <p>Êtes-vous sûr de vouloir supprimer le fichier "{file.name}" ?</p>
+          </ModalBody>
+          <ModalFooter>
+            <Button color="danger" onPress={deleteFile}>
+              Supprimer
+            </Button>
+            <Button onPress={onClose}>
+              Annuler
+            </Button>
+          </ModalFooter>
+        </ModalContent>
       </Modal>
     </>
   );

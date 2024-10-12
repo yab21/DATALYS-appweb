@@ -11,6 +11,7 @@ import FileItem from "@/components/TableauDeBord/Projet/VoirProjet/File/FileItem
 import FileItemXL from "@/components/TableauDeBord/Projet/VoirProjet/File/FileItemXL";
 import { ParentFolderIdContext } from "@/context/ParentFolderIdContext";
 import FolderItem from "@/components/TableauDeBord/Projet/VoirProjet/Folder/FolderItem";
+import FileList from "@/components/TableauDeBord/Projet/VoirProjet/File/FileList";
 
 // Définir les interfaces pour Folder et File
 interface Folder {
@@ -98,17 +99,19 @@ const VoirProjet: React.FC = () => {
       const folderSnapshot = await getDocs(folderCollection);
       const fileSnapshot = await getDocs(fileCollection);
 
-      console.log("All folders:", folderSnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id })));
+      console.log("All folders before filtering:", folderSnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id })));
+      console.log("parentFolderId used for filtering:", parentFolderId);
 
       const folderList = folderSnapshot.docs
         .map((doc) => ({ ...doc.data(), type: "folder", id: doc.id } as Folder))
-        .filter((folder) => folder.parentFolderId === parentFolderId && folder.projectId === projectId);
+        .filter((folder) => folder.parentFolderId === parentFolderId);
 
       const fileList = fileSnapshot.docs
         .map((doc) => ({ ...doc.data(), type: "file", id: doc.id } as File))
-        .filter((file) => file.parentFolderId === parentFolderId && file.projectId === projectId);
+        .filter((file) => file.parentFolderId === parentFolderId);
 
       console.log("Filtered folders:", folderList);
+      console.log("All files:", fileSnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id })));
       console.log("Filtered files:", fileList);
 
       setFolders(folderList);
@@ -297,14 +300,11 @@ const VoirProjet: React.FC = () => {
                   {files.length > 0 && (
                     <>
                       <h3 className="text-lg font-medium mt-4">Fichiers</h3>
-                      {files.map((file) => (
-                        <FileItem 
-                          key={file.id} 
-                          file={file} 
-                          onFileDeleted={fetchFoldersAndFiles}
-                        />
-                      ))}
+                      <FileList files={files} onFileDeleted={fetchFoldersAndFiles} />
                     </>
+                  )}
+                  {folders.length === 0 && files.length === 0 && (
+                    <p>Aucun dossier ou fichier trouvé dans ce répertoire.</p>
                   )}
                 </>
               )}
