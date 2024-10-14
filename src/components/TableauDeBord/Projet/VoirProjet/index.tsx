@@ -2,7 +2,13 @@
 import React, { useEffect, useState, useContext } from "react";
 import { Chip, Button } from "@nextui-org/react";
 import Breadcrumb from "@/components/TableauDeBord/Breadcrumbs/Breadcrumb";
-import { collection, getDoc, getDocs, doc, Timestamp } from "firebase/firestore";
+import {
+  collection,
+  getDoc,
+  getDocs,
+  doc,
+  Timestamp,
+} from "firebase/firestore";
 import { db } from "@/firebase/firebaseConfig";
 import CreateFolderModal from "@/components/TableauDeBord/Projet/VoirProjet/Folder/CreateFolderModal";
 import FolderItemSmall from "@/components/TableauDeBord/Projet/VoirProjet/Folder/FolderItemSmall";
@@ -41,13 +47,18 @@ interface Project {
   createdAt: Timestamp;
 }
 
-const VoirProjet: React.FC = () => {
+const VoirProjet: React.FC<{ id: string }> = ({ id }) => {
+  // Utilisez directement l'ID passé en prop
+  const projectId = id;
+
   const [project, setProject] = useState<Project | null>(null);
   const [folders, setFolders] = useState<Folder[]>([]); // Stocker les dossiers
   const [files, setFiles] = useState<File[]>([]); // Stocker les fichiers
   const [loading, setLoading] = useState(true); // Pour gérer l'état de chargement
   const [showUploadModal, setShowUploadModal] = useState(false); // State pour afficher la modal d'upload
-  const { parentFolderId, setParentFolderId } = useContext(ParentFolderIdContext) || { parentFolderId: null, setParentFolderId: () => {} };
+  const { parentFolderId, setParentFolderId } = useContext(
+    ParentFolderIdContext,
+  ) || { parentFolderId: null, setParentFolderId: () => {} };
   const [isGridView, setIsGridView] = useState(false);
   const [currentPath, setCurrentPath] = useState<string[]>([]);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
@@ -59,13 +70,12 @@ const VoirProjet: React.FC = () => {
     return segments[segments.length - 1];
   };
 
-  const projectId = getProjectIdFromUrl();
-
   useEffect(() => {
     if (parentFolderId === null) {
       setParentFolderId(projectId);
     }
-  }, [projectId, parentFolderId, setParentFolderId]);
+    fetchFoldersAndFiles();
+  }, [projectId, parentFolderId]);
 
   // Récupérer les informations du projet depuis Firestore
   useEffect(() => {
@@ -91,7 +101,12 @@ const VoirProjet: React.FC = () => {
 
   // Récupérer les dossiers et fichiers depuis Firestore
   const fetchFoldersAndFiles = async () => {
-    console.log("Fetching folders and files. parentFolderId:", parentFolderId, "projectId:", projectId);
+    console.log(
+      "Fetching folders and files. parentFolderId:",
+      parentFolderId,
+      "projectId:",
+      projectId,
+    );
     try {
       const folderCollection = collection(db, "Folders");
       const fileCollection = collection(db, "files");
@@ -99,34 +114,44 @@ const VoirProjet: React.FC = () => {
       const folderSnapshot = await getDocs(folderCollection);
       const fileSnapshot = await getDocs(fileCollection);
 
-      console.log("All folders before filtering:", folderSnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id })));
+      console.log(
+        "All folders before filtering:",
+        folderSnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id })),
+      );
       console.log("parentFolderId used for filtering:", parentFolderId);
 
       const folderList = folderSnapshot.docs
-        .map((doc) => ({ ...doc.data(), type: "folder", id: doc.id } as Folder))
-        .filter((folder) => folder.parentFolderId === parentFolderId);
+        .map((doc) => ({ ...doc.data(), type: "folder", id: doc.id }) as Folder)
+        .filter(
+          (folder) =>
+            folder.parentFolderId === parentFolderId &&
+            folder.projectId === projectId,
+        );
 
       const fileList = fileSnapshot.docs
-        .map((doc) => ({ ...doc.data(), type: "file", id: doc.id } as File))
-        .filter((file) => file.parentFolderId === parentFolderId);
+        .map((doc) => ({ ...doc.data(), type: "file", id: doc.id }) as File)
+        .filter(
+          (file) =>
+            file.parentFolderId === parentFolderId &&
+            file.projectId === projectId,
+        );
 
       console.log("Filtered folders:", folderList);
-      console.log("All files:", fileSnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id })));
+      console.log(
+        "All files:",
+        fileSnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id })),
+      );
       console.log("Filtered files:", fileList);
 
       setFolders(folderList);
       setFiles(fileList);
     } catch (error) {
-      console.error("Erreur lors de la récupération des dossiers et fichiers :", error);
+      console.error(
+        "Erreur lors de la récupération des dossiers et fichiers :",
+        error,
+      );
     }
   };
-
-  useEffect(() => {
-    console.log("parentFolderId dans useEffect:", parentFolderId);
-    if (parentFolderId !== null) {
-      fetchFoldersAndFiles();
-    }
-  }, [parentFolderId, projectId]);
 
   const handleFolderClick = (folderId: string, folderName: string) => {
     setParentFolderId(folderId);
@@ -149,12 +174,17 @@ const VoirProjet: React.FC = () => {
 
   const renderBreadcrumbs = () => {
     return (
-      <div className="flex items-center text-sm text-gray-500 mb-4">
-        <span className="cursor-pointer hover:text-gray-700" onClick={() => handleFolderClick(projectId, "Root")}>Root</span>
+      <div className="mb-4 flex items-center text-sm text-gray-500">
+        <span
+          className="cursor-pointer hover:text-gray-700"
+          onClick={() => handleFolderClick(projectId, "Root")}
+        >
+          Root
+        </span>
         {currentPath.map((folder, index) => (
           <React.Fragment key={index}>
             <span className="mx-2">/</span>
-            <span 
+            <span
               className="cursor-pointer hover:text-gray-700"
               onClick={() => handleFolderClick(folders[index].id, folder)}
             >
@@ -244,20 +274,26 @@ const VoirProjet: React.FC = () => {
                 Explorateur de fichiers
               </h3>
               <div className="flex items-center gap-2">
-                <CreateFolderModal 
-                  onFolderCreated={fetchFoldersAndFiles} 
-                  parentFolderId={parentFolderId} 
+                <CreateFolderModal
+                  onFolderCreated={fetchFoldersAndFiles}
+                  parentFolderId={parentFolderId}
                   projectId={projectId}
                 />
-                <Button color="primary" onPress={() => setIsUploadModalOpen(true)}>
-                  Upload File
+                <Button
+                  color="primary"
+                  onPress={() => setIsUploadModalOpen(true)}
+                >
+                  Charger le fichier
                 </Button>
-                <Button color="secondary" onPress={() => setIsGridView(!isGridView)}>
-                  {isGridView ? 'List View' : 'Grid View'}
+                <Button
+                  color="secondary"
+                  onPress={() => setIsGridView(!isGridView)}
+                >
+                  {isGridView ? "Vue en liste" : "Vue en grille"}
                 </Button>
                 {currentPath.length > 0 && (
                   <Button color="warning" onPress={handleBackClick}>
-                    Back
+                    Retour
                   </Button>
                 )}
               </div>
@@ -269,8 +305,8 @@ const VoirProjet: React.FC = () => {
               {isGridView ? (
                 <div className="flex flex-wrap">
                   {folders.map((folder) => (
-                    <FolderItem 
-                      key={folder.id} 
+                    <FolderItem
+                      key={folder.id}
                       folder={folder}
                       onClick={() => handleFolderClick(folder.id, folder.name)}
                     />
@@ -287,20 +323,25 @@ const VoirProjet: React.FC = () => {
                 <>
                   {folders.length > 0 && (
                     <>
-                      <h3 className="text-lg font-medium mb-4">Dossiers</h3>
+                      <h3 className="mb-4 text-lg font-medium">Dossiers</h3>
                       {folders.map((folder) => (
-                        <FolderItemSmall 
-                          key={folder.id} 
+                        <FolderItemSmall
+                          key={folder.id}
                           folder={folder}
-                          onClick={() => handleFolderClick(folder.id, folder.name)}
+                          onClick={() =>
+                            handleFolderClick(folder.id, folder.name)
+                          }
                         />
                       ))}
                     </>
                   )}
                   {files.length > 0 && (
                     <>
-                      <h3 className="text-lg font-medium mt-4">Fichiers</h3>
-                      <FileList files={files} onFileDeleted={fetchFoldersAndFiles} />
+                      <h3 className="mt-4 text-lg font-medium">Fichiers</h3>
+                      <FileList
+                        files={files}
+                        onFileDeleted={fetchFoldersAndFiles}
+                      />
                     </>
                   )}
                   {folders.length === 0 && files.length === 0 && (
@@ -314,11 +355,11 @@ const VoirProjet: React.FC = () => {
       </div>
 
       {/* Modal d'upload */}
-      <UploadFileModal 
+      <UploadFileModal
         isOpen={isUploadModalOpen}
-        onClose={() => setIsUploadModalOpen(false)} 
-        onFileUploaded={fetchFoldersAndFiles} 
-        parentFolderId={parentFolderId} 
+        onClose={() => setIsUploadModalOpen(false)}
+        onFileUploaded={fetchFoldersAndFiles}
+        parentFolderId={parentFolderId}
         projectId={projectId}
       />
     </>

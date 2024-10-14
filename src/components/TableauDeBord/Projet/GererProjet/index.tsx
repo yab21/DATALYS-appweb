@@ -10,7 +10,7 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
-  useDisclosure
+  useDisclosure,
 } from "@nextui-org/react";
 import Breadcrumb from "@/components/TableauDeBord/Breadcrumbs/Breadcrumb";
 import { db } from "@/firebase/firebaseConfig";
@@ -27,10 +27,12 @@ interface Project {
 const GestionProjet = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);
-  const [selectedDomaine, setSelectedDomaine] = useState<Set<string>>(new Set(["all"]));
+  const [selectedDomaine, setSelectedDomaine] = useState<Set<string>>(
+    new Set(["all"]),
+  );
   const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [backdrop, setBackdrop] = useState<string>("blur");  // Par défaut à 'blur'
+  const [backdrop, setBackdrop] = useState<string>("blur"); // Par défaut à 'blur'
 
   // Récupérer les projets depuis Firestore
   const fetchProjects = async () => {
@@ -46,7 +48,7 @@ const GestionProjet = () => {
             project.chefDeProjet &&
             project.societe &&
             project.intitule &&
-            project.domaine
+            project.domaine,
         ); // Assurez-vous que 'domaine' existe
       setProjects(projectList);
       setFilteredProjects(projectList);
@@ -69,7 +71,7 @@ const GestionProjet = () => {
         projects.filter((project) => {
           const domaines = project.domaine; // domaine est un tableau
           return selectedValues.some((value) => domaines.includes(value));
-        })
+        }),
       );
     }
   }, [selectedDomaine, projects]);
@@ -88,7 +90,7 @@ const GestionProjet = () => {
       try {
         await deleteDoc(doc(db, "projects", projectToDelete));
         setFilteredProjects(
-          filteredProjects.filter((project) => project.id !== projectToDelete)
+          filteredProjects.filter((project) => project.id !== projectToDelete),
         );
         onClose();
         setProjectToDelete(null);
@@ -114,7 +116,6 @@ const GestionProjet = () => {
     console.log(`Redirection pour voir le projet avec ID: ${projectId}`);
     window.location.href = `/tableaudebord/projet/pageprojet/${projectId}`;
   };
-  
 
   // Handle selection change
   const handleSelectChange = (selected: Set<string>) => {
@@ -180,7 +181,7 @@ const GestionProjet = () => {
                         {project.domaine.join(", ")}
                       </td>
                       {/* Ajout du bouton "Afficher" à droite */}
-                      <td className="flex items-center gap-2 whitespace-nowrap px-5 py-4">
+                      <td className="flex items-center gap-1 whitespace-nowrap px-5 py-4">
                         <Button
                           onClick={() => handleVoir(project.id)}
                           isIconOnly
@@ -188,7 +189,17 @@ const GestionProjet = () => {
                           color="success"
                           aria-label="afficher"
                         >
-                          Afficher
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              fill="#fff"
+                              d="m19.6 21l-6.3-6.3q-.75.6-1.725.95T9.5 16q-2.725 0-4.612-1.888T3 9.5t1.888-4.612T9.5 3t4.613 1.888T16 9.5q0 1.1-.35 2.075T14.7 13.3l6.3 6.3zM9.5 14q1.875 0 3.188-1.312T14 9.5t-1.312-3.187T9.5 5T6.313 6.313T5 9.5t1.313 3.188T9.5 14"
+                            />
+                          </svg>
                         </Button>
                         <Button
                           onClick={() => handleEdit(project.id)}
@@ -197,7 +208,17 @@ const GestionProjet = () => {
                           color="primary"
                           aria-label="modifier"
                         >
-                          Modifier
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              fill="#fff"
+                              d="M3 21v-4.25L17.625 2.175L21.8 6.45L7.25 21zM17.6 7.8L19 6.4L17.6 5l-1.4 1.4z"
+                            />
+                          </svg>
                         </Button>
                         <Button
                           onClick={() => openDeleteModal(project.id)}
@@ -206,14 +227,21 @@ const GestionProjet = () => {
                           color="danger"
                           aria-label="supprimer"
                         >
-                          Supprimer
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                          >
+                            <path fill="#fff" d="M5 13v-2h14v2z" />
+                          </svg>
                         </Button>
                       </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={5} className="text-center py-4">
+                    <td colSpan={5} className="py-4 text-center">
                       Aucun projet trouvé.
                     </td>
                   </tr>
@@ -223,10 +251,10 @@ const GestionProjet = () => {
           </div>
         </div>
       </div>
-  
+
       {/* Modal pour confirmer la suppression */}
       <Modal
-        backdrop={backdrop}  // Utilise l'effet de fond sélectionné
+        backdrop={backdrop} // Utilise l'effet de fond sélectionné
         isOpen={isOpen}
         onClose={cancelDelete}
         placement="center"
@@ -234,10 +262,13 @@ const GestionProjet = () => {
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="flex flex-col gap-1">Confirmation de suppression</ModalHeader>
+              <ModalHeader className="flex flex-col gap-1">
+                Confirmation de suppression
+              </ModalHeader>
               <ModalBody>
                 <p>
-                  Êtes-vous sûr de vouloir supprimer ce projet ? Cette action est irréversible.
+                  Êtes-vous sûr de vouloir supprimer ce projet ? Cette action
+                  est irréversible.
                 </p>
               </ModalBody>
               <ModalFooter>
@@ -254,7 +285,6 @@ const GestionProjet = () => {
       </Modal>
     </>
   );
-  
 };
 
 export default GestionProjet;

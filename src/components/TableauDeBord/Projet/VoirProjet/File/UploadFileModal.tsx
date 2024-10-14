@@ -50,10 +50,10 @@ const UploadFileModal: React.FC<UploadFileModalProps> = ({ isOpen, onClose, onFi
       onFileUploaded();
       onClose();
       if (setShowToastMsg) {
-        setShowToastMsg("File Uploaded Successfully!");
+        setShowToastMsg("Fichier téléchargé avec succès !");
       }
     } catch (error) {
-      console.error("Error uploading file:", error);
+      console.error("Erreur de téléchargement du fichier :", error);
       setError("Erreur lors de l'upload du fichier.");
       setShowToast(true);
     }
@@ -63,7 +63,7 @@ const UploadFileModal: React.FC<UploadFileModalProps> = ({ isOpen, onClose, onFi
     <>
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalContent>
-          <ModalHeader>Upload File</ModalHeader>
+          <ModalHeader>Charger le fichier</ModalHeader>
           <ModalBody>
             <Input
               type="file"
@@ -72,10 +72,10 @@ const UploadFileModal: React.FC<UploadFileModalProps> = ({ isOpen, onClose, onFi
           </ModalBody>
           <ModalFooter>
             <Button color="danger" variant="light" onPress={onClose}>
-              Cancel
+              Annuler
             </Button>
             <Button color="primary" onPress={handleFileUpload}>
-              Upload
+              Charger
             </Button>
           </ModalFooter>
         </ModalContent>

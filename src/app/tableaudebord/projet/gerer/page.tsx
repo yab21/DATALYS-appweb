@@ -8,6 +8,8 @@ export const metadata: Metadata = {
   description: "La page de gestion de projet de DATALYS Consulting",
 };
 
+export const revalidate = 3600; // Revalider toutes les heures
+
 const Page = () => {
   return (
     <DefaultLayout>
