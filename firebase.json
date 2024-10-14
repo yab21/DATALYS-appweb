@@ -1,0 +1,10 @@
+{
+  "storage": {
+    "rules": "storage.rules",
+    "cors": [{
+      "origin": ["*"],
+      "method": ["GET", "HEAD", "PUT", "POST", "DELETE"],
+      "maxAgeSeconds": 3600
+    }]
+  }
+}
