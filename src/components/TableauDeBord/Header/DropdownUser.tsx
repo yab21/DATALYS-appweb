@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import ClickOutside from "@/components/ClickOutside";
 import { doc, getDoc } from "firebase/firestore";
 import DeconnexionButton from "@/components/deconnexion/deconnexion"; // Importer ton bouton de déconnexion
@@ -28,7 +27,10 @@ const DropdownUser = () => {
             });
           }
         } catch (error) {
-          console.error("Erreur lors de la récupération des données utilisateur :", error);
+          console.error(
+            "Erreur lors de la récupération des données utilisateur :",
+            error,
+          );
         }
       }
     };
@@ -111,12 +113,49 @@ const DropdownUser = () => {
           <ul className="flex flex-col gap-1 border-y-[0.5px] border-stroke p-2.5 dark:border-dark-3">
             <li>
               <Link
-                href="/connexionclient"
-                className="flex w-full items-center gap-2.5 rounded-[7px] p-2.5 text-sm font-medium text-dark-4 duration-300 ease-in-out hover:bg-gray-2 hover:text-dark dark:text-dark-6 dark:hover:bg-dark-3 dark:hover:text-white lg:text-base"
+                href="/tableaudebord/profil/voir"
+                className="flex w-full items-center rounded-[7px] p-2.5 duration-300 ease-in-out hover:bg-gray-2 dark:hover:bg-dark-3"
               >
-                <div className="p-4">
-            <DeconnexionButton />
-          </div>
+                <span className="flex items-center gap-1 text-sm font-medium text-dark-4 hover:text-dark dark:text-dark-6 dark:hover:text-white lg:text-base">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="27"
+                    height="27"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      fill="none"
+                      stroke="#4B5563"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="1.5"
+                      d="M2.5 12c0-4.478 0-6.718 1.391-8.109S7.521 2.5 12 2.5c4.478 0 6.718 0 8.109 1.391S21.5 7.521 21.5 12c0 4.478 0 6.718-1.391 8.109S16.479 21.5 12 21.5c-4.478 0-6.718 0-8.109-1.391S2.5 16.479 2.5 12M11 7h6M7 7h1m-1 5h1m-1 5h1m3-5h6m-6 5h6"
+                      color="#4B5563"
+                    />
+                  </svg>
+                  Profil
+                </span>
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/connexion"
+                className="flex w-full items-center rounded-[7px] p-2.5 text-sm font-medium text-dark-4 duration-300 ease-in-out hover:bg-gray-2 hover:text-dark dark:text-dark-6 dark:hover:bg-dark-3 dark:hover:text-white lg:text-base"
+              >
+                <div className="flex items-center gap-1">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="27"
+                    height="27"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      fill="#4B5563"
+                      d="M5 21q-.825 0-1.412-.587T3 19V5q0-.825.588-1.412T5 3h7v2H5v14h7v2zm11-4l-1.375-1.45l2.55-2.55H9v-2h8.175l-2.55-2.55L16 7l5 5z"
+                    />
+                  </svg>
+                  <DeconnexionButton />
+                </div>
               </Link>
             </li>
           </ul>

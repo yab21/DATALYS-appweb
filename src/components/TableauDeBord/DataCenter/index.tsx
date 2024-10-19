@@ -2,6 +2,7 @@
 import React from "react";
 import { Button } from "@nextui-org/button";
 import Breadcrumb from "@/components/TableauDeBord/Breadcrumbs/Breadcrumb";
+import Image from "next/image";
 
 const DataCenter = () => {
   return (
@@ -31,9 +32,12 @@ const DataCenter = () => {
               <tbody className="mb-3 divide-y text-gray-600">
                 <tr>
                   <td className="flex items-center gap-x-3 whitespace-nowrap px-3 py-3">
-                    <img
+                    <Image
                       src="/images/fav.PNG"
-                      className="h-10 w-10 rounded-full"
+                      className="rounded-full"
+                      width={40}
+                      height={40}
+                      alt=""
                     />
                     <div>
                       <span className="block text-sm font-medium text-dark dark:text-white">
@@ -73,9 +77,12 @@ const DataCenter = () => {
                 </tr>
                 <tr>
                   <td className="flex items-center gap-x-3 whitespace-nowrap px-3 py-3">
-                    <img
+                    <Image
                       src="/images/fav.PNG"
-                      className="h-10 w-10 rounded-full"
+                      className="rounded-full"
+                      width={40}
+                      height={40}
+                      alt=""
                     />
                     <div>
                       <span className="block text-sm font-medium text-dark dark:text-white">
@@ -115,9 +122,12 @@ const DataCenter = () => {
                 </tr>
                 <tr>
                   <td className="flex items-center gap-x-3 whitespace-nowrap px-3 py-3">
-                    <img
+                    <Image
                       src="/images/fav.PNG"
-                      className="h-10 w-10 rounded-full"
+                      className="rounded-full"
+                      width={40}
+                      height={40}
+                      alt=""
                     />
                     <div>
                       <span className="block text-sm font-medium text-dark dark:text-white">
@@ -157,9 +167,12 @@ const DataCenter = () => {
                 </tr>
                 <tr>
                   <td className="flex items-center gap-x-3 whitespace-nowrap px-3 py-3">
-                    <img
+                    <Image
                       src="/images/fav.PNG"
-                      className="h-10 w-10 rounded-full"
+                      className="rounded-full"
+                      width={40}
+                      height={40}
+                      alt=""
                     />
                     <div>
                       <span className="block text-sm font-medium text-dark dark:text-white">
@@ -215,9 +228,12 @@ const DataCenter = () => {
               <tbody className="mb-3 divide-y text-gray-600">
                 <tr>
                   <td className="flex items-center gap-x-3 whitespace-nowrap px-3 py-3">
-                    <img
+                    <Image
                       src="/images/fav.PNG"
-                      className="h-10 w-10 rounded-full"
+                      className="rounded-full"
+                      width={40}
+                      height={40}
+                      alt=""
                     />
                     <div>
                       <span className="block text-sm font-medium text-dark dark:text-white">
@@ -257,9 +273,12 @@ const DataCenter = () => {
                 </tr>
                 <tr>
                   <td className="flex items-center gap-x-3 whitespace-nowrap px-3 py-3">
-                    <img
+                    <Image
                       src="/images/fav.PNG"
-                      className="h-10 w-10 rounded-full"
+                      className="rounded-full"
+                      width={40}
+                      height={40}
+                      alt=""
                     />
                     <div>
                       <span className="block text-sm font-medium text-dark dark:text-white">
@@ -299,9 +318,12 @@ const DataCenter = () => {
                 </tr>
                 <tr>
                   <td className="flex items-center gap-x-3 whitespace-nowrap px-3 py-3">
-                    <img
+                    <Image
                       src="/images/fav.PNG"
-                      className="h-10 w-10 rounded-full"
+                      className="rounded-full"
+                      width={40}
+                      height={40}
+                      alt=""
                     />
                     <div>
                       <span className="block text-sm font-medium text-dark dark:text-white">
@@ -341,9 +363,12 @@ const DataCenter = () => {
                 </tr>
                 <tr>
                   <td className="flex items-center gap-x-3 whitespace-nowrap px-3 py-3">
-                    <img
+                    <Image
                       src="/images/fav.PNG"
-                      className="h-10 w-10 rounded-full"
+                      className="rounded-full"
+                      width={40}
+                      height={40}
+                      alt=""
                     />
                     <div>
                       <span className="block text-sm font-medium text-dark dark:text-white">
@@ -399,9 +424,12 @@ const DataCenter = () => {
               <tbody className="mb-3 divide-y text-gray-600">
                 <tr>
                   <td className="flex items-center gap-x-3 whitespace-nowrap px-3 py-3">
-                    <img
+                    <Image
                       src="/images/fav.PNG"
-                      className="h-10 w-10 rounded-full"
+                      className="rounded-full"
+                      width={40}
+                      height={40}
+                      alt=""
                     />
                     <div>
                       <span className="block text-sm font-medium text-dark dark:text-white">
@@ -441,9 +469,12 @@ const DataCenter = () => {
                 </tr>
                 <tr>
                   <td className="flex items-center gap-x-3 whitespace-nowrap px-3 py-3">
-                    <img
+                    <Image
                       src="/images/fav.PNG"
-                      className="h-10 w-10 rounded-full"
+                      className="rounded-full"
+                      width={40}
+                      height={40}
+                      alt=""
                     />
                     <div>
                       <span className="block text-sm font-medium text-dark dark:text-white">
@@ -483,9 +514,12 @@ const DataCenter = () => {
                 </tr>
                 <tr>
                   <td className="flex items-center gap-x-3 whitespace-nowrap px-3 py-3">
-                    <img
+                    <Image
                       src="/images/fav.PNG"
-                      className="h-10 w-10 rounded-full"
+                      className="rounded-full"
+                      width={40}
+                      height={40}
+                      alt=""
                     />
                     <div>
                       <span className="block text-sm font-medium text-dark dark:text-white">
@@ -525,9 +559,12 @@ const DataCenter = () => {
                 </tr>
                 <tr>
                   <td className="flex items-center gap-x-3 whitespace-nowrap px-3 py-3">
-                    <img
+                    <Image
                       src="/images/fav.PNG"
-                      className="h-10 w-10 rounded-full"
+                      className="rounded-full"
+                      width={40}
+                      height={40}
+                      alt=""
                     />
                     <div>
                       <span className="block text-sm font-medium text-dark dark:text-white">

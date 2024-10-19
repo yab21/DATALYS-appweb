@@ -9,7 +9,7 @@ import { Button } from "@nextui-org/button";
 import { doc, setDoc } from "firebase/firestore"; // Pour enregistrer dans Firestore
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth"; // Importer Firebase auth
 import { db } from "@/firebase/firebaseConfig"; // Importer la configuration Firestore et Firebase
-import OneSignal from 'react-onesignal';
+import OneSignal from "react-onesignal";
 
 const CreerUnCompteClient: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -62,12 +62,12 @@ const CreerUnCompteClient: React.FC = () => {
       });
 
       // Après avoir créé le compte avec succès, envoyez une notification
-      await OneSignal.init({ appId: 'da5a8e4c-ebc1-424a-af0f-9a386736940f' });
+      await OneSignal.init({ appId: "da5a8e4c-ebc1-424a-af0f-9a386736940f" });
       await OneSignal.sendNotification({
         contents: {
-          'en': `Nouveau compte créé par ${formData.firstName} ${formData.lastName}`
+          en: `Nouveau compte créé par ${formData.firstName} ${formData.lastName}`,
         },
-        include_player_ids: ['TEMPORARY_ADMIN_ID'] // Remplacer par l'ID réel de l'admin quand disponible
+        include_player_ids: ["TEMPORARY_ADMIN_ID"], // Remplacer par l'ID réel de l'admin quand disponible
       });
 
       console.log("Utilisateur créé avec succès et notification envoyée");
@@ -98,7 +98,12 @@ const CreerUnCompteClient: React.FC = () => {
     <main className="flex w-full">
       <div className="relative hidden h-screen flex-1 items-center justify-center bg-[#001614] lg:flex">
         <div className="relative z-10 -mt-4 w-full max-w-md">
-          <img src="/images/logo/logo.png" width={180} />
+          <Image
+            src="/images/logo/logo.png"
+            width={180}
+            height={120}
+            alt="logo"
+          />
           <div className="mt-16 space-y-3">
             <h3 className="text-3xl font-bold text-white">
               Infrastructure et analyse des données
@@ -118,7 +123,7 @@ const CreerUnCompteClient: React.FC = () => {
               width={150}
               height={150}
               className="lg:hidden"
-              alt=""
+              alt="logo"
             />
             <div className="mt-5 space-y-2">
               <h3 className="text-2xl font-bold text-[#002925] sm:text-3xl">

@@ -50,12 +50,12 @@ const ConnexionClient: React.FC = () => {
     switch (error.code) {
       case "auth/invalid-email":
         setError(
-          "L'adresse e-mail n'est pas valide. Veuillez vérifier votre saisie."
+          "L'adresse e-mail n'est pas valide. Veuillez vérifier votre saisie.",
         );
         break;
       case "auth/user-not-found":
         setError(
-          "Aucun utilisateur trouvé pour cet e-mail. Veuillez créer un compte."
+          "Aucun utilisateur trouvé pour cet e-mail. Veuillez créer un compte.",
         );
         break;
       case "auth/wrong-password":
@@ -63,12 +63,12 @@ const ConnexionClient: React.FC = () => {
         break;
       case "auth/too-many-requests":
         setError(
-          "Trop de tentatives infructueuses. Veuillez réessayer plus tard."
+          "Trop de tentatives infructueuses. Veuillez réessayer plus tard.",
         );
         break;
       default:
         setError(
-          "Erreur lors de la connexion. Veuillez vérifier vos informations."
+          "Erreur lors de la connexion. Veuillez vérifier vos informations.",
         );
     }
   };
@@ -77,7 +77,7 @@ const ConnexionClient: React.FC = () => {
     <main className="flex w-full">
       <div className="relative hidden h-screen flex-1 items-center justify-center bg-[#001614] lg:flex">
         <div className="relative z-10 -mt-7 w-full max-w-md">
-          <img src="/images/logo/logo.png" alt="" width={180} height={120} />
+          <Image src="/images/logo/logo.png" alt="" width={180} height={120} />
           <div className="mt-16 space-y-3">
             <h3 className="text-3xl font-bold text-white">
               Infrastructure et analyse des données

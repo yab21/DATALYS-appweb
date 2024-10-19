@@ -68,7 +68,12 @@ const Connexion: React.FC = () => {
       <main className="flex w-full">
         <div className="relative hidden h-screen flex-1 items-center justify-center bg-[#001614] lg:flex">
           <div className="relative z-10 -mt-7 w-full max-w-md">
-            <img src="/images/logo/logo.png" alt="" width={180} height={120} />
+            <Image
+              src="/images/logo/logo.png"
+              alt=""
+              width={180}
+              height={120}
+            />
             <div className=" mt-16 space-y-3">
               <h3 className="text-3xl font-bold text-white">
                 Infrastructure et analyse des données
@@ -132,12 +137,12 @@ const Connexion: React.FC = () => {
               >
                 {loading ? "Connexion..." : "Connexion"}
               </Button>
-              <Link
+              {/* <Link
                 className="flex justify-start font-thin text-dark"
                 href="/creeruncompteadmi"
               >
                 Créer un compte admin.
-              </Link>
+              </Link> */}
             </form>
             <Link
               className="mt-1 flex justify-start font-thin text-dark"

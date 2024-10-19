@@ -88,7 +88,12 @@ const CreerUnCompte: React.FC = () => {
     <main className="flex w-full">
       <div className="relative hidden h-screen flex-1 items-center justify-center bg-[#001614] lg:flex">
         <div className="relative z-10 -mt-4 w-full max-w-md">
-          <img src="/images/logo/logo.png" width={180} />
+          <Image
+            src="/images/logo/logo.png"
+            width={180}
+            height={120}
+            alt="logo"
+          />
           <div className="mt-16 space-y-3">
             <h3 className="text-3xl font-bold text-white">
               Infrastructure et analyse des données

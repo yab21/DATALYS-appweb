@@ -13,7 +13,7 @@ const DeconnexionButton: React.FC = () => {
       // Déconnexion de Firebase
       await signOut(auth);
       // Redirection vers la page de connexion après déconnexion
-      window.location.href = "/connexionclient";
+      window.location.href = "/connexion";
     } catch (error) {
       console.error("Erreur lors de la déconnexion:", error);
     } finally {

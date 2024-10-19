@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import Image from 'next/image';
+import React, { useState } from "react";
+import Image from "next/image";
 import { Modal, Button } from "@nextui-org/react";
 
 interface FileItemXLProps {
@@ -15,17 +15,17 @@ const FileItemXL: React.FC<FileItemXLProps> = ({ file }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const getFileIcon = (fileName: string) => {
-    const extension = fileName.split('.').pop()?.toLowerCase();
+    const extension = fileName.split(".").pop()?.toLowerCase();
     const iconMap: { [key: string]: string } = {
-      'pdf': '/images/pdf.png',
-      'png': '/images/png.png',
-      'jpg': '/images/jpg.png',
-      'jpeg': '/images/jpg.png',
-      'pptx': '/images/pptx.png',
-      'docx': '/images/docx.png',
+      pdf: "/images/pdf.png",
+      png: "/images/png.png",
+      jpg: "/images/jpg.png",
+      jpeg: "/images/jpg.png",
+      pptx: "/images/pptx.png",
+      docx: "/images/docx.png",
       // Ajoutez d'autres extensions selon vos besoins
     };
-    return iconMap[extension || ''] || '/images/file-icon.png'; // Icône par défaut si l'extension n'est pas reconnue
+    return iconMap[extension || ""] || "/images/file-icon.png"; // Icône par défaut si l'extension n'est pas reconnue
   };
 
   const handleFileClick = () => {
@@ -35,7 +35,7 @@ const FileItemXL: React.FC<FileItemXLProps> = ({ file }) => {
   const handleDownload = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (file.imageUrl) {
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = file.imageUrl;
       link.download = file.name;
       document.body.appendChild(link);
@@ -48,8 +48,8 @@ const FileItemXL: React.FC<FileItemXLProps> = ({ file }) => {
 
   return (
     <>
-      <div 
-        className="w-1/4 flex flex-col items-center justify-center p-4 cursor-pointer hover:bg-gray-100"
+      <div
+        className="flex w-1/4 cursor-pointer flex-col items-center justify-center p-4 hover:bg-gray-100"
         onClick={handleFileClick}
       >
         <Image
@@ -58,8 +58,14 @@ const FileItemXL: React.FC<FileItemXLProps> = ({ file }) => {
           width={64}
           height={64}
         />
-        <p className="mt-2 text-center text-sm truncate w-full">{file.name}</p>
-        <Button auto light color="primary" onClick={handleDownload} className="mt-2">
+        <p className="mt-2 w-full truncate text-center text-sm">{file.name}</p>
+        <Button
+          auto
+          light
+          color="primary"
+          onClick={handleDownload}
+          className="mt-2"
+        >
           Télécharger
         </Button>
       </div>
@@ -73,10 +79,17 @@ const FileItemXL: React.FC<FileItemXLProps> = ({ file }) => {
           <h2>{file.name}</h2>
         </Modal.Header>
         <Modal.Body>
-          {file.type.startsWith('image/') ? (
-            <img src={file.imageUrl} alt={file.name} style={{ maxWidth: '100%', maxHeight: '80vh' }} />
+          {file.type.startsWith("image/") ? (
+            <Image
+              src={file.imageUrl}
+              alt={file.name}
+              style={{ maxWidth: "100%", maxHeight: "80vh" }}
+            />
           ) : (
-            <iframe src={file.imageUrl} style={{ width: '100%', height: '80vh' }} />
+            <iframe
+              src={file.imageUrl}
+              style={{ width: "100%", height: "80vh" }}
+            />
           )}
         </Modal.Body>
         <Modal.Footer>
