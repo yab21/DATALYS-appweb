@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "node server.ts",
     "build": "next build",
-    "start": "NODE_ENV=production node server.ts"
+    "start": "node server.ts"
   },
   "dependencies": {
     "@clerk/nextjs": "^5.6.1",
