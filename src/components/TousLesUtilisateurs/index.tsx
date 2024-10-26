@@ -62,8 +62,14 @@ const AllUsers: React.FC = () => {
       <div className="-mt-9 flex justify-center px-3 pb-4">
         <p className="text-dark">
           All Rights Reserved by
-          <span className="font-medium"> DATALYS Consulting</span>. Designed and
-          Developed by{" "}
+          <Link
+            className="ml-1 font-medium text-primary"
+            href="https://www.datalysconsulting.com/"
+            target="_blank"
+          >
+            DATALYS Consulting
+          </Link>
+          . Designed and Developed by{" "}
           <Link className="text-primary" href="javascript:;">
             LA VICTOIRE
           </Link>

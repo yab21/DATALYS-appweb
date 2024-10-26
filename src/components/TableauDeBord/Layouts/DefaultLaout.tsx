@@ -29,10 +29,16 @@ export default function DefaultLayout({
             <div className="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
               {children}
               <div className="mt-5 flex justify-center">
-                <p>
+                <p className="text-dark">
                   All Rights Reserved by
-                  <span className="font-medium"> DATALYS Consulting</span>.
-                  Designed and Developed by{" "}
+                  <Link
+                    className="ml-1 font-medium text-primary"
+                    href="https://www.datalysconsulting.com/"
+                    target="_blank"
+                  >
+                    DATALYS Consulting
+                  </Link>
+                  . Designed and Developed by{" "}
                   <Link className="text-primary" href="javascript:;">
                     LA VICTOIRE
                   </Link>

@@ -279,11 +279,17 @@ const CreerUnCompteClient: React.FC = () => {
             Accéder aux différents utilisateurs.
           </Link>
           <div className="flex justify-center px-3 pb-4 pt-5">
-            <p className="text-primary">
+            <p className="text-dark">
               All Rights Reserved by
-              <span className="font-medium"> DATALYS Consulting</span>. Designed
-              and Developed by{" "}
-              <Link className="text-dark" href="javascript:;">
+              <Link
+                className="ml-1 font-medium text-primary"
+                href="https://www.datalysconsulting.com/"
+                target="_blank"
+              >
+                DATALYS Consulting
+              </Link>
+              . Designed and Developed by{" "}
+              <Link className="text-primary" href="javascript:;">
                 LA VICTOIRE
               </Link>
               .

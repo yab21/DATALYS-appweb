@@ -7,6 +7,7 @@ import Image from "next/image";
 import SidebarItem from "@/components/TableauDeBord/Sidebar/SidebarItem";
 import ClickOutside from "@/components/ClickOutside";
 import useLocalStorage from "@/hooks/useLocalStorage";
+import DeconnexionButton from "@/components/Deconnexion";
 
 interface SidebarProps {
   sidebarOpen: boolean;
@@ -195,7 +196,8 @@ const menuGroups = [
         children: [
           {
             label: "Se déconnecter",
-            route: "/connexion",
+            route: "#",
+            component: <DeconnexionButton />,
           },
         ],
       },

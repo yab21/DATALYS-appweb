@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import ClickOutside from "@/components/ClickOutside";
 import { doc, getDoc } from "firebase/firestore";
-import DeconnexionButton from "@/components/deconnexion/deconnexion"; // Importer ton bouton de déconnexion
+import DeconnexionButton from "@/components/DeconnexionClient"; // Importer ton bouton de déconnexion
 import { auth, db } from "@/firebase/firebaseConfig"; // Assurez-vous d'importer Firebase correctement
 
 const DropdownUser = () => {
@@ -28,7 +28,10 @@ const DropdownUser = () => {
             });
           }
         } catch (error) {
-          console.error("Erreur lors de la récupération des données utilisateur :", error);
+          console.error(
+            "Erreur lors de la récupération des données utilisateur :",
+            error,
+          );
         }
       }
     };
@@ -112,11 +115,22 @@ const DropdownUser = () => {
             <li>
               <Link
                 href="/connexionclient"
-                className="flex w-full items-center gap-2.5 rounded-[7px] p-2.5 text-sm font-medium text-dark-4 duration-300 ease-in-out hover:bg-gray-2 hover:text-dark dark:text-dark-6 dark:hover:bg-dark-3 dark:hover:text-white lg:text-base"
+                className="flex w-full items-center rounded-[7px] p-2.5 text-sm font-medium text-dark-4 duration-300 ease-in-out hover:bg-gray-2 hover:text-dark dark:text-dark-6 dark:hover:bg-dark-3 dark:hover:text-white lg:text-base"
               >
-                <div className="p-4">
-            <DeconnexionButton />
-          </div>
+                <div className="flex items-center gap-1">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="27"
+                    height="27"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      fill="#4B5563"
+                      d="M5 21q-.825 0-1.412-.587T3 19V5q0-.825.588-1.412T5 3h7v2H5v14h7v2zm11-4l-1.375-1.45l2.55-2.55H9v-2h8.175l-2.55-2.55L16 7l5 5z"
+                    />
+                  </svg>
+                  <DeconnexionButton />
+                </div>
               </Link>
             </li>
           </ul>

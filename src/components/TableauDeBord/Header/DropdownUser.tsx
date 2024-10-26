@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import ClickOutside from "@/components/ClickOutside";
 import { doc, getDoc } from "firebase/firestore";
-import DeconnexionButton from "@/components/deconnexion/deconnexion"; // Importer ton bouton de déconnexion
+import DeconnexionButton from "@/components/Deconnexion"; // Importer ton bouton de déconnexion
 import { auth, db } from "@/firebase/firebaseConfig"; // Assurez-vous d'importer Firebase correctement
 
 const DropdownUser = () => {

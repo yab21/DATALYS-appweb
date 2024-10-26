@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import Fichier from "@/components/TableauDeBordClient/Fichier";
-import Projet from "./Projet";
+import Projet from "./Projet/GererProjet";
 
 const TableauDeBordClient: React.FC = () => {
   return (
