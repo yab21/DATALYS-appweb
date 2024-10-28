@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState, useContext } from "react";
-import { Chip, Button } from "@nextui-org/react";
+import { Chip, Button, Input } from "@nextui-org/react";
 import Breadcrumb from "@/components/TableauDeBord/Breadcrumbs/Breadcrumb";
 import { CustomCheckbox } from "./CustomCheckbox";
 import {
@@ -229,44 +229,52 @@ const VoirProjet: React.FC<{ id: string }> = ({ id }) => {
 
   return (
     <>
-      <Breadcrumb pageName="Page de projet" />
-      <div className="mt-5 w-full max-w-full rounded-[10px]">
-        <div className="mt-8 rounded-[10px] bg-white shadow-1 dark:bg-gray-dark dark:shadow-card">
-          <div className="w-full max-w-full p-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <h3 className="pt-2 text-xl font-medium text-dark dark:text-white md:text-[22px]">
-                  Informations sur le projet
-                </h3>
-              </div>
-              <div className="mt-2 flex items-center md:mt-0">
-                <Button
-                  onClick={modal.onOpen}
-                  size="md"
-                  variant="solid"
-                  color="primary"
-                  className="text-white"
-                  onPress={() => handleOpen(size)}
-                >
-                  Ajouter un client{" "}
-                  <Image
-                    src="/images/icon/client.svg"
-                    width={15}
-                    height={15}
-                    alt=""
-                  />
-                </Button>
-              </div>
+      <Breadcrumb pageName="Voir le projet" />
+      <div className="mt-5 overflow-hidden rounded-[10px] bg-white shadow-1 dark:bg-gray-dark dark:shadow-card">
+        <div className="relative flex h-35 bg-[#46adb6] md:h-65">
+          <div className="absolute bottom-0 right-0">
+            <Button
+              onClick={modal.onOpen}
+              variant="solid"
+              color="primary"
+              className="m-1 border-1 px-2 py-2 text-white md:px-4 md:py-4"
+              onPress={() => handleOpen(size)}
+            >
+              Ajouter un client{" "}
+              <Image
+                src="/images/icon/client.svg"
+                width={15}
+                height={15}
+                alt=""
+              />
+            </Button>
+          </div>
+          <div className="absolute left-0 right-0 top-0 md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2">
+            <h3 className="text-center text-xl font-light text-white md:text-4xl">
+              Informations sur le projet
+            </h3>
+          </div>
+        </div>
+        <div className="px-4 pb-6 text-center lg:pb-8 xl:pb-11.5">
+          <div className="relative z-30 mx-auto -mt-22 h-30 w-full max-w-30 rounded-full bg-white/20 p-1 backdrop-blur sm:h-44 sm:max-w-[176px] sm:p-3">
+            <div className="relative drop-shadow-2">
+              <Image
+                src="/images/logo-datalys-rvb.jpg"
+                width={160}
+                height={160}
+                className="overflow-hidden rounded-full"
+                alt="profile"
+              />
             </div>
           </div>
-          <div className="mt-4 rounded-lg px-2 py-6 shadow-sm md:py-4">
-            <div className="w-full max-w-[720px]">
-              <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="mt-4 text-dark dark:text-white">
+            <div className="mx-auto mt-6 max-w-[720px]">
+              <div className="grid w-full grid-cols-1 gap-2 md:grid-cols-2 md:gap-4">
                 <div className="mb-4 flex items-center gap-2">
                   <h1 className="text-[18px] font-normal text-dark dark:text-white">
                     Intitulé de projet:
                   </h1>
-                  <Chip color="default" variant="bordered">
+                  <Chip color="primary" variant="bordered">
                     <span className="text-sm font-bold md:text-base">
                       {project.intitule}
                     </span>
@@ -276,7 +284,7 @@ const VoirProjet: React.FC<{ id: string }> = ({ id }) => {
                   <h1 className="text-[18px] font-normal text-dark dark:text-white">
                     Entreprise:
                   </h1>
-                  <Chip color="default" variant="bordered">
+                  <Chip color="primary" variant="bordered">
                     <span className="text-sm font-bold md:text-base">
                       {project.societe}
                     </span>
@@ -286,7 +294,7 @@ const VoirProjet: React.FC<{ id: string }> = ({ id }) => {
                   <h1 className="text-[18px] font-normal text-dark dark:text-white">
                     Chef de projet:
                   </h1>
-                  <Chip color="default" variant="bordered">
+                  <Chip color="primary" variant="bordered">
                     <span className="text-sm font-bold md:text-base">
                       {project.chefDeProjet}
                     </span>
@@ -296,7 +304,7 @@ const VoirProjet: React.FC<{ id: string }> = ({ id }) => {
                   <h1 className="text-[18px] font-normal text-dark dark:text-white">
                     Domaine du projet:
                   </h1>
-                  <Chip color="default" variant="bordered">
+                  <Chip color="primary" variant="bordered">
                     <span className="text-sm font-bold md:text-base">
                       {Array.isArray(project.domaine)
                         ? project.domaine.join(", ")
@@ -308,7 +316,7 @@ const VoirProjet: React.FC<{ id: string }> = ({ id }) => {
                   <h1 className="text-[18px] font-normal text-dark dark:text-white">
                     Date de création du projet:
                   </h1>
-                  <Chip color="default" variant="bordered">
+                  <Chip color="primary" variant="bordered">
                     <span className="text-sm font-bold md:text-base">
                       {project.createdAt.toDate().toLocaleDateString()}
                     </span>

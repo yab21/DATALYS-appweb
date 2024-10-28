@@ -18,11 +18,11 @@ const Utilisateur = () => {
       <div className="mt-5 w-full max-w-full rounded-[10px]">
         <div className="mt-8 rounded-[10px]">
           <div className="w-full max-w-full p-2">
-            <div className="flex w-full items-center justify-between">
+            <div className="flex w-full items-center justify-start">
               <h3 className="pt-2 text-[22px] font-medium text-dark dark:text-white">
                 La liste des utilisateurs
               </h3>
-              <Dropdown>
+              {/* <Dropdown>
                 <DropdownTrigger>
                   <Button
                     color="primary"
@@ -57,7 +57,7 @@ const Utilisateur = () => {
                     Client
                   </DropdownItem>
                 </DropdownMenu>
-              </Dropdown>
+              </Dropdown> */}
             </div>
           </div>
           <div className="mt-4 rounded-lg shadow-sm">

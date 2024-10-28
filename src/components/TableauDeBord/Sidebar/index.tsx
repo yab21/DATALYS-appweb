@@ -3,11 +3,9 @@
 import React from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import SidebarItem from "@/components/TableauDeBord/Sidebar/SidebarItem";
 import ClickOutside from "@/components/ClickOutside";
 import useLocalStorage from "@/hooks/useLocalStorage";
-import DeconnexionButton from "@/components/Deconnexion";
 
 interface SidebarProps {
   sidebarOpen: boolean;
@@ -40,31 +38,6 @@ const menuGroups = [
   {
     name: "Gestion",
     menuItems: [
-      // {
-      //   icon: (
-      //     <svg
-      //       xmlns="http://www.w3.org/2000/svg"
-      //       className="fill-current"
-      //       width="30"
-      //       height="30"
-      //       viewBox="0 0 24 24"
-      //     >
-      //       <path
-      //         fill="fill-current"
-      //         d="M4 20q-.825 0-1.412-.587T2 18V6q0-.825.588-1.412T4 4h6l2 2h8q.825 0 1.413.588T22 8v10q0 .825-.587 1.413T20 20zm0-2h16V8h-8.825l-2-2H4zm0 0V6z"
-      //       />
-      //     </svg>
-      //   ),
-      //   label: "Dossier",
-      //   route: "#",
-      //   children: [
-      //     { label: "Ajouter", route: "/tableaudebord/lesdossiers/ajouter" },
-      //     {
-      //       label: "Gérer",
-      //       route: "/tableaudebord/lesdossiers",
-      //     },
-      //   ],
-      // },
       {
         icon: (
           <svg
@@ -111,7 +84,17 @@ const menuGroups = [
         ),
         label: "Utilisateur",
         route: "#",
-        children: [{ label: "Voir", route: "/tableaudebord/utilisateur/voir" }],
+        children: [
+          { label: "Voir", route: "/tableaudebord/utilisateur/voir" },
+          {
+            label: "Créer un compte administrateur",
+            route: "/tableaudebord/creationduncompte",
+          },
+          {
+            label: "Créer un compte client",
+            route: "/tableaudebord/creationduncompte",
+          },
+        ],
       },
     ],
   },
@@ -173,36 +156,36 @@ const menuGroups = [
   //     },
   //   ],
   // },
-  {
-    name: "AUTRES",
-    menuItems: [
-      {
-        icon: (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="fill-current"
-            width="30"
-            height="30"
-            viewBox="0 0 24 24"
-          >
-            <path
-              fill="currentColor"
-              d="m17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5M4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4z"
-            />
-          </svg>
-        ),
-        label: "Authentication",
-        route: "#",
-        children: [
-          {
-            label: "Se déconnecter",
-            route: "#",
-            component: <DeconnexionButton />,
-          },
-        ],
-      },
-    ],
-  },
+  // {
+  //   name: "AUTRES",
+  //   menuItems: [
+  //     {
+  //       icon: (
+  //         <svg
+  //           xmlns="http://www.w3.org/2000/svg"
+  //           className="fill-current"
+  //           width="30"
+  //           height="30"
+  //           viewBox="0 0 24 24"
+  //         >
+  //           <path
+  //             fill="currentColor"
+  //             d="m17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5M4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4z"
+  //           />
+  //         </svg>
+  //       ),
+  //       label: "Authentication",
+  //       route: "#",
+  //       children: [
+  //         {
+  //           label: "Se déconnecter",
+  //           route: "#",
+  //           component: <DeconnexionButton />,
+  //         },
+  //       ],
+  //     },
+  //   ],
+  // },
 ];
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {

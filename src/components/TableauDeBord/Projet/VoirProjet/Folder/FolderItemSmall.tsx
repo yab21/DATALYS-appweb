@@ -20,11 +20,13 @@ interface FolderItemSmallProps {
 function FolderItemSmall({ folder, onClick }: FolderItemSmallProps) {
   return (
     <div
-      className="flex cursor-pointer gap-3 rounded-md p-2 hover:bg-gray-2 dark:hover:bg-dark-2"
+      className="flex cursor-pointer justify-between rounded-md p-2 hover:bg-gray-2 dark:hover:bg-dark-2"
       onClick={onClick}
     >
-      <Image src="/images/folder.png" alt="folder" width={20} height={20} />
-      <h1 className="text-dark dark:text-white">{folder.name}</h1>
+      <div className="flex items-center gap-1">
+        <Image src="/images/folder.png" alt="folder" width={20} height={20} />
+        <h1 className="text-dark dark:text-white">{folder.name}</h1>
+      </div>
       <Dropdown>
         <DropdownTrigger>
           <Button
