@@ -63,7 +63,9 @@ const CreateFolderModal: React.FC<CreateFolderModalProps> = ({
 
   return (
     <>
-      <Button onPress={onOpen}>Créer un dossier</Button>
+      <Button size="md" onPress={onOpen}>
+        Créer un dossier
+      </Button>
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalContent>
           <ModalHeader>Créer un nouveau dossier</ModalHeader>

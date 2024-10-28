@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import FileItem from "@/components/TableauDeBord/Projet/VoirProjet/File/FileItem";
 
 interface FileListProps {
@@ -17,10 +17,11 @@ const FileList: React.FC<FileListProps> = ({ files, onFileDeleted }) => {
   return (
     <div>
       {/* En-tête du tableau */}
-      <div className="grid grid-cols-4 items-center bg-gray-100 p-3 rounded-md font-bold mb-2">
-        <div className="col-span-2">Nom du fichier</div>
-        <div className="text-center">Taille</div>
-        <div className="text-center">Date d'ajout</div>
+      <div className="mb-2 grid grid-cols-4 overflow-x-scroll rounded-md bg-dark-3 p-3 text-xs font-normal scrollbar-hide md:text-base">
+        <div className="text-dark dark:text-white">Nom du fichier</div>
+        <div className="text-dark dark:text-white">Date d'ajout</div>
+        <div className="text-dark dark:text-white">Taille</div>
+        <div className="text-dark dark:text-white">Action</div>
       </div>
 
       {/* Liste des fichiers */}

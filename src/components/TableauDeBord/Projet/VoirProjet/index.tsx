@@ -2,6 +2,16 @@
 import React, { useEffect, useState, useContext } from "react";
 import { Chip, Button } from "@nextui-org/react";
 import Breadcrumb from "@/components/TableauDeBord/Breadcrumbs/Breadcrumb";
+import { CustomCheckbox } from "./CustomCheckbox";
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  useDisclosure,
+} from "@nextui-org/modal";
+import { CheckboxGroup } from "@nextui-org/react";
 import {
   collection,
   getDoc,
@@ -18,6 +28,7 @@ import FileItemXL from "@/components/TableauDeBord/Projet/VoirProjet/File/FileIt
 import { ParentFolderIdContext } from "@/context/ParentFolderIdContext";
 import FolderItem from "@/components/TableauDeBord/Projet/VoirProjet/Folder/FolderItem";
 import FileList from "@/components/TableauDeBord/Projet/VoirProjet/File/FileList";
+import Image from "next/image";
 
 // Définir les interfaces pour Folder et File
 interface Folder {
@@ -48,6 +59,18 @@ interface Project {
 }
 
 const VoirProjet: React.FC<{ id: string }> = ({ id }) => {
+  // Modal pour ajouter un client
+  const [groupSelected, setGroupSelected] = React.useState([]);
+
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const modal = useDisclosure();
+  const [size, setSize] = React.useState("2xl");
+  const sizes = "2xl";
+
+  const handleOpen = (size) => {
+    setSize(size);
+    onOpen();
+  };
   // Utilisez directement l'ID passé en prop
   const projectId = id;
 
@@ -210,56 +233,88 @@ const VoirProjet: React.FC<{ id: string }> = ({ id }) => {
       <div className="mt-5 w-full max-w-full rounded-[10px]">
         <div className="mt-8 rounded-[10px] bg-white shadow-1 dark:bg-gray-dark dark:shadow-card">
           <div className="w-full max-w-full p-2">
-            <div className="flex w-full items-center justify-start">
-              <h3 className="w-full pt-2 text-[22px] font-medium text-dark dark:text-white">
-                Informations sur le projet
-              </h3>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <h3 className="pt-2 text-xl font-medium text-dark dark:text-white md:text-[22px]">
+                  Informations sur le projet
+                </h3>
+              </div>
+              <div className="mt-2 flex items-center md:mt-0">
+                <Button
+                  onClick={modal.onOpen}
+                  size="md"
+                  variant="solid"
+                  color="primary"
+                  className="text-white"
+                  onPress={() => handleOpen(size)}
+                >
+                  Ajouter un client{" "}
+                  <Image
+                    src="/images/icon/client.svg"
+                    width={15}
+                    height={15}
+                    alt=""
+                  />
+                </Button>
+              </div>
             </div>
           </div>
           <div className="mt-4 rounded-lg px-2 py-6 shadow-sm md:py-4">
-            <div className="mb-4 flex items-center gap-2">
-              <h1 className="text-[15px] text-primary">Intitulé de projet:</h1>
-              <Chip color="default" variant="shadow">
-                <span className="text-sm font-bold md:text-base">
-                  {project.intitule}
-                </span>
-              </Chip>
-            </div>
-            <div className="mb-4 flex items-center gap-2">
-              <h1 className="text-[15px] text-primary">Entreprise:</h1>
-              <Chip color="default" variant="shadow">
-                <span className="text-sm font-bold md:text-base">
-                  {project.societe}
-                </span>
-              </Chip>
-            </div>
-            <div className="mb-4 flex items-center gap-2">
-              <h1 className="text-[15px] text-primary">Chef de projet:</h1>
-              <Chip color="default" variant="shadow">
-                <span className="text-sm font-bold md:text-base">
-                  {project.chefDeProjet}
-                </span>
-              </Chip>
-            </div>
-            <div className="mb-4 flex items-center gap-2">
-              <h1 className="text-[15px] text-primary">Domaine du projet:</h1>
-              <Chip color="default" variant="shadow">
-                <span className="text-sm font-bold md:text-base">
-                  {Array.isArray(project.domaine)
-                    ? project.domaine.join(", ")
-                    : project.domaine || "Non spécifié"}
-                </span>
-              </Chip>
-            </div>
-            <div className="mb-4 flex items-center gap-2">
-              <h1 className="text-[15px] text-primary">
-                Date de création du projet:
-              </h1>
-              <Chip color="default" variant="shadow">
-                <span className="text-sm font-bold md:text-base">
-                  {project.createdAt.toDate().toLocaleDateString()}
-                </span>
-              </Chip>
+            <div className="w-full max-w-[720px]">
+              <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="mb-4 flex items-center gap-2">
+                  <h1 className="text-[18px] font-normal text-dark dark:text-white">
+                    Intitulé de projet:
+                  </h1>
+                  <Chip color="default" variant="bordered">
+                    <span className="text-sm font-bold md:text-base">
+                      {project.intitule}
+                    </span>
+                  </Chip>
+                </div>
+                <div className="mb-4 flex items-center gap-2">
+                  <h1 className="text-[18px] font-normal text-dark dark:text-white">
+                    Entreprise:
+                  </h1>
+                  <Chip color="default" variant="bordered">
+                    <span className="text-sm font-bold md:text-base">
+                      {project.societe}
+                    </span>
+                  </Chip>
+                </div>
+                <div className="mb-4 flex items-center gap-2">
+                  <h1 className="text-[18px] font-normal text-dark dark:text-white">
+                    Chef de projet:
+                  </h1>
+                  <Chip color="default" variant="bordered">
+                    <span className="text-sm font-bold md:text-base">
+                      {project.chefDeProjet}
+                    </span>
+                  </Chip>
+                </div>
+                <div className="mb-4 flex items-center gap-2">
+                  <h1 className="text-[18px] font-normal text-dark dark:text-white">
+                    Domaine du projet:
+                  </h1>
+                  <Chip color="default" variant="bordered">
+                    <span className="text-sm font-bold md:text-base">
+                      {Array.isArray(project.domaine)
+                        ? project.domaine.join(", ")
+                        : project.domaine || "Non spécifié"}
+                    </span>
+                  </Chip>
+                </div>
+                <div className="mb-4 flex items-center gap-2">
+                  <h1 className="text-[18px] font-normal text-dark dark:text-white">
+                    Date de création du projet:
+                  </h1>
+                  <Chip color="default" variant="bordered">
+                    <span className="text-sm font-bold md:text-base">
+                      {project.createdAt.toDate().toLocaleDateString()}
+                    </span>
+                  </Chip>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -268,31 +323,33 @@ const VoirProjet: React.FC<{ id: string }> = ({ id }) => {
       {/* Section Explorateur de fichiers */}
       <div className="mt-5 w-full max-w-full rounded-[10px]">
         <div className="mt-8 rounded-[10px] bg-white shadow-1 dark:bg-gray-dark dark:shadow-card">
-          <div className="w-full max-w-full p-2">
+          <div className="max-w-screen w-full p-2">
             <div className="flex w-full flex-col items-center justify-between gap-6 md:flex-row">
               <h3 className="w-full pt-2 text-[22px] font-medium text-dark dark:text-white md:text-[27px]">
                 Explorateur de fichiers
               </h3>
-              <div className="flex items-center gap-2">
+              <div className="mb-2 flex items-center gap-1 md:gap-2">
                 <CreateFolderModal
                   onFolderCreated={fetchFoldersAndFiles}
                   parentFolderId={parentFolderId}
                   projectId={projectId}
                 />
                 <Button
+                  size="md"
                   color="primary"
                   onPress={() => setIsUploadModalOpen(true)}
                 >
                   Charger le fichier
                 </Button>
                 <Button
+                  size="md"
                   color="secondary"
                   onPress={() => setIsGridView(!isGridView)}
                 >
                   {isGridView ? "Vue en liste" : "Vue en grille"}
                 </Button>
                 {currentPath.length > 0 && (
-                  <Button color="warning" onPress={handleBackClick}>
+                  <Button size="md" color="success" onPress={handleBackClick}>
                     Retour
                   </Button>
                 )}
@@ -323,7 +380,9 @@ const VoirProjet: React.FC<{ id: string }> = ({ id }) => {
                 <>
                   {folders.length > 0 && (
                     <>
-                      <h3 className="mb-4 text-lg font-medium">Dossiers</h3>
+                      <h3 className="mb-4 text-lg font-medium text-dark dark:text-white">
+                        Dossiers
+                      </h3>
                       {folders.map((folder) => (
                         <FolderItemSmall
                           key={folder.id}
@@ -337,7 +396,9 @@ const VoirProjet: React.FC<{ id: string }> = ({ id }) => {
                   )}
                   {files.length > 0 && (
                     <>
-                      <h3 className="mt-4 text-lg font-medium">Fichiers</h3>
+                      <h3 className="mt-4 text-lg font-medium text-dark dark:text-white">
+                        Fichiers
+                      </h3>
                       <FileList
                         files={files}
                         onFileDeleted={fetchFoldersAndFiles}
@@ -362,6 +423,96 @@ const VoirProjet: React.FC<{ id: string }> = ({ id }) => {
         parentFolderId={parentFolderId}
         projectId={projectId}
       />
+      {/* Modal pour valider un client */}
+      <Modal
+        size={size}
+        isOpen={modal.isOpen}
+        onClose={modal.onClose}
+        isDismissable={false}
+        isKeyboardDismissDisabled={true}
+        className="bg-white shadow-1 dark:bg-gray-dark dark:shadow-card"
+      >
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className="flex flex-col gap-1 text-[22px] font-medium text-dark dark:text-white md:text-[27px]">
+                Tableau de validation
+              </ModalHeader>
+              <ModalBody>
+                <div className="max-w-screen w-full gap-1">
+                  <CheckboxGroup
+                    label="Sélectionner les clients"
+                    value={groupSelected}
+                    onChange={setGroupSelected}
+                    classNames={{
+                      base: "w-full max-w-screen h-[250px] overflow-y-auto scrollbar-hide",
+                    }}
+                  >
+                    <CustomCheckbox
+                      value="junior"
+                      user={{
+                        name: "Junior Garcia",
+                        // avatar:
+                        //   "https://avatars.githubusercontent.com/u/30373425?v=4",
+                        username: "jrgarciadev",
+                        url: "https://twitter.com/jrgarciadev",
+                        role: "Software Developer",
+                      }}
+                    />
+                    <CustomCheckbox
+                      value="johndoe"
+                      user={{
+                        name: "John Doe",
+                        username: "johndoe",
+                        url: "#",
+                        role: "Product Designer",
+                      }}
+                    />
+                    <CustomCheckbox
+                      value="zoeylang"
+                      user={{
+                        name: "Zoey Lang",
+                        username: "zoeylang",
+                        url: "#",
+                        role: "Technical Writer",
+                      }}
+                    />
+                    <CustomCheckbox
+                      value="zoeylang"
+                      user={{
+                        name: "Zoey Lang",
+                        username: "zoeylang",
+                        url: "#",
+                        role: "Technical Writer",
+                      }}
+                    />
+                    <CustomCheckbox
+                      value="zoeylang"
+                      user={{
+                        name: "Zoey Lang",
+                        username: "zoeylang",
+                        url: "#",
+                        role: "Technical Writer",
+                      }}
+                    />
+                  </CheckboxGroup>
+                  <p className="ml-1 mt-4 text-default-500">
+                    Sélectionné : {groupSelected.join(", ")}
+                  </p>
+                </div>
+              </ModalBody>
+              <ModalFooter>
+                <Button color="danger" variant="light" onPress={onClose}>
+                  Fermer
+                </Button>
+                <Button color="primary" onPress={onClose}>
+                  Valider
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
     </>
   );
 };

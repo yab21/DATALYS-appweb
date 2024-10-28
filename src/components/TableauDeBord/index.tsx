@@ -1,8 +1,25 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { Button, Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, getKeyValue } from "@nextui-org/react";
+import {
+  Button,
+  Table,
+  TableHeader,
+  TableColumn,
+  TableBody,
+  TableRow,
+  TableCell,
+  getKeyValue,
+} from "@nextui-org/react";
 import Link from "next/link";
-import { collection, query, orderBy, limit, getDocs, getDoc, doc } from "firebase/firestore";
+import {
+  collection,
+  query,
+  orderBy,
+  limit,
+  getDocs,
+  getDoc,
+  doc,
+} from "firebase/firestore";
 import { db } from "@/firebase/firebaseConfig";
 
 interface Project {
@@ -29,14 +46,21 @@ const TableauDeBord: React.FC = () => {
   const fetchRecentProjects = async () => {
     try {
       const projectsRef = collection(db, "projects");
-      const recentProjectsQuery = query(projectsRef, orderBy("createdAt", "desc"), limit(10));
+      const recentProjectsQuery = query(
+        projectsRef,
+        orderBy("createdAt", "desc"),
+        limit(10),
+      );
       const querySnapshot = await getDocs(recentProjectsQuery);
 
-      const projectList = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt.toDate()
-      } as Project));
+      const projectList = querySnapshot.docs.map(
+        (doc) =>
+          ({
+            id: doc.id,
+            ...doc.data(),
+            createdAt: doc.data().createdAt.toDate(),
+          }) as Project,
+      );
 
       console.log("Projets récupérés:", projectList);
       setProjects(projectList);
@@ -48,33 +72,44 @@ const TableauDeBord: React.FC = () => {
   const fetchRecentFiles = async () => {
     try {
       const filesRef = collection(db, "files");
-      const recentFilesQuery = query(filesRef, orderBy("createdAt", "desc"), limit(10));
+      const recentFilesQuery = query(
+        filesRef,
+        orderBy("createdAt", "desc"),
+        limit(10),
+      );
       const querySnapshot = await getDocs(recentFilesQuery);
 
-      const fileList = await Promise.all(querySnapshot.docs.map(async fileDoc => {
-        const fileData = fileDoc.data();
-        const projectDocRef = doc(db, "projects", fileData.projectId);
-        const projectDocSnap = await getDoc(projectDocRef);
-        const projectName = projectDocSnap.exists() ? projectDocSnap.data().intitule : "Projet inconnu";
-        
-        let createdAtDate;
-        if (fileData.createdAt && typeof fileData.createdAt.toDate === 'function') {
-          createdAtDate = fileData.createdAt.toDate();
-        } else if (fileData.createdAt instanceof Date) {
-          createdAtDate = fileData.createdAt;
-        } else if (typeof fileData.createdAt === 'string') {
-          createdAtDate = new Date(fileData.createdAt);
-        } else {
-          createdAtDate = new Date();
-        }
+      const fileList = await Promise.all(
+        querySnapshot.docs.map(async (fileDoc) => {
+          const fileData = fileDoc.data();
+          const projectDocRef = doc(db, "projects", fileData.projectId);
+          const projectDocSnap = await getDoc(projectDocRef);
+          const projectName = projectDocSnap.exists()
+            ? projectDocSnap.data().intitule
+            : "Projet inconnu";
 
-        return {
-          id: fileDoc.id,
-          ...fileData,
-          projectName,
-          createdAt: createdAtDate
-        } as File;
-      }));
+          let createdAtDate;
+          if (
+            fileData.createdAt &&
+            typeof fileData.createdAt.toDate === "function"
+          ) {
+            createdAtDate = fileData.createdAt.toDate();
+          } else if (fileData.createdAt instanceof Date) {
+            createdAtDate = fileData.createdAt;
+          } else if (typeof fileData.createdAt === "string") {
+            createdAtDate = new Date(fileData.createdAt);
+          } else {
+            createdAtDate = new Date();
+          }
+
+          return {
+            id: fileDoc.id,
+            ...fileData,
+            projectName,
+            createdAt: createdAtDate,
+          } as File;
+        }),
+      );
 
       console.log("Fichiers récupérés:", fileList);
       setFiles(fileList);
@@ -94,7 +129,7 @@ const TableauDeBord: React.FC = () => {
         setLoading(false);
         console.log("Chargement terminé");
       })
-      .catch(error => {
+      .catch((error) => {
         console.error("Erreur lors du chargement des données :", error);
         setLoading(false);
       });
@@ -104,7 +139,10 @@ const TableauDeBord: React.FC = () => {
     return <p>Chargement des données récentes...</p>;
   }
 
-  console.log("Rendu des tableaux avec:", { projects: projects.length, files: files.length });
+  console.log("Rendu des tableaux avec:", {
+    projects: projects.length,
+    files: files.length,
+  });
 
   const projectColumns = [
     { key: "intitule", label: "Intitulé" },
@@ -123,10 +161,22 @@ const TableauDeBord: React.FC = () => {
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-2 2xl:gap-7.5">
       <div>
-        <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">Projets récents</h4>
-        <Table aria-label="Projets récents">
+        <h4 className="mb-6 text-xl font-semibold text-dark dark:text-white">
+          Projets récents
+        </h4>
+        <Table
+          aria-label="Projets récents"
+          className="h-[400px] w-full overflow-y-auto scrollbar-hide"
+        >
           <TableHeader columns={projectColumns}>
-            {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
+            {(column) => (
+              <TableColumn
+                key={column.key}
+                className="text-dark dark:text-white"
+              >
+                {column.label}
+              </TableColumn>
+            )}
           </TableHeader>
           <TableBody items={projects}>
             {(project) => (
@@ -154,10 +204,22 @@ const TableauDeBord: React.FC = () => {
       </div>
 
       <div>
-        <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">Fichiers récents</h4>
-        <Table aria-label="Fichiers récents">
+        <h4 className="mb-6 text-xl font-semibold text-dark dark:text-white">
+          Fichiers récents
+        </h4>
+        <Table
+          aria-label="Fichiers récents"
+          className="h-[400px] w-full overflow-y-auto scrollbar-hide"
+        >
           <TableHeader columns={fileColumns}>
-            {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
+            {(column) => (
+              <TableColumn
+                key={column.key}
+                className="text-dark dark:text-white"
+              >
+                {column.label}
+              </TableColumn>
+            )}
           </TableHeader>
           <TableBody items={files}>
             {(file) => (
@@ -165,7 +227,9 @@ const TableauDeBord: React.FC = () => {
                 {(columnKey) => (
                   <TableCell>
                     {columnKey === "name" ? (
-                      <span title={file.name}>{truncateFileName(file.name)}</span>
+                      <span title={file.name}>
+                        {truncateFileName(file.name)}
+                      </span>
                     ) : columnKey === "createdAt" ? (
                       file.createdAt.toLocaleDateString()
                     ) : columnKey === "action" ? (
