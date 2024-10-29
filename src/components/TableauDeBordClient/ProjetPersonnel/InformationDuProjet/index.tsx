@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState, useContext } from "react";
 import { Chip, Button, Input } from "@nextui-org/react";
-import Breadcrumb from "@/components/TableauDeBord/Breadcrumbs/Breadcrumb";
+import Breadcrumb from "@/components/TableauDeBordClient/Breadcrumbs/Breadcrumb";
 import { CustomCheckbox } from "./CustomCheckbox";
 import {
   Modal,
@@ -20,14 +20,14 @@ import {
   Timestamp,
 } from "firebase/firestore";
 import { db } from "@/firebase/firebaseConfig";
-import CreateFolderModal from "@/components/TableauDeBord/Projet/VoirProjet/Folder/CreateFolderModal";
-import FolderItemSmall from "@/components/TableauDeBord/Projet/VoirProjet/Folder/FolderItemSmall";
-import UploadFileModal from "@/components/TableauDeBord/Projet/VoirProjet/File/UploadFileModal";
-import FileItem from "@/components/TableauDeBord/Projet/VoirProjet/File/FileItem";
-import FileItemXL from "@/components/TableauDeBord/Projet/VoirProjet/File/FileItemXL";
+import CreateFolderModal from "@/components/TableauDeBordClient/ProjetPersonnel/InformationDuProjet/Folder/CreateFolderModal";
+import FolderItemSmall from "@/components/TableauDeBordClient/ProjetPersonnel/InformationDuProjet/Folder/FolderItemSmall";
+import UploadFileModal from "@/components/TableauDeBordClient/ProjetPersonnel/InformationDuProjet/File/UploadFileModal";
+import FileItem from "@/components/TableauDeBordClient/ProjetPersonnel/InformationDuProjet/File/FileItem";
+import FileItemXL from "@/components/TableauDeBordClient/ProjetPersonnel/InformationDuProjet/File/FileItemXL";
 import { ParentFolderIdContext } from "@/context/ParentFolderIdContext";
-import FolderItem from "@/components/TableauDeBord/Projet/VoirProjet/Folder/FolderItem";
-import FileList from "@/components/TableauDeBord/Projet/VoirProjet/File/FileList";
+import FolderItem from "@/components/TableauDeBordClient/ProjetPersonnel/InformationDuProjet/Folder/FolderItem";
+import FileList from "@/components/TableauDeBordClient/ProjetPersonnel/InformationDuProjet/File/FileList";
 import Image from "next/image";
 
 // Définir les interfaces pour Folder et File
@@ -232,23 +232,6 @@ const VoirProjet: React.FC<{ id: string }> = ({ id }) => {
       <Breadcrumb pageName="Information du projet" />
       <div className="mt-5 overflow-hidden rounded-[10px] bg-white shadow-1 dark:bg-gray-dark dark:shadow-card">
         <div className="relative flex h-35 bg-[#46adb6] md:h-65">
-          <div className="absolute bottom-0 right-0">
-            <Button
-              onClick={modal.onOpen}
-              variant="solid"
-              color="primary"
-              className="m-1 border-1 px-2 py-2 text-white md:px-4 md:py-4"
-              onPress={() => handleOpen(size)}
-            >
-              Ajouter un client{" "}
-              <Image
-                src="/images/icon/client.svg"
-                width={15}
-                height={15}
-                alt=""
-              />
-            </Button>
-          </div>
           <div className="absolute left-0 right-0 top-0 md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2">
             <h3 className="text-center text-xl font-light text-white md:text-4xl">
               Informations sur le projet

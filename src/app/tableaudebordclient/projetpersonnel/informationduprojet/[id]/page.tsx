@@ -1,8 +1,8 @@
 import React from "react";
 import { Metadata } from "next";
 import { ParentFolderIdProvider } from "@/context/ParentFolderIdContext";
-import DefaultLayout from "@/components/TableauDeBord/Layouts/DefaultLaout";
-import PageProjet from "@/components/TableauDeBord/Projet/VoirProjet";
+import DefaultLayout from "@/components/TableauDeBordClient/Layouts/DefaultLaout";
+import InformationDuProjet from "@/components/TableauDeBordClient/ProjetPersonnel/InformationDuProjet";
 import { db } from "@/firebase/firebaseConfig";
 import { collection, getDocs } from "firebase/firestore";
 
@@ -16,7 +16,7 @@ export async function generateStaticParams() {
   const projectsRef = collection(db, "projects");
   const projectsSnapshot = await getDocs(projectsRef);
 
-  return projectsSnapshot.docs.map((doc) => ({ 
+  return projectsSnapshot.docs.map((doc) => ({
     id: doc.id,
   }));
 }
@@ -28,7 +28,7 @@ const Page = ({ params }: { params: { id: string } }) => {
   return (
     <ParentFolderIdProvider>
       <DefaultLayout>
-        <PageProjet id={params.id} />
+        <InformationDuProjet id={params.id} />
       </DefaultLayout>
     </ParentFolderIdProvider>
   );
