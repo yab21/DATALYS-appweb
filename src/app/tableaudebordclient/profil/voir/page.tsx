@@ -1,6 +1,6 @@
 import React from "react";
-import VoirProfil from "@/components/TableauDeBord/Profil/Voir";
-import DefaultLayout from "@/components/TableauDeBord/Layouts/DefaultLaout";
+import VoirProfil from "@/components/TableauDeBordClient/Profil/Voir";
+import DefaultLayout from "@/components/TableauDeBordClient/Layouts/DefaultLaout";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {

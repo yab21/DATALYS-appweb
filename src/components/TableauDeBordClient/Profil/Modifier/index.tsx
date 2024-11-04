@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import Breadcrumb from "@/components/TableauDeBord/Breadcrumbs/Breadcrumb";
+import Breadcrumb from "@/components/TableauDeBordClient/Breadcrumbs/Breadcrumb";
 import { Button } from "@nextui-org/button";
 import { Input } from "@nextui-org/react";
 import { Select, SelectItem } from "@nextui-org/react";
@@ -9,7 +9,7 @@ import { domaines } from "./domaineData";
 import { db } from "@/firebase/firebaseConfig"; // Assurez-vous que Firestore est bien importé
 import { collection, addDoc } from "firebase/firestore"; // Pour ajouter des documents dans Firestore
 
-const CreerUnCompte = () => {
+const ModifierCompte = () => {
   const [formData, setFormData] = useState({
     nom: "",
     prenom: "",
@@ -76,12 +76,12 @@ const CreerUnCompte = () => {
 
   return (
     <>
-      <Breadcrumb pageName="Créer un compte" />
+      <Breadcrumb pageName="Modifier votre compte" />
       <div className="mt-5 w-full max-w-full rounded-[10px]">
         <div className="mt-8 rounded-[10px] bg-white shadow-1 dark:bg-gray-dark dark:shadow-card">
           <div className="w-full max-w-full p-2">
             <h3 className="pt-2 text-[22px] font-medium text-dark dark:text-white">
-              Créer un compte
+              Modifier votre compte
             </h3>
           </div>
           <div className="mt-4 rounded-lg shadow-sm">
@@ -222,7 +222,7 @@ const CreerUnCompte = () => {
                 onClick={handleSubmit}
                 isDisabled={loading}
               >
-                {loading ? "Création..." : "Créer"}
+                {loading ? "Modification..." : "Modifier"}
               </Button>
             </div>
           </div>
@@ -232,4 +232,4 @@ const CreerUnCompte = () => {
   );
 };
 
-export default CreerUnCompte;
+export default ModifierCompte;

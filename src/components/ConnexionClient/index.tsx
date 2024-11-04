@@ -141,12 +141,6 @@ const ConnexionClient: React.FC = () => {
               {loading ? "Connexion..." : "Connexion"}
             </Button>
             {error && <p className="text-red-500">{error}</p>}
-            <Link
-              className="flex justify-start font-thin text-dark"
-              href="/creeruncompteclient"
-            >
-              Créer un compte.
-            </Link>
           </form>
           <Link className="flex justify-start font-thin text-dark" href="/">
             Accéder aux différents utilisateurs.

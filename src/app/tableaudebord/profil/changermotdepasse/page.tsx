@@ -1,18 +1,18 @@
 import React from "react";
-import VoirProfil from "@/components/TableauDeBord/Profil/Voir";
+import ChangerMotDePasse from "@/components/TableauDeBord/Profil/ChangerMotDePasse";
 import DefaultLayout from "@/components/TableauDeBord/Layouts/DefaultLaout";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Voir profil | DATALYS Consulting",
+  title: "Changer le mot de passe | DATALYS Consulting",
   description:
-    "La page pour voir le profil de l'administrateur de DATALYS Consulting",
+    "La page pour changer le mot de passe de l'administrateur de DATALYS Consulting",
 };
 
 const Page = () => {
   return (
     <DefaultLayout>
-      <VoirProfil />
+      <ChangerMotDePasse />
     </DefaultLayout>
   );
 };
