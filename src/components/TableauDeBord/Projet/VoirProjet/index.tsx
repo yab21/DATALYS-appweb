@@ -454,6 +454,24 @@ const VoirProjet: React.FC<{ id: string }> = ({ id }) => {
     await fetchFoldersAndFiles();
   };
 
+  useEffect(() => {
+    const fetchProjectData = async () => {
+      try {
+        const projectDoc = await getDoc(doc(db, "projects", id));
+        if (projectDoc.exists()) {
+          const projectData = projectDoc.data() as Project;
+          setProjectData(projectData);
+          setAuthorizedUsers(projectData.authorizedUsers || []);
+          setGroupSelected(projectData.authorizedUsers || []); // Initialiser avec les utilisateurs autorisés
+        }
+      } catch (error) {
+        console.error("Erreur lors de la récupération des données du projet:", error);
+      }
+    };
+
+    fetchProjectData();
+  }, [id]);
+
   if (loading) {
     return <p>Chargement des informations du projet...</p>;
   }

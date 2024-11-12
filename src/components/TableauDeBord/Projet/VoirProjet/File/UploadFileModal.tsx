@@ -16,8 +16,9 @@ interface UploadFileModalProps {
 }
 
 const UploadFileModal: React.FC<UploadFileModalProps> = ({ isOpen, onClose, onFileUploaded, parentFolderId, projectId }) => {
-  const { setShowToastMsg } = useContext(ShowToastContext) || {};
-  
+  const context = useContext(ShowToastContext);
+  const setShowToastMsg = context?.setShowToastMsg;
+
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showToast, setShowToast] = useState(false);
@@ -110,6 +111,7 @@ const UploadFileModal: React.FC<UploadFileModalProps> = ({ isOpen, onClose, onFi
               type="file"
               onChange={(e) => setSelectedFile(e.target.files ? e.target.files[0] : null)}
             />
+            {error && <p className="text-red-500">{error}</p>}
           </ModalBody>
           <ModalFooter>
             <Button color="danger" variant="light" onPress={onClose}>
