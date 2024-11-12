@@ -18,7 +18,7 @@ const CreerUnCompte = () => {
     email: "",
     password: "",
     confirmPassword: "",
-    isAdmin: false, // Utilisez un booléen pour le rôle
+    isAdmin: false,
     function: "",
     company: "",
     department: "",
@@ -50,55 +50,76 @@ const CreerUnCompte = () => {
     return await getDownloadURL(storageRef);
   };
 
+  const checkUsernameExists = async (username: string): Promise<boolean> => {
+    const usersRef = collection(db, "users");
+    const q = query(usersRef, where("username", "==", username));
+    const querySnapshot = await getDocs(q);
+    return !querySnapshot.empty;
+  };
+
   const handleSubmit = async () => {
     setError(null);
 
-    if (
-      !formData.lastName ||
-      !formData.firstName ||
-      !formData.username ||
-      !formData.email ||
-      !formData.password ||
-      !formData.confirmPassword
-    ) {
-      setError("Veuillez remplir tous les champs.");
-      return;
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      setError("Les mots de passe ne correspondent pas.");
-      return;
-    }
-
-    setLoading(true);
-
     try {
       const auth = getAuth();
+      const currentUser = auth.currentUser;
+
+      if (!currentUser) {
+        setError("Vous devez être connecté pour créer un compte");
+        return;
+      }
+
+      if (
+        !formData.lastName ||
+        !formData.firstName ||
+        !formData.username ||
+        !formData.email ||
+        !formData.password ||
+        !formData.confirmPassword
+      ) {
+        setError("Veuillez remplir tous les champs.");
+        return;
+      }
+
+      if (formData.password !== formData.confirmPassword) {
+        setError("Les mots de passe ne correspondent pas.");
+        return;
+      }
+
+      // Vérifier si le username existe déjà
+      const usernameExists = await checkUsernameExists(formData.username);
+      if (usernameExists) {
+        setError("Ce nom d'utilisateur est déjà pris.");
+        return;
+      }
+
+      setLoading(true);
+
+      // Créer le nouvel utilisateur
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         formData.email,
         formData.password
       );
-      const user = userCredential.user;
+      const newUser = userCredential.user;
 
-      // Upload profile image if provided
-      let profileImageUrl = "/images/user.png"; // Image par défaut
+      // Upload de l'image de profil si fournie
+      let profileImageUrl = "/images/user.png";
       if (formData.profileImage) {
         try {
-          profileImageUrl = await uploadProfileImage(formData.profileImage, user.uid);
+          profileImageUrl = await uploadProfileImage(formData.profileImage, newUser.uid);
         } catch (error) {
           console.error("Erreur lors de l'upload de l'image:", error);
-          // Continue with default image if upload fails
         }
       }
 
-      // Use setDoc with the user's uid to ensure unique document
-      await setDoc(doc(db, "users", user.uid), {
+      // Créer le document utilisateur
+      await setDoc(doc(db, "users", newUser.uid), {
         lastName: formData.lastName,
         firstName: formData.firstName,
         username: formData.username,
         email: formData.email,
-        isAdmin: formData.isAdmin, // Use boolean for admin role
+        isAdmin: formData.isAdmin,
         function: formData.function,
         company: formData.company,
         department: formData.department,
@@ -107,20 +128,28 @@ const CreerUnCompte = () => {
       });
 
       console.log("Utilisateur créé avec succès !");
-      alert("Utilisateur créé avec succès !");
 
-      // Créer une notification pour les administrateurs
+      // Notifier les administrateurs
       const adminsSnapshot = await getDocs(
         query(collection(db, "users"), where("isAdmin", "==", true))
       );
 
-      adminsSnapshot.docs.forEach(async (adminDoc) => {
-        await createNotification(adminDoc.id, {
-          title: "Nouveau compte créé",
-          body: `Un nouveau compte a été créé pour ${formData.firstName} ${formData.lastName}`,
-          link: "/tableaudebord/utilisateur/voir"
-        });
+      // Créer les notifications avec l'ID de l'utilisateur actuel
+      const notificationPromises = adminsSnapshot.docs.map(async (adminDoc) => {
+        await createNotification(
+          adminDoc.id,
+          {
+            title: "Nouveau compte créé",
+            body: `créé un nouveau compte pour ${formData.firstName} ${formData.lastName} (${formData.username})`,
+            link: "/tableaudebord/utilisateur/voir"
+          },
+          currentUser.uid
+        );
       });
+
+      await Promise.all(notificationPromises);
+      alert("Utilisateur créé avec succès !");
+
     } catch (error: any) {
       if (error.code === "auth/email-already-in-use") {
         setError("Cette adresse e-mail est déjà utilisée.");
