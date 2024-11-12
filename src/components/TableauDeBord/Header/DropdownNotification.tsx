@@ -31,9 +31,7 @@ const DropdownNotification = () => {
   const [notifying, setNotifying] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [fcmToken, setFcmToken] = useState<string | null>(null);
-  const [lastReadTimestamp, setLastReadTimestamp] = useState<number>(
-    parseInt(localStorage.getItem('lastReadNotification') || '0')
-  );
+  const [lastReadTimestamp, setLastReadTimestamp] = useState<number>(0);
   const [unreadCount, setUnreadCount] = useState(0);
 
   const markAsRead = async (notificationId: string) => {
@@ -57,10 +55,12 @@ const DropdownNotification = () => {
   };
 
   const checkUnreadNotifications = (notifs: Notification[]) => {
+    const storedTimestamp = parseInt(localStorage.getItem('lastReadNotification') || '0');
+    
     const unreadNotifs = notifs.filter(notification => {
       if (!notification.timestamp) return false;
       const notifTimestamp = notification.timestamp.toDate().getTime();
-      return notifTimestamp > lastReadTimestamp;
+      return notifTimestamp > storedTimestamp;
     });
     
     setUnreadCount(unreadNotifs.length);
@@ -80,6 +80,9 @@ const DropdownNotification = () => {
       const user = auth.currentUser;
       if (user) {
         try {
+          const storedTimestamp = parseInt(localStorage.getItem('lastReadNotification') || '0');
+          setLastReadTimestamp(storedTimestamp);
+
           const token = await requestFCMToken();
           if (token) {
             setFcmToken(token);
@@ -134,7 +137,15 @@ const DropdownNotification = () => {
       }
     };
 
-    initializeNotifications();
+    const unsubscribeAuth = auth.onAuthStateChanged((user) => {
+      if (user) {
+        initializeNotifications();
+      }
+    });
+
+    return () => {
+      unsubscribeAuth();
+    };
   }, []);
 
   const getNotificationTimestamp = (notification: Notification): number => {
