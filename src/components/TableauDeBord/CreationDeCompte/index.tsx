@@ -5,8 +5,10 @@ import Breadcrumb from "@/components/TableauDeBord/Breadcrumbs/Breadcrumb";
 import { Button } from "@nextui-org/button";
 import { Input, Checkbox } from "@nextui-org/react";
 import { db } from "@/firebase/firebaseConfig";
-import { collection, setDoc, doc } from "firebase/firestore";
+import { collection, setDoc, doc, getDocs, query, where } from "firebase/firestore";
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { createNotification } from "@/firebase/firebaseConfig";
 
 const CreerUnCompte = () => {
   const [formData, setFormData] = useState({
@@ -41,6 +43,13 @@ const CreerUnCompte = () => {
     setFormData({ ...formData, isAdmin: e.target.checked });
   };
 
+  const uploadProfileImage = async (file: File, userId: string): Promise<string> => {
+    const storage = getStorage();
+    const storageRef = ref(storage, `profileImages/${userId}`);
+    await uploadBytes(storageRef, file);
+    return await getDownloadURL(storageRef);
+  };
+
   const handleSubmit = async () => {
     setError(null);
 
@@ -73,10 +82,14 @@ const CreerUnCompte = () => {
       const user = userCredential.user;
 
       // Upload profile image if provided
-      let profileImageUrl = "/images/user.png"; // Default image
+      let profileImageUrl = "/images/user.png"; // Image par défaut
       if (formData.profileImage) {
-        // Logic to upload the image to a storage service and get the URL
-        // profileImageUrl = await uploadImageAndGetUrl(formData.profileImage);
+        try {
+          profileImageUrl = await uploadProfileImage(formData.profileImage, user.uid);
+        } catch (error) {
+          console.error("Erreur lors de l'upload de l'image:", error);
+          // Continue with default image if upload fails
+        }
       }
 
       // Use setDoc with the user's uid to ensure unique document
@@ -95,6 +108,19 @@ const CreerUnCompte = () => {
 
       console.log("Utilisateur créé avec succès !");
       alert("Utilisateur créé avec succès !");
+
+      // Créer une notification pour les administrateurs
+      const adminsSnapshot = await getDocs(
+        query(collection(db, "users"), where("isAdmin", "==", true))
+      );
+
+      adminsSnapshot.docs.forEach(async (adminDoc) => {
+        await createNotification(adminDoc.id, {
+          title: "Nouveau compte créé",
+          body: `Un nouveau compte a été créé pour ${formData.firstName} ${formData.lastName}`,
+          link: "/tableaudebord/utilisateur/voir"
+        });
+      });
     } catch (error: any) {
       if (error.code === "auth/email-already-in-use") {
         setError("Cette adresse e-mail est déjà utilisée.");

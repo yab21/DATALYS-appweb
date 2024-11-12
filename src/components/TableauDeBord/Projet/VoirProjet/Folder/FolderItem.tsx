@@ -17,7 +17,7 @@ import {
   ModalFooter
 } from "@nextui-org/react";
 import { getAuth } from "firebase/auth";
-import { doc, getDoc, getFirestore, updateDoc, deleteDoc } from "firebase/firestore";
+import { doc, getDoc, getFirestore, updateDoc, deleteDoc, collection, query, where, getDocs } from "firebase/firestore";
 import RenameModal from "../Common/RenameModal";
 import MoveModal from "../Common/MoveModal";
 
@@ -80,7 +80,63 @@ function FolderItem({ folder, onClick, onFolderUpdated }: FolderItemProps) {
   const handleDelete = async () => {
     try {
       const db = getFirestore();
-      await deleteDoc(doc(db, "Folders", folder.id));
+
+      // Fonction récursive pour supprimer un dossier et son contenu
+      const deleteRecursively = async (folderId: string) => {
+        // 1. Récupérer tous les sous-dossiers
+        const subFoldersQuery = query(
+          collection(db, "Folders"),
+          where("parentFolderId", "==", folderId)
+        );
+        const subFoldersSnapshot = await getDocs(subFoldersQuery);
+
+        // 2. Supprimer récursivement chaque sous-dossier
+        for (const subFolder of subFoldersSnapshot.docs) {
+          await deleteRecursively(subFolder.id);
+        }
+
+        // 3. Récupérer tous les fichiers du dossier
+        const filesQuery = query(
+          collection(db, "files"),
+          where("parentFolderId", "==", folderId)
+        );
+        const filesSnapshot = await getDocs(filesQuery);
+
+        // 4. Supprimer tous les fichiers du dossier
+        const fileDeletions = filesSnapshot.docs.map(fileDoc => 
+          deleteDoc(doc(db, "files", fileDoc.id))
+        );
+        await Promise.all(fileDeletions);
+
+        // 5. Supprimer le dossier lui-même
+        await deleteDoc(doc(db, "Folders", folderId));
+      };
+
+      // Démarrer la suppression récursive
+      await deleteRecursively(folder.id);
+      
+      // Notifier les administrateurs de la suppression
+      const adminsSnapshot = await getDocs(
+        query(collection(db, "users"), where("isAdmin", "==", true))
+      );
+
+      const auth = getAuth();
+      const currentUser = auth.currentUser;
+
+      if (currentUser) {
+        adminsSnapshot.docs.forEach(async (adminDoc) => {
+          await createNotification(
+            adminDoc.id,
+            {
+              title: "Dossier supprimé",
+              body: `Le dossier "${folder.name}" et tout son contenu ont été supprimés`,
+              link: `/tableaudebord/projet/pageprojet/${folder.projectId}`
+            },
+            currentUser.uid
+          );
+        });
+      }
+
       onFolderUpdated();
       onDeleteModalClose();
     } catch (error) {

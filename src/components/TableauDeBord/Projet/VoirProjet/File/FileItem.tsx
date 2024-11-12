@@ -18,6 +18,8 @@ import { getAuth } from "firebase/auth";
 import { getDoc } from "firebase/firestore";
 import RenameModal from "../Common/RenameModal";
 import MoveModal from "../Common/MoveModal";
+import { createNotification } from "@/firebase/firebaseConfig";
+import { getDocs, query, collection, where } from "firebase/firestore";
 
 interface FileItemProps {
   file: {
@@ -96,6 +98,20 @@ const FileItem: React.FC<FileItemProps> = ({ file, onFileDeleted }) => {
       setShowToastMsg("Fichier supprimé !");
       onFileDeleted();
       onClose();
+
+      // Notifier les administrateurs
+      const adminsSnapshot = await getDocs(
+        query(collection(db, "users"), where("isAdmin", "==", true))
+      );
+
+      adminsSnapshot.docs.forEach(async (adminDoc) => {
+        await createNotification(adminDoc.id, {
+          title: "Fichier supprimé",
+          body: `Le fichier "${file.name}" a été supprimé du projet`,
+          link: `/tableaudebord/projet/pageprojet/${file.projectId}`
+        });
+      });
+
     } catch (error) {
       console.error("Erreur lors de la suppression du fichier: ", error);
       setShowToastMsg("Erreur lors de la suppression du fichier");

@@ -79,21 +79,11 @@ const ModifierProfil: React.FC<ModifierProfilProps> = ({ userData, onClose, onUp
         updatedData.profileImage = profileImageUrl;
       }
 
-      const preservedFields = {
-        isAdmin: userData.isAdmin,
-        createdAt: userData.createdAt,
-        uid: userId,
-      };
-
-      console.log("Données à mettre à jour:", {
-        ...updatedData,
-        ...preservedFields
-      });
-
       const userDocRef = doc(db, "users", userId);
       await updateDoc(userDocRef, {
         ...updatedData,
-        ...preservedFields
+        isAdmin: userData.isAdmin,
+        createdAt: userData.createdAt,
       });
 
       console.log("Profil mis à jour avec succès");
@@ -185,13 +175,21 @@ const ModifierProfil: React.FC<ModifierProfilProps> = ({ userData, onClose, onUp
                   variant="bordered"
                   className="w-full"
                 />
-                <Input
-                  type="file"
-                  label="Photo de profil"
-                  onChange={handleFileChange}
-                  variant="bordered"
-                  className="w-full md:col-span-2"
-                />
+                <div className="mb-4">
+                  <div className="flex items-center justify-center">
+                    <img
+                      src={formData.profileImage || "/images/user.png"}
+                      alt="Profile"
+                      className="h-24 w-24 rounded-full object-cover"
+                    />
+                  </div>
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="mt-2"
+                  />
+                </div>
               </div>
             </ModalBody>
             <ModalFooter>

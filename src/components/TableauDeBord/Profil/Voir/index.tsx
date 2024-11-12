@@ -2,15 +2,26 @@
 
 import React, { useEffect, useState } from "react";
 import Breadcrumb from "@/components/TableauDeBord/Breadcrumbs/Breadcrumb";
-import Image from "next/image";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { app } from "@/firebase/firebaseConfig";
 import ModifierProfil from "@/components/TableauDeBord/Profil/ModifierProfil";
 import { Button } from "@nextui-org/react";
 
+interface UserData {
+  lastName: string;
+  firstName: string;
+  function: string;
+  company: string;
+  department: string;
+  email: string;
+  profileImage: string;
+  isAdmin: boolean;
+  createdAt: Date;
+}
+
 const VoirProfil = () => {
-  const [userData, setUserData] = useState<any>(null);
+  const [userData, setUserData] = useState<UserData | null>(null);
   const [isEditing, setIsEditing] = useState(false);
 
   const fetchUserData = async () => {
@@ -24,7 +35,7 @@ const VoirProfil = () => {
       const userSnapshot = await getDoc(userDoc);
       if (userSnapshot.exists()) {
         console.log("Données utilisateur récupérées:", userSnapshot.data());
-        setUserData(userSnapshot.data());
+        setUserData(userSnapshot.data() as UserData);
       } else {
         console.log("Aucune donnée trouvée pour cet utilisateur.");
       }
@@ -42,6 +53,10 @@ const VoirProfil = () => {
     await fetchUserData();
   };
 
+  if (!userData) {
+    return <div>Chargement...</div>;
+  }
+
   return (
     <>
       <Breadcrumb pageName="Voir votre profil" />
@@ -52,18 +67,18 @@ const VoirProfil = () => {
               <div className="col-span-3">
                 <div className="rounded-lg border-stroke bg-white p-6 shadow dark:border-stroke-dark dark:bg-gray-dark">
                   <div className="flex flex-col items-center">
-                    {userData && (
-                      <Image
+                    <div className="relative h-32 w-32 overflow-hidden rounded-full">
+                      <img
                         src={userData.profileImage || "/images/user.png"}
-                        className="mb-4 shrink-0 rounded-full bg-gray-300"
-                        width={128}
-                        height={128}
-                        alt="person"
+                        alt="Photo de profil"
+                        className="h-full w-full object-cover"
                       />
-                    )}
-                    <h1 className="text-xl font-bold">{userData?.firstName} {userData?.lastName || "Nom"}</h1>
+                    </div>
+                    <h1 className="mt-4 text-xl font-bold">
+                      {userData.firstName} {userData.lastName}
+                    </h1>
                     <p className="text-gray-900 dark:text-white">
-                      {userData?.role || "Rôle"}
+                      {userData.function}
                     </p>
                     <Button
                       onPress={() => setIsEditing(true)}
@@ -81,32 +96,27 @@ const VoirProfil = () => {
                   <div className="mt-4 rounded-lg shadow-sm">
                     <div className="grid grid-cols-1 gap-2 px-2 py-6 md:grid-cols-2 md:gap-4 md:py-4">
                       <p className="text-base font-extrabold tracking-wide text-dark dark:text-white">
-                        Nom: <span className="font-light">{userData?.lastName || "Nom"}</span>
+                        Nom: <span className="font-light">{userData.lastName}</span>
                       </p>
                       <p className="text-base font-extrabold tracking-wide text-dark dark:text-white">
-                        Prénom: <span className="font-light">{userData?.firstName || "Prénom"}</span>
-                      </p>
-                      <p className="text-base font-extrabold tracking-wide text-dark dark:text-white">
-                        Nom d'utilisateur:{" "}
-                        <span className="font-light">{userData?.username || "Nom d'utilisateur"}</span>
+                        Prénom: <span className="font-light">{userData.firstName}</span>
                       </p>
                       <p className="text-base font-extrabold tracking-wide text-dark dark:text-white">
                         Votre fonction:{" "}
-                        <span className="font-light">{userData?.function || "Fonction"}</span>
+                        <span className="font-light">{userData.function}</span>
                       </p>
                       <p className="text-base font-extrabold tracking-wide text-dark dark:text-white">
                         Société:{" "}
-                        <span className="font-light">{userData?.company || "Société"}</span>
+                        <span className="font-light">{userData.company}</span>
                       </p>
                       <p className="text-base font-extrabold tracking-wide text-dark dark:text-white">
                         Département de la société:{" "}
-                        <span className="font-light">{userData?.department || "Département"}</span>
+                        <span className="font-light">{userData.department}</span>
                       </p>
                       <p className="text-base font-extrabold tracking-wide text-dark dark:text-white">
                         Adresse e-mail:{" "}
-                        <span className="font-light">{userData?.email || "Email"}</span>
+                        <span className="font-light">{userData.email}</span>
                       </p>
-                      {/* Ne pas afficher le mot de passe pour des raisons de sécurité */}
                     </div>
                   </div>
                 </div>

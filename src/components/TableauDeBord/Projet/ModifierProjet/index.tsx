@@ -1,11 +1,13 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { db } from "@/firebase/firebaseConfig";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc, getDocs, query, collection, where } from "firebase/firestore";
 import { Input, Select, SelectItem } from "@nextui-org/react";
 import { Button } from "@nextui-org/button";
 import Breadcrumb from "@/components/TableauDeBord/Breadcrumbs/Breadcrumb";
 import { domaines } from "../GererProjet/domaineData";
+import { createNotification } from "@/firebase/firebaseConfig";
+import { getAuth } from "firebase/auth";
 
 interface ProjectData {
   intitule: string;
@@ -56,6 +58,14 @@ const ModifierProjet: React.FC<ModifierProjetProps> = ({ id }) => {
 
   const handleUpdate = async () => {
     try {
+      const auth = getAuth();
+      const currentUser = auth.currentUser;
+      
+      if (!currentUser) {
+        setError("Utilisateur non connecté");
+        return;
+      }
+
       if (!id) return;
       
       const docRef = doc(db, "projects", id);
@@ -68,6 +78,37 @@ const ModifierProjet: React.FC<ModifierProjetProps> = ({ id }) => {
 
       await updateDoc(docRef, updateData);
       console.log("Projet mis à jour avec succès");
+
+      // Notifier les administrateurs
+      const adminsSnapshot = await getDocs(
+        query(collection(db, "users"), where("isAdmin", "==", true))
+      );
+
+      adminsSnapshot.docs.forEach(async (adminDoc) => {
+        await createNotification(
+          adminDoc.id,
+          {
+            title: "Projet modifié",
+            body: `a modifié le projet "${projectData.intitule}"`,
+            link: `/tableaudebord/projet/pageprojet/${id}`
+          },
+          currentUser.uid
+        );
+      });
+
+      // Notifier l'utilisateur lui-même s'il n'est pas admin
+      if (!isUserAdmin) {
+        await createNotification(
+          currentUser.uid,
+          {
+            title: "Projet modifié",
+            body: `modifié le projet "${projectData.intitule}"`,
+            link: `/tableaudebord/projet/pageprojet/${id}`
+          },
+          currentUser.uid
+        );
+      }
+
       window.location.href = "/tableaudebord/projet/gerer";
     } catch (error) {
       console.error("Erreur lors de la mise à jour du projet:", error);

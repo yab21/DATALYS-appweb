@@ -6,31 +6,35 @@ import ClickOutside from "@/components/ClickOutside";
 import { doc, getDoc } from "firebase/firestore";
 import DeconnexionButton from "@/components/Deconnexion"; // Importer ton bouton de déconnexion
 import { auth, db } from "@/firebase/firebaseConfig"; // Assurez-vous d'importer Firebase correctement
+import { getAuth } from "firebase/auth";
 
 const DropdownUser = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [userName, setUserName] = useState({ firstName: "", lastName: "" });
+  const [userData, setUserData] = useState({
+    firstName: "",
+    lastName: "",
+    profileImage: "/images/user.png" // Image par défaut
+  });
 
   // Fonction pour récupérer les informations utilisateur depuis Firestore
   useEffect(() => {
     const fetchUserData = async () => {
+      const auth = getAuth();
       const user = auth.currentUser;
       if (user) {
         try {
-          const userDocRef = doc(db, "users", user.uid); // Assurez-vous que la collection est correcte
+          const userDocRef = doc(db, "users", user.uid);
           const userDoc = await getDoc(userDocRef);
           if (userDoc.exists()) {
-            const userData = userDoc.data();
-            setUserName({
-              firstName: userData.firstName,
-              lastName: userData.lastName,
+            const data = userDoc.data();
+            setUserData({
+              firstName: data.firstName || "",
+              lastName: data.lastName || "",
+              profileImage: data.profileImage || "/images/user.png"
             });
           }
         } catch (error) {
-          console.error(
-            "Erreur lors de la récupération des données utilisateur :",
-            error,
-          );
+          console.error("Erreur lors de la récupération des données utilisateur:", error);
         }
       }
     };
@@ -47,22 +51,16 @@ const DropdownUser = () => {
       >
         <span className="h-12 w-12 rounded-full">
           <img
-            width={50}
-            height={50}
-            src="/images/fav.PNG"
-            style={{
-              width: "auto",
-              height: "auto",
-            }}
+            src={userData.profileImage}
             alt="User"
-            className="overflow-hidden rounded-full"
+            className="h-full w-full rounded-full object-cover"
           />
         </span>
 
         <span className="flex items-center gap-2 font-medium text-dark dark:text-dark-6">
           {/* Remplacement de "Client" par l'initiale du prénom et le nom */}
           <span className="hidden lg:block">
-            {userName.firstName.charAt(0)}. {userName.lastName}
+            {userData.firstName.charAt(0)}. {userData.lastName}
           </span>
 
           <svg
@@ -84,31 +82,22 @@ const DropdownUser = () => {
       </Link>
 
       {dropdownOpen && (
-        <div
-          className={`absolute right-0 mt-7.5 flex w-[280px] flex-col rounded-lg border-[0.5px] border-stroke bg-white shadow-default dark:border-dark-3 dark:bg-gray-dark`}
-        >
-          <div className="flex items-center gap-2.5 px-5 pb-5.5 pt-3.5">
-            <span className="relative block h-12 w-12 rounded-full">
-              <img
-                width={50}
-                height={50}
-                src="/images/fav.PNG"
-                style={{
-                  width: "auto",
-                  height: "auto",
-                }}
-                alt="User"
-                className="overflow-hidden rounded-full"
-              />
-
-              <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-green dark:border-gray-dark"></span>
-            </span>
-
-            <span className="block">
-              <span className="block font-medium text-dark dark:text-white">
-              {userName.firstName} {userName.lastName}
-              </span>
-            </span>
+        <div className="absolute right-0 mt-4 flex w-62.5 flex-col rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+          <div className="flex flex-col gap-4 border-b border-stroke px-4 py-3 dark:border-strokedark">
+            <div className="flex items-center gap-3">
+              <div className="h-12 w-12 rounded-full">
+                <img
+                  src={userData.profileImage}
+                  alt="User"
+                  className="h-full w-full rounded-full object-cover"
+                />
+              </div>
+              <div>
+                <h6 className="font-medium text-black dark:text-white">
+                  {userData.firstName} {userData.lastName}
+                </h6>
+              </div>
+            </div>
           </div>
           <ul className="flex flex-col gap-1 border-y-[0.5px] border-stroke p-2.5 dark:border-dark-3">
             <li>
@@ -126,9 +115,9 @@ const DropdownUser = () => {
                     <path
                       fill="none"
                       stroke="#4B5563"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="1.5"
                       d="M2.5 12c0-4.478 0-6.718 1.391-8.109S7.521 2.5 12 2.5c4.478 0 6.718 0 8.109 1.391S21.5 7.521 21.5 12c0 4.478 0 6.718-1.391 8.109S16.479 21.5 12 21.5c-4.478 0-6.718 0-8.109-1.391S2.5 16.479 2.5 12M11 7h6M7 7h1m-1 5h1m-1 5h1m3-5h6m-6 5h6"
                       color="#4B5563"
                     />

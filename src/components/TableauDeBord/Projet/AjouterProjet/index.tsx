@@ -6,15 +6,17 @@ import { Button } from "@nextui-org/button";
 import { Input } from "@nextui-org/react";
 import { Select, SelectItem } from "@nextui-org/react";
 import { domaines } from "./domaineData";
-import { db } from "@/firebase/firebaseConfig"; // Assurez-vous que Firestore est bien importé
-import { collection, addDoc } from "firebase/firestore"; // Pour ajouter des documents dans Firestore
+import { db } from "@/firebase/firebaseConfig";
+import { collection, addDoc, getDocs, query, where } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
+import { createNotification } from "@/firebase/firebaseConfig";
 
 const CreerProjet = () => {
   const [formData, setFormData] = useState({
     intitule: "",
     societe: "",
     chefDeProjet: "",
-    domaine: [] as string[], // Utiliser un tableau de chaînes de caractères pour les domaines
+    domaine: [] as string[],
   });
 
   const [error, setError] = useState<string | null>(null);
@@ -26,35 +28,69 @@ const CreerProjet = () => {
   };
 
   const handleSelectChange = (selected: Set<string>) => {
-    // Convertir les éléments sélectionnés en tableau
     setFormData({ ...formData, domaine: Array.from(selected) });
   };
 
   const handleSubmit = async () => {
-    
-    setError(null);
-    
-    // Vérifier que tous les champs sont remplis
-    if (!formData.intitule || !formData.societe || !formData.chefDeProjet || formData.domaine.length === 0) {
-      setError("Veuillez remplir tous les champs.");
-      return;
-    }
-    setLoading(true);
-
     try {
-      // Enregistrer le projet dans Firestore
+      console.log("Début de la création du projet...");
+      const auth = getAuth();
+      const currentUser = auth.currentUser;
+      
+      if (!currentUser) {
+        console.error("Aucun utilisateur connecté");
+        setError("Utilisateur non connecté");
+        return;
+      }
+
+      if (!formData.intitule || !formData.societe || !formData.chefDeProjet || formData.domaine.length === 0) {
+        setError("Veuillez remplir tous les champs.");
+        return;
+      }
+      setLoading(true);
+
       const docRef = await addDoc(collection(db, "projects"), {
         intitule: formData.intitule,
         societe: formData.societe,
         chefDeProjet: formData.chefDeProjet,
-        domaine: formData.domaine, // Un tableau de chaînes de caractères
-        createdAt: new Date(), // Ajout de la date de création
+        domaine: formData.domaine,
+        createdAt: new Date(),
+        createdBy: currentUser.uid,
       });
 
-      console.log("Projet créé avec ID :", docRef.id);
+      console.log("Projet créé avec succès, ID:", docRef.id);
+
+      const adminsSnapshot = await getDocs(
+        query(collection(db, "users"), where("isAdmin", "==", true))
+      );
+
+      console.log("Nombre d'administrateurs trouvés:", adminsSnapshot.size);
+
+      const notificationPromises = adminsSnapshot.docs.map(async (adminDoc) => {
+        console.log("Création de notification pour admin:", adminDoc.id);
+        try {
+          await createNotification(
+            adminDoc.id,
+            {
+              title: "Nouveau projet créé",
+              body: `a créé un nouveau projet "${formData.intitule}"`,
+              link: `/tableaudebord/projet/pageprojet/${docRef.id}`
+            },
+            currentUser.uid
+          );
+          console.log("Notification créée avec succès pour admin:", adminDoc.id);
+        } catch (error) {
+          console.error("Erreur lors de la création de la notification pour admin:", adminDoc.id, error);
+        }
+      });
+
+      await Promise.all(notificationPromises);
+      console.log("Toutes les notifications ont été créées");
+
       alert("Projet créé avec succès !");
-    } catch (error: any) {
-      console.error("Erreur lors de la création du projet :", error);
+      window.location.href = "/tableaudebord/projet/gerer";
+    } catch (error) {
+      console.error("Erreur lors de la création du projet:", error);
       setError("Erreur lors de la création du projet. Veuillez réessayer.");
     } finally {
       setLoading(false);

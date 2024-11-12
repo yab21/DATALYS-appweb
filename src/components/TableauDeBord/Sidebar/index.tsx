@@ -8,6 +8,7 @@ import ClickOutside from "@/components/ClickOutside";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { getAuth } from "firebase/auth";
 import { doc, getDoc, getFirestore } from "firebase/firestore";
+import Image from "next/image";
 
 interface SidebarProps {
   sidebarOpen: boolean;
@@ -174,23 +175,21 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
         {/* <!-- SIDEBAR HEADER --> */}
         <div className="flex items-center justify-between gap-2 px-6 py-5.5 lg:py-6.5 xl:py-10">
           <Link href="/tableaudebord">
-            <img
-              width={176}
-              height={32}
-              src={"/images/logo/logo-2.png"}
+            <Image
+              width={300}
+              height={100}
+              src="/images/logo/logo-2.png"
               alt="Logo"
-              priority
               className="dark:hidden"
-              style={{ width: "300px", height: "100px" }}
+              priority={true}
             />
-            <img
-              width={176}
-              height={32}
-              src={"/images/logo/logo.png"}
+            <Image
+              width={300}
+              height={100}
+              src="/images/logo/logo.png"
               alt="Logo"
-              priority
               className="hidden dark:block"
-              style={{ width: "300px", height: "100px" }}
+              priority={true}
             />
           </Link>
 
