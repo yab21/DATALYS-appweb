@@ -117,6 +117,46 @@ const VoirProjet: React.FC<{ id: string }> = ({ id }) => {
   // Ajoutez cette fonction pour vérifier si l'utilisateur est admin
   const [isUserAdmin, setIsUserAdmin] = useState(false);
 
+  const [searchQuery, setSearchQuery] = useState("");
+  const [nonAdminUsers, setNonAdminUsers] = useState<User[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
+
+  // Fonction pour récupérer les utilisateurs non-admin
+  const fetchNonAdminUsers = async () => {
+    try {
+      const usersSnapshot = await getDocs(collection(db, "users"));
+      const usersList = usersSnapshot.docs
+        .map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          name: `${doc.data().firstName} ${doc.data().lastName}`,
+          username: doc.data().username,
+          profileImage: doc.data().profileImage || "/images/user.png",
+        }))
+        .filter(user => !user.isAdmin); // Ne garder que les utilisateurs non-admin
+
+      setNonAdminUsers(usersList);
+      setFilteredUsers(usersList);
+    } catch (error) {
+      console.error("Erreur lors de la récupération des utilisateurs:", error);
+    }
+  };
+
+  // Effet pour charger les utilisateurs non-admin
+  useEffect(() => {
+    fetchNonAdminUsers();
+  }, []);
+
+  // Effet pour filtrer les utilisateurs selon la recherche
+  useEffect(() => {
+    const filtered = nonAdminUsers.filter(user => 
+      user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.email?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    setFilteredUsers(filtered);
+  }, [searchQuery, nonAdminUsers]);
+
   useEffect(() => {
     const checkUserAdmin = async () => {
       const auth = getAuth(app);
@@ -648,50 +688,51 @@ const VoirProjet: React.FC<{ id: string }> = ({ id }) => {
         className="bg-white shadow-1 dark:bg-gray-dark dark:shadow-card"
       >
         <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader className="flex flex-col gap-1 text-[22px] font-medium text-dark dark:text-white md:text-[27px]">
-                Tableau de validation
-              </ModalHeader>
-              <ModalBody>
-                <div className="max-w-screen w-full gap-1">
-                  <CheckboxGroup
-                    label="Sélectionner les clients"
-                    value={groupSelected}
-                    onChange={setGroupSelected}
-                    classNames={{
-                      base: "w-full max-w-screen h-[250px] overflow-y-auto scrollbar-hide",
-                    }}
-                  >
-                    {users.map((user) => (
-                      <CustomCheckbox
-                        key={user.id}
-                        value={user.id}
-                        user={{
-                          name: user.name,
-                          username: user.username,
-                          url: user.url,
-                          role: user.role,
-                        }}
-                        className={authorizedUsers.includes(user.id) ? "active-class" : ""}
-                      />
-                    ))}
-                  </CheckboxGroup>
-                  <p className="ml-1 mt-4 text-default-500">
-                    Sélectionné : {groupSelected.join(", ")}
-                  </p>
-                </div>
-              </ModalBody>
-              <ModalFooter>
-                <Button color="danger" variant="light" onPress={onClose}>
-                  Fermer
-                </Button>
-                <Button color="primary" onPress={handleValidate}>
-                  Valider
-                </Button>
-              </ModalFooter>
-            </>
-          )}
+          <ModalHeader className="text-[22px] font-medium text-dark dark:text-white">
+            Sélectionner les clients
+          </ModalHeader>
+          <ModalBody>
+            <Input
+              type="text"
+              placeholder="Rechercher un client..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="mb-4"
+            />
+            <CheckboxGroup
+              label="Sélectionner les clients"
+              value={groupSelected}
+              onChange={setGroupSelected}
+              classNames={{
+                base: "w-full max-w-screen h-[250px] overflow-y-auto scrollbar-hide",
+              }}
+            >
+              {filteredUsers.map((user) => (
+                <CustomCheckbox
+                  key={user.id}
+                  value={user.id}
+                  user={{
+                    name: user.name,
+                    username: user.username,
+                    url: user.profileImage,
+                    role: user.function,
+                  }}
+                  className={authorizedUsers.includes(user.id) ? "active-class" : ""}
+                />
+              ))}
+            </CheckboxGroup>
+            <p className="ml-1 mt-4 text-default-500">
+              Sélectionné : {groupSelected.length} client(s)
+            </p>
+          </ModalBody>
+          <ModalFooter>
+            <Button color="danger" variant="light" onPress={modal.onClose}>
+              Fermer
+            </Button>
+            <Button color="primary" onPress={handleValidate}>
+              Valider
+            </Button>
+          </ModalFooter>
         </ModalContent>
       </Modal>
     </>

@@ -4,9 +4,9 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import ClickOutside from "@/components/ClickOutside";
 import { doc, getDoc } from "firebase/firestore";
-import DeconnexionButton from "@/components/Deconnexion"; // Importer ton bouton de déconnexion
-import { auth, db } from "@/firebase/firebaseConfig"; // Assurez-vous d'importer Firebase correctement
-import { getAuth } from "firebase/auth";
+import { auth, db } from "@/firebase/firebaseConfig";
+import { getAuth, signOut } from "firebase/auth";
+import { useRouter } from "next/navigation";
 
 const DropdownUser = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -15,6 +15,7 @@ const DropdownUser = () => {
     lastName: "",
     profileImage: "/images/user.png" // Image par défaut
   });
+  const router = useRouter();
 
   // Fonction pour récupérer les informations utilisateur depuis Firestore
   useEffect(() => {
@@ -42,6 +43,15 @@ const DropdownUser = () => {
     fetchUserData();
   }, []);
 
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+      router.push("/connexion");
+    } catch (error) {
+      console.error("Erreur lors de la déconnexion:", error);
+    }
+  };
+
   return (
     <ClickOutside onClick={() => setDropdownOpen(false)} className="relative">
       <Link
@@ -58,7 +68,6 @@ const DropdownUser = () => {
         </span>
 
         <span className="flex items-center gap-2 font-medium text-dark dark:text-dark-6">
-          {/* Remplacement de "Client" par l'initiale du prénom et le nom */}
           <span className="hidden lg:block">
             {userData.firstName.charAt(0)}. {userData.lastName}
           </span>
@@ -127,8 +136,8 @@ const DropdownUser = () => {
               </Link>
             </li>
             <li>
-              <Link
-                href="/connexion"
+              <button
+                onClick={handleSignOut}
                 className="flex w-full items-center rounded-[7px] p-2.5 text-sm font-medium text-dark-4 duration-300 ease-in-out hover:bg-gray-2 hover:text-dark dark:text-dark-6 dark:hover:bg-dark-3 dark:hover:text-white lg:text-base"
               >
                 <div className="flex items-center gap-1">
@@ -143,9 +152,9 @@ const DropdownUser = () => {
                       d="M5 21q-.825 0-1.412-.587T3 19V5q0-.825.588-1.412T5 3h7v2H5v14h7v2zm11-4l-1.375-1.45l2.55-2.55H9v-2h8.175l-2.55-2.55L16 7l5 5z"
                     />
                   </svg>
-                  <DeconnexionButton />
+                  Déconnexion
                 </div>
-              </Link>
+              </button>
             </li>
           </ul>
         </div>
