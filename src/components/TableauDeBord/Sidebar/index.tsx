@@ -181,7 +181,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               src="/images/logo/logo-2.png"
               alt="Logo"
               className="dark:hidden"
-              priority={true}
+              priority
             />
             <Image
               width={300}
@@ -189,7 +189,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               src="/images/logo/logo.png"
               alt="Logo"
               className="hidden dark:block"
-              priority={true}
+              priority
             />
           </Link>
 
