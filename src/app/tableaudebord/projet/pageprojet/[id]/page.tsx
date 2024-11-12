@@ -9,7 +9,7 @@ import { collection, getDocs } from "firebase/firestore";
 export const metadata: Metadata = {
   title: "Informations du projet | DATALYS Consulting",
   description: "La page des informations du projet de DATALYS Consulting",
-};
+}; 
 
 // Ajoutez cette fonction pour la génération statique
 export async function generateStaticParams() {

@@ -1,19 +1,34 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Input } from "@nextui-org/react";
 import { Button } from "@nextui-org/button";
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth"; // Firebase Auth
-import { doc, getDoc } from "firebase/firestore"; // Firestore
-import { db } from "@/firebase/firebaseConfig"; // Importer la configuration Firebase
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
+import { useRouter } from "next/navigation";
 
 const Connexion: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    const auth = getAuth();
+    // Vérifier si un utilisateur est déjà connecté
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // Si un utilisateur est connecté, rediriger vers le tableau de bord
+        console.log("Utilisateur déjà connecté, redirection vers le tableau de bord...");
+        router.push("/tableaudebord");
+      }
+    });
+
+    // Nettoyer l'écouteur lors du démontage du composant
+    return () => unsubscribe();
+  }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,23 +38,10 @@ const Connexion: React.FC = () => {
     try {
       const auth = getAuth();
       // Connexion de l'utilisateur
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        email,
-        password,
-      );
-      const user = userCredential.user;
+      await signInWithEmailAndPassword(auth, email, password);
 
-      // Vérifier si l'utilisateur est admin
-      const userDocRef = doc(db, "users", user.uid);
-      const userDoc = await getDoc(userDocRef);
-      if (userDoc.exists() && userDoc.data().isAdmin) {
-        // Rediriger vers le tableau de bord admin
-        window.location.href = "/tableaudebord";
-      } else {
-        // Si l'utilisateur n'est pas admin
-        setError("Vous n'avez pas les droits pour accéder à cette section.");
-      }
+      // Rediriger vers le tableau de bord après connexion réussie
+      router.push("/tableaudebord");
     } catch (error: any) {
       // Gérer les erreurs spécifiques à Firebase
       switch (error.code) {
@@ -137,12 +139,6 @@ const Connexion: React.FC = () => {
               >
                 {loading ? "Connexion..." : "Connexion"}
               </Button>
-              {/* <Link
-                className="flex justify-start font-thin text-dark"
-                href="/creeruncompteadmi"
-              >
-                Créer un compte admin.
-              </Link> */}
             </form>
             <Link
               className="mt-1 flex justify-start font-thin text-dark"

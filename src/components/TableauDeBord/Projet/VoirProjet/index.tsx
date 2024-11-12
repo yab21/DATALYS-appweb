@@ -1,23 +1,27 @@
 "use client";
+
 import React, { useEffect, useState, useContext } from "react";
-import { Chip, Button, Input } from "@nextui-org/react";
-import Breadcrumb from "@/components/TableauDeBord/Breadcrumbs/Breadcrumb";
-import { CustomCheckbox } from "./CustomCheckbox";
 import {
+  Chip,
+  Button,
+  Input,
+  useDisclosure,
   Modal,
   ModalContent,
   ModalHeader,
   ModalBody,
   ModalFooter,
-  useDisclosure,
-} from "@nextui-org/modal";
-import { CheckboxGroup } from "@nextui-org/react";
+  CheckboxGroup,
+} from "@nextui-org/react";
+import Breadcrumb from "@/components/TableauDeBord/Breadcrumbs/Breadcrumb";
+import { CustomCheckbox } from "./CustomCheckbox";
 import {
   collection,
-  getDoc,
   getDocs,
-  doc,
   Timestamp,
+  updateDoc,
+  query,
+  where,
 } from "firebase/firestore";
 import { db } from "@/firebase/firebaseConfig";
 import CreateFolderModal from "@/components/TableauDeBord/Projet/VoirProjet/Folder/CreateFolderModal";
@@ -29,14 +33,18 @@ import { ParentFolderIdContext } from "@/context/ParentFolderIdContext";
 import FolderItem from "@/components/TableauDeBord/Projet/VoirProjet/Folder/FolderItem";
 import FileList from "@/components/TableauDeBord/Projet/VoirProjet/File/FileList";
 import Image from "next/image";
+import { getFirestore, doc, getDoc } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
+import { app } from "@/firebase/firebaseConfig"; 
 
 // Définir les interfaces pour Folder et File
 interface Folder {
   id: string;
-  parentFolderId: string | null;
   name: string;
-  type: "folder";
-  // Ajoutez d'autres propriétés si nécessaire
+  parentFolderId: string | null;
+  projectId: string;
+  type: 'folder';
+  isPrivate?: boolean;
 }
 
 interface File {
@@ -48,6 +56,7 @@ interface File {
   imageUrl: string;
   parentFolderId: string | null;
   projectId: string;
+  isPrivate?: boolean;
 }
 
 interface Project {
@@ -55,20 +64,35 @@ interface Project {
   societe: string;
   chefDeProjet: string;
   domaine: string[] | string;
-  createdAt: Timestamp;
+  createdAt: any; // Utilisez Timestamp de Firestore
+  authorizedUsers?: string[];
 }
+
+interface User {
+  id: string;
+  name?: string;
+  username?: string;
+  url?: string;
+  role?: string;
+}
+
+// Ajoutez une fonction pour récupérer les utilisateurs
+const fetchUsers = async () => {
+  const usersSnapshot = await getDocs(collection(db, "users"));
+  return usersSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+};
 
 const VoirProjet: React.FC<{ id: string }> = ({ id }) => {
   // Modal pour ajouter un client
-  const [groupSelected, setGroupSelected] = React.useState([]);
+  const [groupSelected, setGroupSelected] = React.useState<string[]>([]);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
   const modal = useDisclosure();
-  const [size, setSize] = React.useState("2xl");
+  const [size, setSize] = React.useState<"xs" | "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | "full">("2xl");
   const sizes = "2xl";
 
-  const handleOpen = (size) => {
-    setSize(size);
+  const handleOpen = (newSize: typeof size) => {
+    setSize(newSize);
     onOpen();
   };
   // Utilisez directement l'ID passé en prop
@@ -85,6 +109,116 @@ const VoirProjet: React.FC<{ id: string }> = ({ id }) => {
   const [isGridView, setIsGridView] = useState(false);
   const [currentPath, setCurrentPath] = useState<string[]>([]);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [users, setUsers] = useState<User[]>([]); // Stocker les utilisateurs
+  const [authorizedUsers, setAuthorizedUsers] = useState<string[]>([]); // Stocker les utilisateurs autorisés
+  const [projectData, setProjectData] = useState<Project | null>(null);
+  const [hasAccess, setHasAccess] = useState(false);
+
+  // Ajoutez cette fonction pour vérifier si l'utilisateur est admin
+  const [isUserAdmin, setIsUserAdmin] = useState(false);
+
+  useEffect(() => {
+    const checkUserAdmin = async () => {
+      const auth = getAuth(app);
+      const user = auth.currentUser;
+      if (user) {
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (userDoc.exists()) {
+          setIsUserAdmin(userDoc.data().isAdmin || false);
+        }
+      }
+    };
+    checkUserAdmin();
+  }, []);
+
+  useEffect(() => {
+    const fetchProjectData = async () => {
+      const auth = getAuth(app);
+      const user = auth.currentUser;
+      if (user) {
+        console.log("Utilisateur authentifié:", user.uid);
+        const db = getFirestore(app);
+        const userDoc = doc(db, "users", user.uid);
+        const userSnapshot = await getDoc(userDoc);
+        if (userSnapshot.exists()) {
+          const userData = userSnapshot.data();
+          console.log("Données utilisateur récupérées:", userData);
+          console.log("isAdmin:", userData.isAdmin);
+
+          const projectDoc = doc(db, "projects", id);
+          const projectSnapshot = await getDoc(projectDoc);
+          if (projectSnapshot.exists()) {
+            const projectData = projectSnapshot.data() as Project;
+            console.log("Données du projet récupérées:", projectData);
+
+            if (
+              userData.isAdmin || 
+              (projectData.authorizedUsers && projectData.authorizedUsers.includes(user.uid))
+            ) {
+              setHasAccess(true);
+              setProjectData(projectData);
+            } else {
+              console.log("Accès refusé : l'utilisateur n'a pas les permissions nécessaires.");
+            }
+          } else {
+            console.log("Aucune donnée trouvée pour ce projet.");
+          }
+        } else {
+          console.log("Aucune donnée trouvée pour cet utilisateur.");
+        }
+      } else {
+        console.log("Aucun utilisateur authentifié.");
+      }
+      setLoading(false);
+    };
+
+    fetchProjectData();
+  }, [id]);
+
+  useEffect(() => {
+    const fetchProjectAndUsers = async () => {
+      const projectDoc = await getDoc(doc(db, "projects", projectId));
+      if (projectDoc.exists()) {
+        const projectData = projectDoc.data() as Project;
+        setProject(projectData);
+        setAuthorizedUsers(projectData.authorizedUsers || []);
+      }
+      const usersList = await fetchUsers();
+      setUsers(usersList);
+    };
+
+    fetchProjectAndUsers();
+  }, [projectId]);
+
+  const handleValidate = async () => {
+    try {
+      console.log("Utilisateurs sélectionnés pour l'ajout :", groupSelected);
+      // Mettre à jour authorizedUsers dans le document du projet
+      await updateDoc(doc(db, "projects", projectId), {
+        authorizedUsers: groupSelected,
+      });
+
+      // Pour chaque utilisateur sélectionné, mettre à jour leur tableau authorizedProjects
+      groupSelected.forEach(async (userId) => {
+        const userDocRef = doc(db, "users", userId);
+        const userDocSnap = await getDoc(userDocRef);
+        if (userDocSnap.exists()) {
+          const userData = userDocSnap.data();
+          const authorizedProjects = userData.authorizedProjects || [];
+          if (!authorizedProjects.includes(projectId)) {
+            authorizedProjects.push(projectId);
+            await updateDoc(userDocRef, { authorizedProjects });
+          }
+        }
+      });
+
+      setAuthorizedUsers(groupSelected);
+      modal.onClose();
+      console.log("Utilisateurs autorisés mis à jour avec succès.");
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour des utilisateurs autorisés :", error);
+    }
+  };
 
   // Récupérer l'ID du projet à partir de l'URL
   const getProjectIdFromUrl = () => {
@@ -124,69 +258,124 @@ const VoirProjet: React.FC<{ id: string }> = ({ id }) => {
 
   // Récupérer les dossiers et fichiers depuis Firestore
   const fetchFoldersAndFiles = async () => {
-    console.log(
-      "Fetching folders and files. parentFolderId:",
-      parentFolderId,
-      "projectId:",
-      projectId,
-    );
     try {
-      const folderCollection = collection(db, "Folders");
-      const fileCollection = collection(db, "files");
+      const auth = getAuth(app);
+      const user = auth.currentUser;
+      const userDoc = await getDoc(doc(db, "users", user?.uid));
+      const isUserAdmin = userDoc.exists() ? userDoc.data().isAdmin : false;
 
-      const folderSnapshot = await getDocs(folderCollection);
-      const fileSnapshot = await getDocs(fileCollection);
-
-      console.log(
-        "All folders before filtering:",
-        folderSnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id })),
+      // Récupérer les dossiers du projet actuel
+      const folderSnapshot = await getDocs(
+        query(collection(db, "Folders"), 
+          where("projectId", "==", projectId),
+          where("parentFolderId", "==", parentFolderId) // Ne récupérer que les dossiers du niveau actuel
+        )
       );
-      console.log("parentFolderId used for filtering:", parentFolderId);
 
+      // Filtrer les dossiers
       const folderList = folderSnapshot.docs
-        .map((doc) => ({ ...doc.data(), type: "folder", id: doc.id }) as Folder)
-        .filter(
-          (folder) =>
-            folder.parentFolderId === parentFolderId &&
-            folder.projectId === projectId,
-        );
+        .map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }))
+        .filter((folder) => {
+          // Si l'utilisateur est admin, il voit tout
+          if (isUserAdmin) return true;
+          
+          // Si le dossier est privé et l'utilisateur n'est pas admin, il ne le voit pas
+          if (folder.isPrivate) return false;
+          
+          return true;
+        });
 
-      const fileList = fileSnapshot.docs
-        .map((doc) => ({ ...doc.data(), type: "file", id: doc.id }) as File)
-        .filter(
-          (file) =>
-            file.parentFolderId === parentFolderId &&
-            file.projectId === projectId,
-        );
-
-      console.log("Filtered folders:", folderList);
-      console.log(
-        "All files:",
-        fileSnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id })),
+      // Récupérer les fichiers du projet actuel
+      const fileSnapshot = await getDocs(
+        query(collection(db, "files"), 
+          where("projectId", "==", projectId),
+          where("parentFolderId", "==", parentFolderId) // Ne récupérer que les fichiers du niveau actuel
+        )
       );
-      console.log("Filtered files:", fileList);
+
+      // Filtrer les fichiers
+      const fileList = fileSnapshot.docs
+        .map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }))
+        .filter((file) => {
+          // Si l'utilisateur est admin, il voit tout
+          if (isUserAdmin) return true;
+          
+          // Si le fichier est privé et l'utilisateur n'est pas admin, il ne le voit pas
+          if (file.isPrivate) return false;
+          
+          return true;
+        });
 
       setFolders(folderList);
       setFiles(fileList);
     } catch (error) {
-      console.error(
-        "Erreur lors de la récupération des dossiers et fichiers :",
-        error,
-      );
+      console.error("Erreur lors de la récupération des dossiers et fichiers:", error);
     }
   };
 
-  const handleFolderClick = (folderId: string, folderName: string) => {
-    setParentFolderId(folderId);
-    setCurrentPath([...currentPath, folderName]);
+  const handleFolderClick = async (folderId: string, folderName: string) => {
+    try {
+      // Vérifier si le dossier existe et est accessible
+      const folderDoc = await getDoc(doc(db, "Folders", folderId));
+      if (!folderDoc.exists()) {
+        console.error("Dossier non trouvé");
+        return;
+      }
+
+      const folderData = folderDoc.data();
+      
+      // Vérifier que le dossier appartient bien au projet actuel
+      if (folderData.projectId !== projectId) {
+        console.error("Ce dossier n'appartient pas au projet actuel");
+        return;
+      }
+
+      // Mettre à jour le chemin et le dossier parent
+      setParentFolderId(folderId);
+      setCurrentPath([...currentPath, folderName]);
+      
+      // Rafraîchir la liste des dossiers et fichiers pour le nouveau dossier parent
+      await fetchFoldersAndFiles();
+    } catch (error) {
+      console.error("Erreur lors de l'accès au dossier:", error);
+    }
   };
 
-  const handleBackClick = () => {
+  const handleBackClick = async () => {
     if (currentPath.length > 0) {
-      const newPath = [...currentPath];
-      newPath.pop();
-      setCurrentPath(newPath);
-      setParentFolderId(newPath.length === 0 ? projectId : parentFolderId);
+      try {
+        const newPath = [...currentPath];
+        newPath.pop();
+        setCurrentPath(newPath);
+
+        // Si on revient à la racine
+        if (newPath.length === 0) {
+          setParentFolderId(projectId);
+        } else {
+          // Sinon, on récupère l'ID du dossier parent
+          const parentFolderSnapshot = await getDocs(
+            query(collection(db, "Folders"),
+              where("projectId", "==", projectId),
+              where("name", "==", newPath[newPath.length - 1])
+            )
+          );
+
+          if (!parentFolderSnapshot.empty) {
+            setParentFolderId(parentFolderSnapshot.docs[0].id);
+          }
+        }
+
+        // Rafraîchir la liste des dossiers et fichiers
+        await fetchFoldersAndFiles();
+      } catch (error) {
+        console.error("Erreur lors du retour au dossier parent:", error);
+      }
     }
   };
 
@@ -219,11 +408,21 @@ const VoirProjet: React.FC<{ id: string }> = ({ id }) => {
     );
   };
 
+  // Ajoutez cette fonction pour rafraîchir les dossiers et fichiers
+  const handleFolderUpdated = async () => {
+    console.log("Rafraîchissement des dossiers et fichiers...");
+    await fetchFoldersAndFiles();
+  };
+
   if (loading) {
     return <p>Chargement des informations du projet...</p>;
   }
 
-  if (!project) {
+  if (!hasAccess) {
+    return <p>Vous n'avez pas les accès pour consulter ce projet.</p>;
+  }
+
+  if (!projectData) {
     return <p>Projet non trouvé</p>;
   }
 
@@ -233,21 +432,23 @@ const VoirProjet: React.FC<{ id: string }> = ({ id }) => {
       <div className="mt-5 overflow-hidden rounded-[10px] bg-white shadow-1 dark:bg-gray-dark dark:shadow-card">
         <div className="relative flex h-35 bg-[#46adb6] md:h-65">
           <div className="absolute bottom-0 right-0">
-            <Button
-              onClick={modal.onOpen}
-              variant="solid"
-              color="primary"
-              className="m-1 border-1 px-2 py-2 text-white md:px-4 md:py-4"
-              onPress={() => handleOpen(size)}
-            >
-              Ajouter un client{" "}
-              <Image
-                src="/images/icon/client.svg"
-                width={15}
-                height={15}
-                alt=""
-              />
-            </Button>
+            {isUserAdmin && (
+              <Button
+                onClick={modal.onOpen}
+                variant="solid"
+                color="primary"
+                className="m-1 border-1 px-2 py-2 text-white md:px-4 md:py-4"
+                onPress={() => handleOpen(size)}
+              >
+                Ajouter un client{" "}
+                <Image
+                  src="/images/icon/client.svg"
+                  width={15}
+                  height={15}
+                  alt=""
+                />
+              </Button>
+            )}
           </div>
           <div className="absolute left-0 right-0 top-0 md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2">
             <h3 className="text-center text-xl font-light text-white md:text-4xl">
@@ -276,7 +477,7 @@ const VoirProjet: React.FC<{ id: string }> = ({ id }) => {
                   </h1>
                   <Chip color="primary" variant="bordered">
                     <span className="text-sm font-bold md:text-base">
-                      {project.intitule}
+                      {projectData.intitule}
                     </span>
                   </Chip>
                 </div>
@@ -286,7 +487,7 @@ const VoirProjet: React.FC<{ id: string }> = ({ id }) => {
                   </h1>
                   <Chip color="primary" variant="bordered">
                     <span className="text-sm font-bold md:text-base">
-                      {project.societe}
+                      {projectData.societe}
                     </span>
                   </Chip>
                 </div>
@@ -296,7 +497,7 @@ const VoirProjet: React.FC<{ id: string }> = ({ id }) => {
                   </h1>
                   <Chip color="primary" variant="bordered">
                     <span className="text-sm font-bold md:text-base">
-                      {project.chefDeProjet}
+                      {projectData.chefDeProjet}
                     </span>
                   </Chip>
                 </div>
@@ -306,9 +507,9 @@ const VoirProjet: React.FC<{ id: string }> = ({ id }) => {
                   </h1>
                   <Chip color="primary" variant="bordered">
                     <span className="text-sm font-bold md:text-base">
-                      {Array.isArray(project.domaine)
-                        ? project.domaine.join(", ")
-                        : project.domaine || "Non spécifié"}
+                      {Array.isArray(projectData.domaine)
+                        ? projectData.domaine.join(", ")
+                        : projectData.domaine || "Non spécifié"}
                     </span>
                   </Chip>
                 </div>
@@ -318,7 +519,7 @@ const VoirProjet: React.FC<{ id: string }> = ({ id }) => {
                   </h1>
                   <Chip color="primary" variant="bordered">
                     <span className="text-sm font-bold md:text-base">
-                      {project.createdAt.toDate().toLocaleDateString()}
+                      {projectData.createdAt.toDate().toLocaleDateString()}
                     </span>
                   </Chip>
                 </div>
@@ -337,18 +538,22 @@ const VoirProjet: React.FC<{ id: string }> = ({ id }) => {
                 Explorateur de fichiers
               </h3>
               <div className="mb-2 flex items-center gap-1 md:gap-2">
-                <CreateFolderModal
-                  onFolderCreated={fetchFoldersAndFiles}
-                  parentFolderId={parentFolderId}
-                  projectId={projectId}
-                />
-                <Button
-                  size="md"
-                  color="primary"
-                  onPress={() => setIsUploadModalOpen(true)}
-                >
-                  Charger le fichier
-                </Button>
+                {isUserAdmin && (
+                  <>
+                    <CreateFolderModal
+                      onFolderCreated={fetchFoldersAndFiles}
+                      parentFolderId={parentFolderId}
+                      projectId={projectId}
+                    />
+                    <Button
+                      size="md"
+                      color="primary"
+                      onPress={() => setIsUploadModalOpen(true)}
+                    >
+                      Charger le fichier
+                    </Button>
+                  </>
+                )}
                 <Button
                   size="md"
                   color="secondary"
@@ -374,6 +579,7 @@ const VoirProjet: React.FC<{ id: string }> = ({ id }) => {
                       key={folder.id}
                       folder={folder}
                       onClick={() => handleFolderClick(folder.id, folder.name)}
+                      onFolderUpdated={handleFolderUpdated}
                     />
                   ))}
                   {files.map((file) => (
@@ -398,6 +604,7 @@ const VoirProjet: React.FC<{ id: string }> = ({ id }) => {
                           onClick={() =>
                             handleFolderClick(folder.id, folder.name)
                           }
+                          onFolderUpdated={handleFolderUpdated}
                         />
                       ))}
                     </>
@@ -456,53 +663,19 @@ const VoirProjet: React.FC<{ id: string }> = ({ id }) => {
                       base: "w-full max-w-screen h-[250px] overflow-y-auto scrollbar-hide",
                     }}
                   >
-                    <CustomCheckbox
-                      value="junior"
-                      user={{
-                        name: "Junior Garcia",
-                        // avatar:
-                        //   "https://avatars.githubusercontent.com/u/30373425?v=4",
-                        username: "jrgarciadev",
-                        url: "https://twitter.com/jrgarciadev",
-                        role: "Software Developer",
-                      }}
-                    />
-                    <CustomCheckbox
-                      value="johndoe"
-                      user={{
-                        name: "John Doe",
-                        username: "johndoe",
-                        url: "#",
-                        role: "Product Designer",
-                      }}
-                    />
-                    <CustomCheckbox
-                      value="zoeylang"
-                      user={{
-                        name: "Zoey Lang",
-                        username: "zoeylang",
-                        url: "#",
-                        role: "Technical Writer",
-                      }}
-                    />
-                    <CustomCheckbox
-                      value="zoeylang"
-                      user={{
-                        name: "Zoey Lang",
-                        username: "zoeylang",
-                        url: "#",
-                        role: "Technical Writer",
-                      }}
-                    />
-                    <CustomCheckbox
-                      value="zoeylang"
-                      user={{
-                        name: "Zoey Lang",
-                        username: "zoeylang",
-                        url: "#",
-                        role: "Technical Writer",
-                      }}
-                    />
+                    {users.map((user) => (
+                      <CustomCheckbox
+                        key={user.id}
+                        value={user.id}
+                        user={{
+                          name: user.name,
+                          username: user.username,
+                          url: user.url,
+                          role: user.role,
+                        }}
+                        className={authorizedUsers.includes(user.id) ? "active-class" : ""}
+                      />
+                    ))}
                   </CheckboxGroup>
                   <p className="ml-1 mt-4 text-default-500">
                     Sélectionné : {groupSelected.join(", ")}
@@ -513,7 +686,7 @@ const VoirProjet: React.FC<{ id: string }> = ({ id }) => {
                 <Button color="danger" variant="light" onPress={onClose}>
                   Fermer
                 </Button>
-                <Button color="primary" onPress={onClose}>
+                <Button color="primary" onPress={handleValidate}>
                   Valider
                 </Button>
               </ModalFooter>

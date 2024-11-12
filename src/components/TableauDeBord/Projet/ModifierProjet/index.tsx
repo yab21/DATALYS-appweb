@@ -2,43 +2,84 @@
 import React, { useEffect, useState } from "react";
 import { db } from "@/firebase/firebaseConfig";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { Input } from "@nextui-org/react";
+import { Input, Select, SelectItem } from "@nextui-org/react";
 import { Button } from "@nextui-org/button";
 import Breadcrumb from "@/components/TableauDeBord/Breadcrumbs/Breadcrumb";
+import { domaines } from "../GererProjet/domaineData";
 
-const ModifierProjet = () => {
-  const [projectData, setProjectData] = useState({
+interface ProjectData {
+  intitule: string;
+  societe: string;
+  chefDeProjet: string;
+  domaine: string[];
+  createdAt: Date;
+}
+
+interface ModifierProjetProps {
+  id: string;
+}
+
+const ModifierProjet: React.FC<ModifierProjetProps> = ({ id }) => {
+  const [projectData, setProjectData] = useState<ProjectData>({
     intitule: "",
     societe: "",
     chefDeProjet: "",
+    domaine: [],
+    createdAt: new Date(),
   });
-
-  const projectId = window.location.pathname.split("/").pop(); // Récupérer l'ID du projet depuis l'URL
 
   useEffect(() => {
     const fetchProject = async () => {
-      if (projectId) {
-        const docRef = doc(db, "projects", projectId);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          setProjectData(docSnap.data() as typeof projectData);
-        } else {
-          console.log("Projet non trouvé");
+      if (id) {
+        try {
+          const docRef = doc(db, "projects", id);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            setProjectData({
+              intitule: data.intitule || "",
+              societe: data.societe || "",
+              chefDeProjet: data.chefDeProjet || "",
+              domaine: data.domaine || [],
+              createdAt: data.createdAt.toDate(),
+            });
+          } else {
+            console.log("Projet non trouvé");
+          }
+        } catch (error) {
+          console.error("Erreur lors de la récupération du projet:", error);
         }
       }
     };
     fetchProject();
-  }, [projectId]);
+  }, [id]);
 
   const handleUpdate = async () => {
-    const docRef = doc(db, "projects", projectId);
-    await updateDoc(docRef, projectData);
-    window.location.href = "/tableaudebord/projet/gerer"; // Redirection après modification
+    try {
+      if (!id) return;
+      
+      const docRef = doc(db, "projects", id);
+      const updateData = {
+        intitule: projectData.intitule,
+        societe: projectData.societe,
+        chefDeProjet: projectData.chefDeProjet,
+        domaine: projectData.domaine,
+      };
+
+      await updateDoc(docRef, updateData);
+      console.log("Projet mis à jour avec succès");
+      window.location.href = "/tableaudebord/projet/gerer";
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour du projet:", error);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setProjectData({ ...projectData, [name]: value });
+    setProjectData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   return (
@@ -85,6 +126,24 @@ const ModifierProjet = () => {
                 onChange={handleChange}
                 className="text-sm font-medium md:text-base"
               />
+              <Select
+                label="Domaine du projet"
+                variant="bordered"
+                color="primary"
+                selectionMode="multiple"
+                selectedKeys={new Set(projectData.domaine)}
+                onSelectionChange={(keys) => {
+                  const selectedDomaines = Array.from(keys) as string[];
+                  setProjectData(prev => ({ ...prev, domaine: selectedDomaines }));
+                }}
+                className="text-sm font-medium md:text-base"
+              >
+                {domaines.map((domaine) => (
+                  <SelectItem key={domaine.key} value={domaine.key}>
+                    {domaine.label}
+                  </SelectItem>
+                ))}
+              </Select>
             </div>
             <div className="flex justify-center px-2 py-2">
               <Button

@@ -21,6 +21,7 @@ import {
   doc,
 } from "firebase/firestore";
 import { db } from "@/firebase/firebaseConfig";
+import { getAuth } from "firebase/auth";
 
 interface Project {
   id: string;
@@ -38,13 +39,48 @@ interface File {
   createdAt: Date;
 }
 
+interface User {
+  id: string;
+  isAdmin: boolean;
+}
+
 const TableauDeBord: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [files, setFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
-  const fetchRecentProjects = async () => {
+  const fetchUserData = async () => {
+    const auth = getAuth();
+    const firebaseUser = auth.currentUser;
+
+    if (!firebaseUser) {
+      console.error("Aucun utilisateur connecté");
+      return null;
+    }
+
     try {
+      const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        console.log("User data fetched:", userData);
+        return {
+          id: firebaseUser.uid,
+          isAdmin: userData.isAdmin || false,
+        };
+      }
+      return null;
+    } catch (error) {
+      console.error("Erreur lors de la récupération des données utilisateur:", error);
+      return null;
+    }
+  };
+
+  const fetchRecentProjects = async (user: User) => {
+    try {
+      console.log("Fetching recent projects...");
+      console.log("Current user:", { id: user.id, isAdmin: user.isAdmin });
+      
       const projectsRef = collection(db, "projects");
       const recentProjectsQuery = query(
         projectsRef,
@@ -53,24 +89,49 @@ const TableauDeBord: React.FC = () => {
       );
       const querySnapshot = await getDocs(recentProjectsQuery);
 
-      const projectList = querySnapshot.docs.map(
-        (doc) =>
-          ({
-            id: doc.id,
-            ...doc.data(),
-            createdAt: doc.data().createdAt.toDate(),
-          }) as Project,
-      );
+      const projectList = querySnapshot.docs
+        .map((doc) => {
+          const projectData = doc.data();
+          console.log(`Project ${doc.id} data:`, {
+            hasAuthorizedUsers: !!projectData.authorizedUsers,
+            authorizedUsers: projectData.authorizedUsers || [],
+          });
 
-      console.log("Projets récupérés:", projectList);
+          if (!projectData.authorizedUsers && !user.isAdmin) {
+            console.log(`Project ${doc.id} skipped: no authorizedUsers field and user is not admin`);
+            return null;
+          }
+
+          const isAuthorized = user.isAdmin || 
+            (projectData.authorizedUsers && 
+             Array.isArray(projectData.authorizedUsers) && 
+             projectData.authorizedUsers.includes(user.id));
+
+          console.log(`Project ${doc.id} authorization check:`, {
+            isAdmin: user.isAdmin,
+            hasAuthorizedUsers: !!projectData.authorizedUsers,
+            isUserAuthorized: projectData.authorizedUsers?.includes(user.id),
+            finalDecision: isAuthorized
+          });
+
+          return isAuthorized ? {
+            id: doc.id,
+            ...projectData,
+            createdAt: projectData.createdAt.toDate(),
+          } as Project : null;
+        })
+        .filter((project) => project !== null);
+
+      console.log("Projets filtrés et récupérés:", projectList);
       setProjects(projectList);
     } catch (error) {
       console.error("Erreur lors de la récupération des projets :", error);
     }
   };
 
-  const fetchRecentFiles = async () => {
+  const fetchRecentFiles = async (user: User) => {
     try {
+      console.log("Fetching recent files...");
       const filesRef = collection(db, "files");
       const recentFilesQuery = query(
         filesRef,
@@ -84,9 +145,61 @@ const TableauDeBord: React.FC = () => {
           const fileData = fileDoc.data();
           const projectDocRef = doc(db, "projects", fileData.projectId);
           const projectDocSnap = await getDoc(projectDocRef);
-          const projectName = projectDocSnap.exists()
-            ? projectDocSnap.data().intitule
-            : "Projet inconnu";
+          
+          if (!projectDocSnap.exists()) {
+            console.log(`File ${fileDoc.id} skipped: project not found`);
+            return null;
+          }
+
+          const projectData = projectDocSnap.data();
+          console.log(`File ${fileDoc.id} project data:`, {
+            projectId: fileData.projectId,
+            hasAuthorizedUsers: !!projectData.authorizedUsers,
+            authorizedUsers: projectData.authorizedUsers || [],
+          });
+
+          if (user.isAdmin) {
+            let createdAtDate;
+            if (
+              fileData.createdAt &&
+              typeof fileData.createdAt.toDate === "function"
+            ) {
+              createdAtDate = fileData.createdAt.toDate();
+            } else if (fileData.createdAt instanceof Date) {
+              createdAtDate = fileData.createdAt;
+            } else if (typeof fileData.createdAt === "string") {
+              createdAtDate = new Date(fileData.createdAt);
+            } else {
+              createdAtDate = new Date();
+            }
+
+            return {
+              id: fileDoc.id,
+              ...fileData,
+              projectName: projectData.intitule,
+              createdAt: createdAtDate,
+            } as File;
+          }
+
+          if (!projectData.authorizedUsers) {
+            console.log(`File ${fileDoc.id} skipped: no authorizedUsers field and user is not admin`);
+            return null;
+          }
+
+          const isAuthorized = projectData.authorizedUsers && 
+            Array.isArray(projectData.authorizedUsers) && 
+            projectData.authorizedUsers.includes(user.id);
+
+          console.log(`File ${fileDoc.id} authorization check:`, {
+            isAdmin: user.isAdmin,
+            hasAuthorizedUsers: !!projectData.authorizedUsers,
+            isUserAuthorized: projectData.authorizedUsers?.includes(user.id),
+            finalDecision: isAuthorized
+          });
+
+          if (!isAuthorized) {
+            return null;
+          }
 
           let createdAtDate;
           if (
@@ -105,14 +218,15 @@ const TableauDeBord: React.FC = () => {
           return {
             id: fileDoc.id,
             ...fileData,
-            projectName,
+            projectName: projectData.intitule,
             createdAt: createdAtDate,
           } as File;
         }),
       );
 
-      console.log("Fichiers récupérés:", fileList);
-      setFiles(fileList);
+      const filteredFileList = fileList.filter((file) => file !== null);
+      console.log("Fichiers filtrés et récupérés:", filteredFileList);
+      setFiles(filteredFileList);
     } catch (error) {
       console.error("Erreur lors de la récupération des fichiers :", error);
     }
@@ -124,15 +238,19 @@ const TableauDeBord: React.FC = () => {
   };
 
   useEffect(() => {
-    Promise.all([fetchRecentProjects(), fetchRecentFiles()])
-      .then(() => {
+    const initializeData = async () => {
+      const userData = await fetchUserData();
+      if (userData) {
+        setCurrentUser(userData);
+        await Promise.all([
+          fetchRecentProjects(userData),
+          fetchRecentFiles(userData)
+        ]);
         setLoading(false);
-        console.log("Chargement terminé");
-      })
-      .catch((error) => {
-        console.error("Erreur lors du chargement des données :", error);
-        setLoading(false);
-      });
+      }
+    };
+
+    initializeData();
   }, []);
 
   if (loading) {

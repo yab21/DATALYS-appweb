@@ -106,7 +106,7 @@ const DropdownUser = () => {
 
             <span className="block">
               <span className="block font-medium text-dark dark:text-white">
-                DATALYS Consulting
+              {userName.firstName} {userName.lastName}
               </span>
             </span>
           </div>

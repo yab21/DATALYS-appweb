@@ -1,8 +1,8 @@
 "use client";
-import { deleteDoc, doc, getFirestore } from "firebase/firestore";
+import { deleteDoc, doc, getFirestore, updateDoc } from "firebase/firestore";
 import moment from "moment/moment";
 import Image from "next/image";
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { app } from "@/firebase/firebaseConfig";
 import { ShowToastContext } from "@/context/ShowToastContext";
 import {
@@ -14,6 +14,10 @@ import {
   Button,
   useDisclosure,
 } from "@nextui-org/react";
+import { getAuth } from "firebase/auth";
+import { getDoc } from "firebase/firestore";
+import RenameModal from "../Common/RenameModal";
+import MoveModal from "../Common/MoveModal";
 
 interface FileItemProps {
   file: {
@@ -23,6 +27,8 @@ interface FileItemProps {
     size: number;
     modifiedAt: number;
     imageUrl: string;
+    projectId: string;
+    isPrivate?: boolean;
   };
   onFileDeleted: () => void;
 }
@@ -32,16 +38,67 @@ const FileItem: React.FC<FileItemProps> = ({ file, onFileDeleted }) => {
   const context = useContext(ShowToastContext);
   const setShowToastMsg = context ? context.setShowToastMsg : () => {};
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const [isUserAdmin, setIsUserAdmin] = useState(false);
+  const [showRenameModal, setShowRenameModal] = useState(false);
+  const [showMoveModal, setShowMoveModal] = useState(false);
+
+  useEffect(() => {
+    const checkUserAdmin = async () => {
+      const auth = getAuth();
+      const user = auth.currentUser;
+      if (user) {
+        const db = getFirestore();
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (userDoc.exists()) {
+          setIsUserAdmin(userDoc.data().isAdmin || false);
+        }
+      }
+    };
+    checkUserAdmin();
+  }, []);
+
+  const handleRename = async (newName: string) => {
+    try {
+      const fileRef = doc(db, "files", file.id);
+      await updateDoc(fileRef, { name: newName });
+      onFileDeleted(); // Rafraîchir la liste
+    } catch (error) {
+      console.error("Erreur lors du renommage du fichier:", error);
+      throw new Error("Erreur lors du renommage du fichier");
+    }
+  };
+
+  const handleMove = async (newParentId: string) => {
+    try {
+      const fileRef = doc(db, "files", file.id);
+      await updateDoc(fileRef, { parentFolderId: newParentId });
+      onFileDeleted(); // Rafraîchir la liste
+    } catch (error) {
+      console.error("Erreur lors du déplacement du fichier:", error);
+      throw new Error("Erreur lors du déplacement du fichier");
+    }
+  };
+
+  const togglePrivate = async () => {
+    try {
+      const fileRef = doc(db, "files", file.id);
+      await updateDoc(fileRef, { isPrivate: !file.isPrivate });
+      onFileDeleted(); // Rafraîchir la liste
+    } catch (error) {
+      console.error("Erreur lors du changement de statut privé:", error);
+      throw new Error("Erreur lors du changement de statut privé");
+    }
+  };
 
   const deleteFile = async () => {
     try {
-      await deleteDoc(doc(db, "files", file.id.toString()));
-      setShowToastMsg("File Deleted!!!");
+      await deleteDoc(doc(db, "files", file.id));
+      setShowToastMsg("Fichier supprimé !");
       onFileDeleted();
       onClose();
     } catch (error) {
-      console.error("Error deleting file: ", error);
-      setShowToastMsg("Error deleting file");
+      console.error("Erreur lors de la suppression du fichier: ", error);
+      setShowToastMsg("Erreur lors de la suppression du fichier");
     }
   };
 
@@ -54,7 +111,6 @@ const FileItem: React.FC<FileItemProps> = ({ file, onFileDeleted }) => {
       jpeg: "/images/jpg.png",
       pptx: "/images/pptx.png",
       docx: "/images/docx.png",
-      // Ajoutez d'autres extensions selon vos besoins
     };
     return iconMap[extension || ""] || "/images/file-icon.png";
   };
@@ -73,27 +129,66 @@ const FileItem: React.FC<FileItemProps> = ({ file, onFileDeleted }) => {
               width={26}
               height={20}
             />
-            <h2 className="truncate">{file.name}</h2>
+            <h2 className="truncate">
+              {file.name}
+              {file.isPrivate && " 🔒"}
+            </h2>
           </div>
           <h2>{moment(file.modifiedAt).format("MMMM DD, YYYY")}</h2>
           <h2>{(file.size / 1024 ** 2).toFixed(2) + " MB"}</h2>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            onClick={onOpen}
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-            className="hover:text-scale-100 h-5 w-5 cursor-pointer text-red-500 transition-all"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
-            />
-          </svg>
+          {isUserAdmin && (
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                color="primary"
+                onPress={() => setShowRenameModal(true)}
+              >
+                Renommer
+              </Button>
+              <Button
+                size="sm"
+                color="secondary"
+                onPress={() => setShowMoveModal(true)}
+              >
+                Déplacer
+              </Button>
+              <Button
+                size="sm"
+                color="warning"
+                onPress={togglePrivate}
+              >
+                {file.isPrivate ? "Rendre public" : "Rendre privé"}
+              </Button>
+              <Button
+                size="sm"
+                color="danger"
+                onPress={onOpen}
+              >
+                Supprimer
+              </Button>
+            </div>
+          )}
         </div>
       </div>
+
+      <RenameModal
+        isOpen={showRenameModal}
+        onClose={() => setShowRenameModal(false)}
+        onRename={handleRename}
+        currentName={file.name}
+        itemType="file"
+      />
+
+      <MoveModal
+        isOpen={showMoveModal}
+        onClose={() => setShowMoveModal(false)}
+        onMove={handleMove}
+        currentParentId={file.projectId}
+        projectId={file.projectId}
+        itemType="file"
+        currentItemId={file.id}
+        itemName={file.name}
+      />
 
       <Modal
         isOpen={isOpen}

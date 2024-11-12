@@ -2,8 +2,10 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
+import { getMessaging, getToken } from "firebase/messaging";
+import { useEffect, useState } from "react";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -13,16 +15,10 @@ const firebaseConfig = {
   storageBucket: "datalys-consulting.appspot.com",
   messagingSenderId: "374891323631",
   appId: "1:374891323631:web:2517ab2666832cc0a53b1a",
-  measurementId: "G-MRGRBCZQHV"
-
-  // apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  // authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  // projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  // storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  // messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  // appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-  // measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
+  measurementId: "G-MRGRBCZQHV",
 };
+
+const vapidKey = "BFaXd4OytA6IpbDILdtWk_GjmBUk4Iwd9t5-L1tc4A1K6N8x9owSfSv1ylB-oeRWuksMnQj9sXIx6D_9XNfE5w8";
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
@@ -33,6 +29,48 @@ const auth = getAuth(app); // Authentification Firebase
 const db = getFirestore(app); // Firestore si nécessaire
 const storage = getStorage(app); // Storage si nécessaire
 
-export { auth, db, storage };
+let messaging;
+if (typeof window !== "undefined") {
+  messaging = getMessaging(app);
+}
 
-export { app, analytics };
+export const requestFCMToken = async () => {
+  return await Notification.requestPermission()
+    .then((permission) => {
+      if (permission === "granted") {
+        return getToken(messaging, { vapidKey });
+      } else {
+        throw new Error("Notification non accordée");
+      }
+    })
+    .catch((err) => {
+      console.error("Erreur dans l'obtention du FCM Token", err);
+      throw err;
+    });
+};
+
+export { auth, db, storage, app, analytics, messaging };
+
+const fetchProject = async (projectId) => {
+  const user = auth.currentUser;
+  if (!user) {
+    console.error("Utilisateur non authentifié");
+    return null;
+  }
+
+  const docRef = doc(db, "projects", projectId);
+  const docSnap = await getDoc(docRef);
+
+  if (docSnap.exists()) {
+    const projectData = docSnap.data();
+    if (projectData.authorizedUsers.includes(user.uid) || user.admin) {
+      return projectData;
+    } else {
+      console.error("Accès refusé");
+      return null;
+    }
+  } else {
+    console.error("Projet non trouvé");
+    return null;
+  }
+};

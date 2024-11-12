@@ -2,9 +2,15 @@
 
 import React, { useEffect, useState } from "react";
 import {
-  Select,
-  SelectItem,
   Button,
+  Table,
+  TableHeader,
+  TableColumn,
+  TableBody,
+  TableRow,
+  TableCell,
+  Input,
+  Pagination,
   Modal,
   ModalContent,
   ModalHeader,
@@ -12,44 +18,111 @@ import {
   ModalFooter,
   useDisclosure,
 } from "@nextui-org/react";
+import { getAuth } from "firebase/auth";
 import Breadcrumb from "@/components/TableauDeBord/Breadcrumbs/Breadcrumb";
 import { db } from "@/firebase/firebaseConfig";
-import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
+import { collection, getDocs, deleteDoc, doc, getDoc, query, where } from "firebase/firestore";
 
 interface Project {
   id: string;
   chefDeProjet: string;
   societe: string;
   intitule: string;
-  domaine: string[]; // Domaine est un tableau de chaînes
+  domaine: string[];
+  createdAt: Date;
+  authorizedUsers?: string[];
+}
+
+interface User {
+  id: string;
+  isAdmin: boolean;
 }
 
 const GestionProjet = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);
-  const [selectedDomaine, setSelectedDomaine] = useState<Set<string>>(
-    new Set(["all"]),
-  );
-  const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [projectsPerPage] = useState(5);
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [sortKey, setSortKey] = useState<keyof Project>("intitule");
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [backdrop, setBackdrop] = useState<string>("blur"); // Par défaut à 'blur'
+  const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
-  // Récupérer les projets depuis Firestore
-  const fetchProjects = async () => {
+  const fetchUserData = async () => {
+    const auth = getAuth();
+    const firebaseUser = auth.currentUser;
+
+    if (!firebaseUser) {
+      console.error("Aucun utilisateur connecté");
+      return null;
+    }
+
     try {
+      const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        console.log("User data fetched:", userData);
+        return {
+          id: firebaseUser.uid,
+          isAdmin: userData.isAdmin || false,
+        };
+      }
+      return null;
+    } catch (error) {
+      console.error("Erreur lors de la récupération des données utilisateur:", error);
+      return null;
+    }
+  };
+
+  useEffect(() => {
+    const initializeData = async () => {
+      const userData = await fetchUserData();
+      if (userData) {
+        setCurrentUser(userData);
+        await fetchProjects(userData);
+      }
+    };
+
+    initializeData();
+  }, []);
+
+  const fetchProjects = async (user: User) => {
+    try {
+      console.log("Fetching projects with user:", user);
       const querySnapshot = await getDocs(collection(db, "projects"));
       const projectList = querySnapshot.docs
-        .map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }))
-        .filter(
-          (project) =>
-            project.chefDeProjet &&
-            project.societe &&
-            project.intitule &&
-            project.domaine,
-        ); // Assurez-vous que 'domaine' existe
+        .map((doc) => {
+          const projectData = doc.data();
+          
+          // Vérification des autorisations
+          if (!projectData.authorizedUsers && !user.isAdmin) {
+            console.log(`Project ${doc.id} skipped: no authorizedUsers field and user is not admin`);
+            return null;
+          }
+
+          const isAuthorized = user.isAdmin || 
+            (projectData.authorizedUsers && 
+             Array.isArray(projectData.authorizedUsers) && 
+             projectData.authorizedUsers.includes(user.id));
+
+          console.log(`Project ${doc.id} authorization check:`, {
+            isAdmin: user.isAdmin,
+            hasAuthorizedUsers: !!projectData.authorizedUsers,
+            isUserAuthorized: projectData.authorizedUsers?.includes(user.id),
+            finalDecision: isAuthorized
+          });
+
+          return isAuthorized ? {
+            id: doc.id,
+            ...projectData,
+            createdAt: projectData.createdAt.toDate(),
+          } as Project : null;
+        })
+        .filter((project): project is Project => project !== null);
+
+      console.log("Projets filtrés et récupérés:", projectList);
       setProjects(projectList);
       setFilteredProjects(projectList);
     } catch (error) {
@@ -58,68 +131,115 @@ const GestionProjet = () => {
   };
 
   useEffect(() => {
-    fetchProjects();
-  }, []);
-
-  // Filtrer les projets par domaine
-  useEffect(() => {
-    if (selectedDomaine.has("all")) {
-      setFilteredProjects(projects);
-    } else {
-      const selectedValues = Array.from(selectedDomaine);
-      setFilteredProjects(
-        projects.filter((project) => {
-          const domaines = project.domaine; // domaine est un tableau
-          return selectedValues.some((value) => domaines.includes(value));
-        }),
+    if (currentUser) {
+      const filtered = projects.filter((project) =>
+        project.intitule.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        project.chefDeProjet.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        project.societe.toLowerCase().includes(searchTerm.toLowerCase())
       );
+      setFilteredProjects(filtered);
     }
-  }, [selectedDomaine, projects]);
+  }, [searchTerm, projects, currentUser]);
 
-  // Ouvrir le modal pour confirmer la suppression
-  const openDeleteModal = (projectId: string) => {
-    console.log(`Modal ouvert pour le projet ID: ${projectId}`);
-    setProjectToDelete(projectId);
-    onOpen();
-  };
-
-  // Confirmer la suppression
-  const confirmDelete = async () => {
-    console.log("Confirmation de suppression");
-    if (projectToDelete) {
-      try {
-        await deleteDoc(doc(db, "projects", projectToDelete));
-        setFilteredProjects(
-          filteredProjects.filter((project) => project.id !== projectToDelete),
-        );
-        onClose();
-        setProjectToDelete(null);
-      } catch (error) {
-        console.error("Erreur lors de la suppression du projet :", error);
+  const handleSort = (key: keyof Project) => {
+    setSortKey(key);
+    const sortedProjects = [...filteredProjects].sort((a, b) => {
+      if (key === "createdAt") {
+        return sortOrder === "asc"
+          ? a.createdAt.getTime() - b.createdAt.getTime()
+          : b.createdAt.getTime() - a.createdAt.getTime();
       }
-    }
+      if (key === "domaine") {
+        const aDomaine = a.domaine.join(", ");
+        const bDomaine = b.domaine.join(", ");
+        return sortOrder === "asc"
+          ? aDomaine.localeCompare(bDomaine)
+          : bDomaine.localeCompare(aDomaine);
+      }
+      return sortOrder === "asc"
+        ? a[key].localeCompare(b[key])
+        : b[key].localeCompare(a[key]);
+    });
+    setFilteredProjects(sortedProjects);
+    setSortOrder(sortOrder === "asc" ? "desc" : "asc");
   };
 
-  // Annuler la suppression
-  const cancelDelete = () => {
-    console.log("Suppression annulée");
-    onClose();
-    setProjectToDelete(null);
-  };
+  const indexOfLastProject = currentPage * projectsPerPage;
+  const indexOfFirstProject = indexOfLastProject - projectsPerPage;
+  const currentProjects = filteredProjects.slice(
+    indexOfFirstProject,
+    indexOfLastProject
+  );
+
+  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
   const handleEdit = (projectId: string) => {
     console.log(`Redirection pour la modification du projet ID: ${projectId}`);
     window.location.href = `/tableaudebord/projet/modifier/${projectId}`;
   };
 
-  const handleVoir = (projectId: string) => {
-    console.log(`Redirection pour voir le projet avec ID: ${projectId}`);
-    window.location.href = `/tableaudebord/projet/pageprojet/${projectId}`;
+  const handleDelete = async () => {
+    if (projectToDelete && currentUser) {
+      try {
+        const projectDoc = await getDoc(doc(db, "projects", projectToDelete));
+        const projectData = projectDoc.data();
+        
+        // Vérification des autorisations avant la suppression
+        const isAuthorized = currentUser.isAdmin || 
+          (projectData?.authorizedUsers && projectData.authorizedUsers.includes(currentUser.id));
+
+        if (!isAuthorized) {
+          console.error("Non autorisé à supprimer ce projet");
+          onClose();
+          return;
+        }
+
+        // 1. Supprimer tous les fichiers associés au projet
+        const filesRef = collection(db, "files");
+        const filesQuery = query(filesRef, where("projectId", "==", projectToDelete));
+        const filesSnapshot = await getDocs(filesQuery);
+        
+        console.log(`Suppression de ${filesSnapshot.size} fichiers...`);
+        const filesDeletions = filesSnapshot.docs.map(fileDoc => 
+          deleteDoc(doc(db, "files", fileDoc.id))
+        );
+        await Promise.all(filesDeletions);
+
+        // 2. Supprimer tous les dossiers associés au projet
+        const foldersRef = collection(db, "folders");
+        const foldersQuery = query(foldersRef, where("projectId", "==", projectToDelete));
+        const foldersSnapshot = await getDocs(foldersQuery);
+        
+        console.log(`Suppression de ${foldersSnapshot.size} dossiers...`);
+        const foldersDeletions = foldersSnapshot.docs.map(folderDoc => 
+          deleteDoc(doc(db, "folders", folderDoc.id))
+        );
+        await Promise.all(foldersDeletions);
+
+        // 3. Supprimer le projet
+        console.log(`Suppression du projet ${projectToDelete}...`);
+        await deleteDoc(doc(db, "projects", projectToDelete));
+
+        // 4. Mettre à jour l'interface
+        setFilteredProjects(
+          filteredProjects.filter((project) => project.id !== projectToDelete)
+        );
+        setProjects(
+          projects.filter((project) => project.id !== projectToDelete)
+        );
+        
+        console.log("Suppression complète terminée avec succès");
+        onClose();
+        setProjectToDelete(null);
+      } catch (error) {
+        console.error("Erreur lors de la suppression du projet et de ses données :", error);
+      }
+    }
   };
 
-  // Handle selection change
-  const handleSelectChange = (selected: Set<string>) => {
-    setSelectedDomaine(selected);
+  const handleView = (projectId: string) => {
+    console.log(`Redirection pour voir le projet ID: ${projectId}`);
+    window.location.href = `/tableaudebord/projet/pageprojet/${projectId}`;
   };
 
   return (
@@ -128,136 +248,115 @@ const GestionProjet = () => {
       <div className="mt-5 w-full max-w-full rounded-[10px]">
         <div className="mt-8 rounded-[10px] bg-white shadow-1 dark:bg-gray-dark dark:shadow-card">
           <div className="w-full max-w-full p-2">
-            <div className="flex w-full justify-start gap-6">
+            <div className="flex w-full justify-between items-center">
               <h3 className="pt-2 text-[22px] font-medium text-dark dark:text-white">
                 Gestion de projet
               </h3>
-              <Select
-                label="Domaine du projet"
-                color="primary"
-                variant="underlined"
-                placeholder="Choisir un domaine"
-                className="max-w-sm text-sm font-medium md:text-base"
-                selectionMode="single"
-                onSelectionChange={handleSelectChange}
-                selectedKeys={selectedDomaine}
-              >
-                <SelectItem key="all">Tous les domaines</SelectItem>
-                <SelectItem key="itcloud">ITCloud</SelectItem>
-                <SelectItem key="sécurité réseau">Sécurité réseau</SelectItem>
-                <SelectItem key="data center & énergie">
-                  Data center & énergie
-                </SelectItem>
-              </Select>
+              <Input
+                type="text"
+                placeholder="Rechercher un projet"
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="max-w-sm"
+              />
             </div>
           </div>
           <div className="mt-4 overflow-x-auto rounded-lg border shadow-sm">
-            {/* Ajoute une colonne pour montrer le domaine dans le tableau */}
-            <table className="w-full table-auto text-left text-sm">
-              <thead className="border-b bg-gray-1 font-medium text-dark dark:bg-gray-dark dark:text-white">
-                <tr>
-                  <th className="px-3 py-3">Intitulé du projet</th>
-                  <th className="px-3 py-3">Nom du chef de projet</th>
-                  <th className="px-3 py-3">Nom de la société</th>
-                  <th className="px-3 py-3">Domaine</th>
-                  <th className="px-3 py-3">Action</th>
-                </tr>
-              </thead>
-              <tbody className="mb-3 divide-y text-gray-600">
-                {filteredProjects && filteredProjects.length > 0 ? (
-                  filteredProjects.map((project) => (
-                    <tr key={project.id}>
-                      {/* Affichage de l'intitulé du projet en premier */}
-                      <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
-                        {project.intitule}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
-                        {project.chefDeProjet}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
-                        {project.societe}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-dark dark:text-white">
-                        {project.domaine.join(", ")}
-                      </td>
-                      {/* Ajout du bouton "Afficher" à droite */}
-                      <td className="flex items-center gap-1 whitespace-nowrap px-5 py-4">
-                        <Button
-                          onClick={() => handleVoir(project.id)}
-                          isIconOnly
-                          size="sm"
-                          color="success"
-                          aria-label="afficher"
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="24"
-                            height="24"
-                            viewBox="0 0 24 24"
+            <Table
+              aria-label="Gestion de projet"
+              className="h-[400px] w-full overflow-y-auto scrollbar-hide"
+            >
+              <TableHeader>
+                <TableColumn
+                  onClick={() => handleSort("intitule")}
+                  className="cursor-pointer"
+                >
+                  Intitulé {sortKey === "intitule" && (sortOrder === "asc" ? "↑" : "↓")}
+                </TableColumn>
+                <TableColumn
+                  onClick={() => handleSort("chefDeProjet")}
+                  className="cursor-pointer"
+                >
+                  Chef de projet {sortKey === "chefDeProjet" && (sortOrder === "asc" ? "↑" : "↓")}
+                </TableColumn>
+                <TableColumn
+                  onClick={() => handleSort("societe")}
+                  className="cursor-pointer"
+                >
+                  Société {sortKey === "societe" && (sortOrder === "asc" ? "↑" : "↓")}
+                </TableColumn>
+                <TableColumn
+                  onClick={() => handleSort("domaine")}
+                  className="cursor-pointer"
+                >
+                  Domaine {sortKey === "domaine" && (sortOrder === "asc" ? "↑" : "↓")}
+                </TableColumn>
+                <TableColumn
+                  onClick={() => handleSort("createdAt")}
+                  className="cursor-pointer"
+                >
+                  Date de création {sortKey === "createdAt" && (sortOrder === "asc" ? "↑" : "↓")}
+                </TableColumn>
+                <TableColumn>Action</TableColumn>
+              </TableHeader>
+              <TableBody>
+                {currentProjects.map((project) => (
+                  <TableRow key={project.id}>
+                    <TableCell>{project.intitule}</TableCell>
+                    <TableCell>{project.chefDeProjet}</TableCell>
+                    <TableCell>{project.societe}</TableCell>
+                    <TableCell>{project.domaine.join(", ")}</TableCell>
+                    <TableCell>
+                      {project.createdAt.toLocaleDateString()}
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        onClick={() => handleView(project.id)}
+                        color="success"
+                        size="sm"
+                      >
+                        Voir
+                      </Button>
+                      {currentUser?.isAdmin && (
+                        <>
+                          <Button
+                            onClick={() => handleEdit(project.id)}
+                            color="primary"
+                            size="sm"
                           >
-                            <path
-                              fill="#fff"
-                              d="m19.6 21l-6.3-6.3q-.75.6-1.725.95T9.5 16q-2.725 0-4.612-1.888T3 9.5t1.888-4.612T9.5 3t4.613 1.888T16 9.5q0 1.1-.35 2.075T14.7 13.3l6.3 6.3zM9.5 14q1.875 0 3.188-1.312T14 9.5t-1.312-3.187T9.5 5T6.313 6.313T5 9.5t1.313 3.188T9.5 14"
-                            />
-                          </svg>
-                        </Button>
-                        <Button
-                          onClick={() => handleEdit(project.id)}
-                          isIconOnly
-                          size="sm"
-                          color="primary"
-                          aria-label="modifier"
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="24"
-                            height="24"
-                            viewBox="0 0 24 24"
+                            Modifier
+                          </Button>
+                          <Button
+                            onClick={() => {
+                              setProjectToDelete(project.id);
+                              onOpen();
+                            }}
+                            color="danger"
+                            size="sm"
                           >
-                            <path
-                              fill="#fff"
-                              d="M3 21v-4.25L17.625 2.175L21.8 6.45L7.25 21zM17.6 7.8L19 6.4L17.6 5l-1.4 1.4z"
-                            />
-                          </svg>
-                        </Button>
-                        <Button
-                          onClick={() => openDeleteModal(project.id)}
-                          isIconOnly
-                          size="sm"
-                          color="danger"
-                          aria-label="supprimer"
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="24"
-                            height="24"
-                            viewBox="0 0 24 24"
-                          >
-                            <path fill="#fff" d="M5 13v-2h14v2z" />
-                          </svg>
-                        </Button>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={5} className="py-4 text-center">
-                      Aucun projet trouvé.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                            Supprimer
+                          </Button>
+                        </>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+            <Pagination
+              total={Math.ceil(filteredProjects.length / projectsPerPage)}
+              initialPage={1}
+              onChange={(page) => paginate(page)}
+              className="mt-4"
+            />
           </div>
         </div>
       </div>
 
       {/* Modal pour confirmer la suppression */}
       <Modal
-        backdrop={backdrop} // Utilise l'effet de fond sélectionné
         isOpen={isOpen}
-        onClose={cancelDelete}
-        placement="center"
+        onOpenChange={onClose}
+        placement="top-center"
       >
         <ModalContent>
           {(onClose) => (
@@ -272,7 +371,7 @@ const GestionProjet = () => {
                 </p>
               </ModalBody>
               <ModalFooter>
-                <Button color="danger" variant="light" onPress={confirmDelete}>
+                <Button color="danger" variant="flat" onPress={handleDelete}>
                   Supprimer
                 </Button>
                 <Button color="primary" onPress={onClose}>

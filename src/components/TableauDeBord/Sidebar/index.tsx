@@ -1,78 +1,135 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import SidebarItem from "@/components/TableauDeBord/Sidebar/SidebarItem";
 import ClickOutside from "@/components/ClickOutside";
 import useLocalStorage from "@/hooks/useLocalStorage";
+import { getAuth } from "firebase/auth";
+import { doc, getDoc, getFirestore } from "firebase/firestore";
 
 interface SidebarProps {
   sidebarOpen: boolean;
   setSidebarOpen: (arg: boolean) => void;
 }
 
-const menuGroups = [
-  {
-    name: "Accueil",
-    menuItems: [
+const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
+  const pathname = usePathname();
+  const [pageName, setPageName] = useLocalStorage("selectedMenu", "dashboard");
+  const [isUserAdmin, setIsUserAdmin] = useState(false);
+
+  useEffect(() => {
+    const checkUserAdmin = async () => {
+      const auth = getAuth();
+      const user = auth.currentUser;
+      if (user) {
+        const db = getFirestore();
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (userDoc.exists()) {
+          setIsUserAdmin(userDoc.data().isAdmin || false);
+        }
+      }
+    };
+    checkUserAdmin();
+  }, []);
+
+  // Définir les menus en fonction des autorisations
+  const getMenuGroups = () => {
+    const baseMenuGroups = [
       {
-        icon: (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="30"
-            height="30"
-            viewBox="0 0 24 24"
-          >
-            <path
-              fill="currentColor"
-              d="M6 19h3v-6h6v6h3v-9l-6-4.5L6 10zm-2 2V9l8-6l8 6v12h-7v-6h-2v6zm8-8.75"
-            />
-          </svg>
-        ),
-        label: "Tableau de bord",
-        route: "/tableaudebord",
-      },
-    ],
-  },
-  {
-    name: "Gestion",
-    menuItems: [
-      {
-        icon: (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="fill-current"
-            width="30"
-            height="30"
-            viewBox="0 0 24 24"
-          >
-            <path
-              fill="fill-current"
-              d="M7.25 6a.75.75 0 0 0-.75.75v7.5a.75.75 0 0 0 1.5 0v-7.5A.75.75 0 0 0 7.25 6M12 6a.75.75 0 0 0-.75.75v4.5a.75.75 0 0 0 1.5 0v-4.5A.75.75 0 0 0 12 6m4 .75a.75.75 0 0 1 1.5 0v9.5a.75.75 0 0 1-1.5 0z"
-            />
-            <path
-              fill="fill-current"
-              d="M3.75 2h16.5c.966 0 1.75.784 1.75 1.75v16.5A1.75 1.75 0 0 1 20.25 22H3.75A1.75 1.75 0 0 1 2 20.25V3.75C2 2.784 2.784 2 3.75 2M3.5 3.75v16.5c0 .138.112.25.25.25h16.5a.25.25 0 0 0 .25-.25V3.75a.25.25 0 0 0-.25-.25H3.75a.25.25 0 0 0-.25.25"
-            />
-          </svg>
-        ),
-        label: "Projet",
-        route: "#",
-        children: [
-          { label: "Ajouter", route: "/tableaudebord/projet/ajouter" },
+        name: "Accueil",
+        menuItems: [
           {
-            label: "Gérer",
-            route: "/tableaudebord/projet/gerer",
+            icon: (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="30"
+                height="30"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  fill="currentColor"
+                  d="M6 19h3v-6h6v6h3v-9l-6-4.5L6 10zm-2 2V9l8-6l8 6v12h-7v-6h-2v6zm8-8.75"
+                />
+              </svg>
+            ),
+            label: "Tableau de bord",
+            route: "/tableaudebord",
           },
         ],
       },
-    ],
-  },
-  {
-    name: "AUTRES",
-    menuItems: [
+      // Le menu Projet est toujours présent, mais avec des sous-menus conditionnels
       {
+        name: "Gestion",
+        menuItems: [
+          {
+            icon: (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="fill-current"
+                width="30"
+                height="30"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  fill="fill-current"
+                  d="M7.25 6a.75.75 0 0 0-.75.75v7.5a.75.75 0 0 0 1.5 0v-7.5A.75.75 0 0 0 7.25 6M12 6a.75.75 0 0 0-.75.75v4.5a.75.75 0 0 0 1.5 0v-4.5A.75.75 0 0 0 12 6m4 .75a.75.75 0 0 1 1.5 0v9.5a.75.75 0 0 1-1.5 0z"
+                />
+                <path
+                  fill="fill-current"
+                  d="M3.75 2h16.5c.966 0 1.75.784 1.75 1.75v16.5A1.75 1.75 0 0 1 20.25 22H3.75A1.75 1.75 0 0 1 2 20.25V3.75C2 2.784 2.784 2 3.75 2M3.5 3.75v16.5c0 .138.112.25.25.25h16.5a.25.25 0 0 0 .25-.25V3.75a.25.25 0 0 0-.25-.25H3.75a.25.25 0 0 0-.25.25"
+                />
+              </svg>
+            ),
+            label: "Projet",
+            route: "#",
+            children: [
+              ...(isUserAdmin ? [{ label: "Ajouter", route: "/tableaudebord/projet/ajouter" }] : []),
+              { label: "Gérer", route: "/tableaudebord/projet/gerer" },
+            ],
+          },
+        ],
+      }
+    ];
+
+    // Menu Autres
+    const autresMenu = {
+      name: "AUTRES",
+      menuItems: [
+        // Menu Profil - pour tous les utilisateurs
+        {
+          icon: (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="fill-current"
+              width="30"
+              height="30"
+              viewBox="0 0 24 24"
+            >
+              <path
+                fill="fill-current"
+                d="M21.008 3c.548 0 .992.445.992.993v16.014a1 1 0 0 1-.992.993H2.992A.993.993 0 0 1 2 20.007V3.993A1 1 0 0 1 2.992 3zM20 5H4v14h16zm-2 10v2H6v-2zm-6-8v6H6V7zm6 4v2h-4v-2zm-8-2H8v2h2zm8-2v2h-4V7z"
+              />
+            </svg>
+          ),
+          label: "Profil",
+          route: "#",
+          children: [
+            { label: "Voir", route: "/tableaudebord/profil/voir" },
+            { label: "Modifier", route: "/tableaudebord/profil/modifier" },
+            {
+              label: "Changer le mot de passe",
+              route: "/tableaudebord/profil/changermotdepasse",
+            },
+          ],
+        },
+      ],
+    };
+
+    // Ajouter le menu Utilisateur uniquement pour les admins
+    if (isUserAdmin) {
+      autresMenu.menuItems.unshift({
         icon: (
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -100,53 +157,19 @@ const menuGroups = [
             route: "/tableaudebord/creationduncompte",
           },
         ],
-      },
-      {
-        icon: (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="fill-current"
-            width="30"
-            height="30"
-            viewBox="0 0 24 24"
-          >
-            <path
-              fill="fill-current"
-              d="M21.008 3c.548 0 .992.445.992.993v16.014a1 1 0 0 1-.992.993H2.992A.993.993 0 0 1 2 20.007V3.993A1 1 0 0 1 2.992 3zM20 5H4v14h16zm-2 10v2H6v-2zm-6-8v6H6V7zm6 4v2h-4v-2zm-8-2H8v2h2zm8-2v2h-4V7z"
-            />
-          </svg>
-        ),
-        label: "Profil",
-        route: "#",
-        children: [
-          { label: "Voir", route: "/tableaudebord/profil/voir" },
-          {
-            label: "Modifier",
-            route: "/tableaudebord/profil/modifier",
-          },
-          {
-            label: "Changer le mot de passe",
-            route: "/tableaudebord/profil/changermotdepasse",
-          },
-        ],
-      },
-    ],
-  },
-];
+      });
+    }
 
-const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
-  const pathname = usePathname();
-
-  const [pageName, setPageName] = useLocalStorage("selectedMenu", "dashboard");
+    baseMenuGroups.push(autresMenu);
+    return baseMenuGroups;
+  };
 
   return (
     <ClickOutside onClick={() => setSidebarOpen(false)}>
       <aside
         className={`absolute left-0 top-0 z-9999 flex h-screen w-72.5 flex-col overflow-y-hidden border-r border-stroke bg-white dark:border-stroke-dark dark:bg-gray-dark lg:static lg:translate-x-0 ${
-          sidebarOpen
-            ? "translate-x-0 duration-300 ease-linear"
-            : "-translate-x-full"
-        }`}
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } duration-300 ease-linear`}
       >
         {/* <!-- SIDEBAR HEADER --> */}
         <div className="flex items-center justify-between gap-2 px-6 py-5.5 lg:py-6.5 xl:py-10">
@@ -195,7 +218,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
         <div className="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear">
           {/* <!-- Sidebar Menu --> */}
           <nav className="mt-1 px-4 lg:px-6">
-            {menuGroups.map((group, groupIndex) => (
+            {getMenuGroups().map((group, groupIndex) => (
               <div key={groupIndex}>
                 <h3 className="mb-5 text-sm font-medium text-dark-4 dark:text-dark-6">
                   {group.name}

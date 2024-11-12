@@ -3,21 +3,24 @@
 import React, { useState } from "react";
 import Breadcrumb from "@/components/TableauDeBord/Breadcrumbs/Breadcrumb";
 import { Button } from "@nextui-org/button";
-import { Input } from "@nextui-org/react";
-import { Select, SelectItem } from "@nextui-org/react";
-import { domaines } from "./domaineData";
-import { db } from "@/firebase/firebaseConfig"; // Assurez-vous que Firestore est bien importé
-import { collection, addDoc } from "firebase/firestore"; // Pour ajouter des documents dans Firestore
+import { Input, Checkbox } from "@nextui-org/react";
+import { db } from "@/firebase/firebaseConfig";
+import { collection, setDoc, doc } from "firebase/firestore";
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 
 const CreerUnCompte = () => {
   const [formData, setFormData] = useState({
-    nom: "",
-    prenom: "",
-    utilisateur: "",
+    lastName: "",
+    firstName: "",
+    username: "",
     email: "",
-    motdepasse: "",
-    cmotdepasse: "",
-    domaine: [] as string[], // Utiliser un tableau de chaînes de caractères pour les domaines
+    password: "",
+    confirmPassword: "",
+    isAdmin: false, // Utilisez un booléen pour le rôle
+    function: "",
+    company: "",
+    department: "",
+    profileImage: null as File | null,
   });
 
   const [error, setError] = useState<string | null>(null);
@@ -28,47 +31,77 @@ const CreerUnCompte = () => {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSelectChange = (selected: Set<string>) => {
-    // Convertir les éléments sélectionnés en tableau
-    setFormData({ ...formData, domaine: Array.from(selected) });
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setFormData({ ...formData, profileImage: e.target.files[0] });
+    }
+  };
+
+  const handleRoleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, isAdmin: e.target.checked });
   };
 
   const handleSubmit = async () => {
     setError(null);
 
-    // Vérifier que tous les champs sont remplis
     if (
-      !formData.nom ||
-      !formData.prenom ||
-      !formData.utilisateur ||
+      !formData.lastName ||
+      !formData.firstName ||
+      !formData.username ||
       !formData.email ||
-      !formData.motdepasse ||
-      !formData.cmotdepasse ||
-      formData.domaine.length === 0
+      !formData.password ||
+      !formData.confirmPassword
     ) {
       setError("Veuillez remplir tous les champs.");
       return;
     }
+
+    if (formData.password !== formData.confirmPassword) {
+      setError("Les mots de passe ne correspondent pas.");
+      return;
+    }
+
     setLoading(true);
 
     try {
-      // Enregistrer le projet dans Firestore
-      const docRef = await addDoc(collection(db, "projects"), {
-        nom: formData.nom,
-        prenom: formData.prenom,
-        utilisateur: formData.utilisateur,
+      const auth = getAuth();
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        formData.email,
+        formData.password
+      );
+      const user = userCredential.user;
+
+      // Upload profile image if provided
+      let profileImageUrl = "/images/user.png"; // Default image
+      if (formData.profileImage) {
+        // Logic to upload the image to a storage service and get the URL
+        // profileImageUrl = await uploadImageAndGetUrl(formData.profileImage);
+      }
+
+      // Use setDoc with the user's uid to ensure unique document
+      await setDoc(doc(db, "users", user.uid), {
+        lastName: formData.lastName,
+        firstName: formData.firstName,
+        username: formData.username,
         email: formData.email,
-        motdepasse: formData.motdepasse,
-        cmotdepasse: formData.cmotdepasse,
-        domaine: formData.domaine, // Un tableau de chaînes de caractères
-        createdAt: new Date(), // Ajout de la date de création
+        isAdmin: formData.isAdmin, // Use boolean for admin role
+        function: formData.function,
+        company: formData.company,
+        department: formData.department,
+        profileImage: profileImageUrl,
+        createdAt: new Date(),
       });
 
-      console.log("Projet créé avec ID :", docRef.id);
-      alert("Projet créé avec succès !");
+      console.log("Utilisateur créé avec succès !");
+      alert("Utilisateur créé avec succès !");
     } catch (error: any) {
-      console.error("Erreur lors de la création du projet :", error);
-      setError("Erreur lors de la création du projet. Veuillez réessayer.");
+      if (error.code === "auth/email-already-in-use") {
+        setError("Cette adresse e-mail est déjà utilisée.");
+      } else {
+        console.error("Erreur lors de la création de l'utilisateur :", error);
+        setError("Erreur lors de la création de l'utilisateur. Veuillez réessayer.");
+      }
     } finally {
       setLoading(false);
     }
@@ -93,7 +126,7 @@ const CreerUnCompte = () => {
                 color="primary"
                 placeholder="Entrer votre nom"
                 className="text-sm font-medium md:text-base"
-                name="nom"
+                name="lastName"
                 onChange={handleChange}
                 required
               />
@@ -104,7 +137,7 @@ const CreerUnCompte = () => {
                 color="primary"
                 placeholder="Entrer votre prénom"
                 className="text-sm font-medium md:text-base"
-                name="prenom"
+                name="firstName"
                 onChange={handleChange}
                 required
               />
@@ -115,54 +148,11 @@ const CreerUnCompte = () => {
                 color="primary"
                 placeholder="Entrer votre nom d'utilisateur"
                 className="text-sm font-medium md:text-base"
-                name="utilisateur"
+                name="username"
                 onChange={handleChange}
                 required
               />
-              <Input
-                type="text"
-                color="primary"
-                label="Fonction"
-                variant="bordered"
-                placeholder="Entrer votre fonction"
-                className="text-sm font-medium md:text-base"
-                name="role"
-                // onChange={handleChange}
-                required
-              />
-              <Input
-                type="text"
-                color="primary"
-                label="Société"
-                variant="bordered"
-                placeholder="Entrer le nom de la société"
-                className="text-sm font-medium md:text-base"
-                name="company"
-                // onChange={handleChange}
-                required
-              />
-              <Input
-                type="text"
-                color="primary"
-                label="Département de la société"
-                variant="bordered"
-                placeholder="Entrer le département"
-                className="text-sm font-medium md:text-base"
-                name="department"
-                // onChange={handleChange}
-                required
-              />
-              <Input
-                type="text"
-                color="primary"
-                label="Nom du projet"
-                variant="bordered"
-                placeholder="Entrer le nom du projet"
-                className="text-sm font-medium md:text-base"
-                name="projectName"
-                // onChange={handleChange}
-                required
-              />
+             
               <Input
                 type="text"
                 label="Adresse e-mail"
@@ -175,42 +165,76 @@ const CreerUnCompte = () => {
                 required
               />
               <Input
-                type="text"
+                type="password"
                 label="Mot de passe"
                 variant="bordered"
                 color="primary"
                 placeholder="Entrer votre mot de passe"
                 className="text-sm font-medium md:text-base"
-                name="motdepasse"
+                name="password"
                 onChange={handleChange}
                 required
               />
               <Input
-                type="text"
+                type="password"
                 label="Confirmer le mot de passe"
                 variant="bordered"
                 color="primary"
                 placeholder="Veuillez confirmer votre mot de passe"
                 className="text-sm font-medium md:text-base"
-                name="cmotdepasse"
+                name="confirmPassword"
                 onChange={handleChange}
                 required
               />
-              <Select
-                label="Domaine du projet"
-                color="primary"
+              <Input
+                type="text"
+                label="Poste"
                 variant="bordered"
-                placeholder="Choisir le domaine de projet"
-                selectionMode="single"
+                color="primary"
+                placeholder="Entrer votre poste"
                 className="text-sm font-medium md:text-base"
-                onSelectionChange={handleSelectChange}
+                name="function"
+                onChange={handleChange}
+                required
+              />
+              <Input
+                type="text"
+                label="Société"
+                variant="bordered"
+                color="primary"
+                placeholder="Entrer le nom de la société"
+                className="text-sm font-medium md:text-base"
+                name="company"
+                onChange={handleChange}
+                required
+              />
+              <Input
+                type="text"
+                label="Département de la société"
+                variant="bordered"
+                color="primary"
+                placeholder="Entrer le département"
+                className="text-sm font-medium md:text-base"
+                name="department"
+                onChange={handleChange}
+                required
+              />
+              <Input
+                type="file"
+                label="Photo de profil"
+                variant="bordered"
+                color="primary"
+                className="text-sm font-medium md:text-base"
+                name="profileImage"
+                onChange={handleFileChange}
+              />
+               <Checkbox
+                isSelected={formData.isAdmin}
+                onChange={handleRoleChange}
+                color="primary"
               >
-                {domaines.map((domaine) => (
-                  <SelectItem key={domaine.key} value={domaine.label}>
-                    {domaine.label}
-                  </SelectItem>
-                ))}
-              </Select>
+                Administrateur
+              </Checkbox>
             </div>
             {error && <p className="text-red-500">{error}</p>}
             <div className="flex justify-center px-2 py-2">

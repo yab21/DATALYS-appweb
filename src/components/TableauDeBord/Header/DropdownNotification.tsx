@@ -1,67 +1,79 @@
-import { useEffect, useRef, useState } from "react";
+"use client"
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import ClickOutside from "@/components/ClickOutside";
-import Image from "next/image";
-import OneSignal from 'react-onesignal';
+import { auth, requestFCMToken } from "@/firebase/firebaseConfig";
 
-const notificationList = [
-  {
-    // image: "/images/logo-datalys-rvb.jpg",
-    title: "Mr. Ronald",
-    subTitle: "Merci de nous faire un devis sur mesure pour une commande... ",
-  },
-  {
-    // image: "/images/logo-datalys-rvb.jpg",
-    title: "Mme. Yvette",
-    subTitle: "Merci de nous faire un devis sur mesure pour une commande... ",
-  },
-  {
-    // image: "/images/logo-datalys-rvb.jpg",
-    title: "Mr. Arnaud",
-    subTitle: "La creation d'un nouveau compte",
-  },
-  {
-    title: "Mr. Arnaud",
-    subTitle: "La creation d'un nouveau compte",
-  },
-  {
-    title: "Mr. Arnaud",
-    subTitle: "La creation d'un nouveau compte",
-  },
-];
+
+
 
 const DropdownNotification = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notifying, setNotifying] = useState(true);
   const [notifications, setNotifications] = useState([]);
+  const [fcmToken, setFcmToken] = useState(null);
 
   useEffect(() => {
-    const initializeOneSignal = async () => {
-      await OneSignal.init({ appId: 'da5a8e4c-ebc1-424a-af0f-9a386736940f' });
-      console.log("OneSignal initialisé dans DropdownNotification");
-  
-      OneSignal.on('notificationDisplay', (event) => {
-        console.log("Nouvelle notification reçue:", event);
-        setNotifications(prevNotifications => [
-          {
-            title: event.heading,
-            subTitle: event.content,
-            time: new Date().toLocaleString()
-          },
-          ...prevNotifications
-        ]);
-        console.log("Notifications mises à jour:", notifications);
-      });
+    const fetchFCMToken = async () => {
+      const user = auth.currentUser;
+      if (user) {
+        try {
+          // Demander l'autorisation de notification
+          const permission = await Notification.requestPermission();
+          if (permission !== "granted") {
+            console.error("Notification non accordée");
+            return; // Sortir si l'autorisation n'est pas accordée
+          }
+
+          const token: string | null = await requestFCMToken();
+          setFcmToken(token);
+          console.log(token);
+        } catch (err) {
+          console.error("Erreur dans l'obtention du FCM Token", err);
+        }
+      } else {
+        console.log("Utilisateur non authentifié, impossible de récupérer le FCM Token.");
+      }
     };
-  
-    initializeOneSignal();
+
+    fetchFCMToken();
   }, []);
 
+  /*const notificationList = [
+    {
+      image: "/images/logo-datalys-rvb.jpg",
+      title: "Mr. Ronald",
+      subTitle: fcmToken ? (
+        <div className="col-md-12 mb-4">
+          <div className="alert-info alert">
+            <strong>FCM Token:</strong> {fcmToken}
+          </div>
+        </div>
+      ) : "Aucun token disponible",
+    },
+    {
+      image: "/images/logo-datalys-rvb.jpg",
+      title: "Mme. Yvette",
+      subTitle: "Merci de nous faire un devis sur mesure pour une commande... ",
+    },
+    {
+      image: "/images/logo-datalys-rvb.jpg",
+      title: "Mr. Arnaud",
+      subTitle: "La création d'un nouveau compte",
+    },
+    {
+      title: "Mr. Arnaud",
+      subTitle: "La création d'un nouveau compte",
+    },
+    {
+      title: "Mr. Arnaud",
+      subTitle: "La création d'un nouveau compte",
+    },
+  ];*/
+
+
   return (
-    <ClickOutside
-      onClick={() => setDropdownOpen(false)}
-      className="relative hidden sm:block"
-    >
+    <ClickOutside onClick={() => setDropdownOpen(false)} className="relative hidden sm:block">
       <li>
         <Link
           onClick={() => {
@@ -88,11 +100,7 @@ const DropdownNotification = () => {
               />
             </svg>
 
-            <span
-              className={`absolute -top-0.5 right-0 z-1 h-2.5 w-2.5 rounded-full border-2 border-gray-2 bg-primary dark:border-dark-3 ${
-                !notifying ? "hidden" : "inline"
-              }`}
-            >
+            <span className={`absolute -top-0.5 right-0 z-1 h-2.5 w-2.5 rounded-full border-2 border-gray-2 bg-primary dark:border-dark-3 ${!notifying ? "hidden" : "inline"}`}>
               <span className="absolute -z-1 inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75"></span>
             </span>
           </span>
@@ -103,14 +111,9 @@ const DropdownNotification = () => {
             className={`absolute -right-27 mt-7.5 flex h-[350px] w-75 flex-col rounded-xl border-[0.5px] border-stroke bg-white px-5.5 pb-5.5 pt-5 shadow-default dark:border-dark-3 dark:bg-gray-dark sm:right-0 sm:w-[364px]`}
           >
             <div className="mb-5 flex items-center justify-between">
-              <h5 className="text-lg font-medium text-dark dark:text-white">
-                Notifications
-              </h5>
-              <span className="rounded-md bg-primary px-2 py-0.5 text-body-xs font-medium text-white">
-                5 nouveaux
-              </span>
+              <h5 className="text-lg font-medium text-dark dark:text-white">Notifications</h5>
+              <span className="rounded-md bg-primary px-2 py-0.5 text-body-xs font-medium text-white">5 nouveaux</span>
             </div>
-
             <ul className="no-scrollbar flex h-auto flex-col gap-1 overflow-y-auto">
               {notifications.map((item, index) => (
                 <li key={index}>
@@ -119,27 +122,20 @@ const DropdownNotification = () => {
                     href="#"
                   >
                     <span className="block">
-                      <span className="block font-medium text-dark dark:text-white">
-                        {item.title}
-                      </span>
+                      <span className="block font-medium text-dark dark:text-white">{item.title}</span>
                       <span className="block text-body-sm font-medium text-dark-5 dark:text-dark-6">
-                        {item.subTitle}
+                        {fcmToken && (
+                          <div className="alert-info alert">
+                            <strong>FCM Token:</strong> {fcmToken}
+                          </div>
+                        )}
                       </span>
-                      <span className="block text-body-xs text-dark-5 dark:text-dark-6">
-                        {item.time}
-                      </span>
+                      <span className="block text-body-xs text-dark-5 dark:text-dark-6">{item.time}</span>
                     </span>
                   </Link>
                 </li>
               ))}
             </ul>
-
-            {/* <Link
-              className="flex items-center justify-center rounded-[7px] border border-orange-400 p-2.5 font-medium text-orange-400 hover:bg-orange-100 dark:border-dark-4 dark:text-dark-6 dark:hover:border-orange-400 dark:hover:bg-blue-light-3 dark:hover:text-orange-400"
-              href="/dashboardclient/mail/mailenvoye"
-            >
-              Voir toutes les notifications
-            </Link> */}
           </div>
         )}
       </li>
