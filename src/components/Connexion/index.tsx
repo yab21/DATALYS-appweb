@@ -5,7 +5,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { Input } from "@nextui-org/react";
 import { Button } from "@nextui-org/button";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+} from "firebase/auth";
 import { useRouter } from "next/navigation";
 
 const Connexion: React.FC = () => {
@@ -21,7 +25,9 @@ const Connexion: React.FC = () => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         // Si un utilisateur est connecté, rediriger vers le tableau de bord
-        console.log("Utilisateur déjà connecté, redirection vers le tableau de bord...");
+        console.log(
+          "Utilisateur déjà connecté, redirection vers le tableau de bord...",
+        );
         router.push("/tableaudebord");
       }
     });
@@ -72,7 +78,7 @@ const Connexion: React.FC = () => {
           <div className="relative z-10 -mt-7 w-full max-w-md">
             <Image
               src="/images/logo/logo.png"
-              alt=""
+              alt="logo"
               width={180}
               height={120}
             />
@@ -112,9 +118,11 @@ const Connexion: React.FC = () => {
                   variant="flat"
                   placeholder="Entrer votre adresse email"
                   className="max-w-sm"
+                  size="lg"
                   onChange={(e) => setEmail(e.target.value)}
                   value={email}
                   required
+                  style={{ fontSize: "0.9rem" }}
                 />
               </div>
               <div>
@@ -125,9 +133,11 @@ const Connexion: React.FC = () => {
                   variant="flat"
                   placeholder="Entrer votre mot de passe"
                   className="max-w-sm"
+                  size="lg"
                   onChange={(e) => setPassword(e.target.value)}
                   value={password}
                   required
+                  style={{ fontSize: "0.9rem" }}
                 />
               </div>
               {error && <p className="text-red-500">{error}</p>}
@@ -140,13 +150,7 @@ const Connexion: React.FC = () => {
                 {loading ? "Connexion..." : "Connexion"}
               </Button>
             </form>
-            <Link
-              className="mt-1 flex justify-start font-thin text-dark"
-              href="/"
-            >
-              Accéder aux différents utilisateurs.
-            </Link>
-            <div className="flex justify-center px-3 pb-4 pt-5">
+            <div className="flex flex-wrap pb-4 pt-5">
               <p className="text-dark">
                 All Rights Reserved by
                 <Link
