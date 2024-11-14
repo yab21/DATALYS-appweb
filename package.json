@@ -4,10 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
-    "start": "ts-node --transpile-only server.ts",
-    "build:server": "tsc --project tsconfig.server.json",
-    "prod:server": "node dist/server.js"
+    "build": "next build && tsc --project tsconfig.server.json",
+    "start": "NODE_ENV=production node dist/server.js",
+    "prod": "npm run build && npm run start"
   },
   "dependencies": {
     "@clerk/nextjs": "^5.6.1",
