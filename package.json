@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "ts-node --transpile-only server.ts"
+    "start": "ts-node --transpile-only server.ts",
+    "build:server": "tsc --project tsconfig.server.json",
+    "prod:server": "node dist/server.js"
   },
   "dependencies": {
     "@clerk/nextjs": "^5.6.1",

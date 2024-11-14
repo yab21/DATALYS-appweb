@@ -1,20 +1,20 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  compress: false,
-  // webpack: (config) => {
-  //   config.output.chunkLoadTimeout = 60000;
-  //   return config;
-  // },
-  // experimental: {
-  //   serverActions: {
-  //     bodySizeLimit: "2mb",
-  //     allowedOrigins: [
-  //       "localhost:3000",
-  //       "applicationweb.datalysconsulting.com",
-  //     ],
-  //   },
-  // },
+  compress: true,
+  webpack: (config) => {
+    config.output.chunkLoadTimeout = 60000;
+    return config;
+  },
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "2mb",
+      allowedOrigins: [
+        "localhost:3000",
+        "applicationweb.datalysconsulting.com",
+      ],
+    },
+  },
   eslint: {
     ignoreDuringBuilds: true,
   },
@@ -29,7 +29,6 @@ const nextConfig = {
     ],
     unoptimized: true,
   },
-  swcMinify: true,
   async headers() {
     return [
       {
@@ -50,9 +49,6 @@ const nextConfig = {
         ],
       },
     ];
-  },
-  async redirects() {
-    return [];
   },
   async rewrites() {
     return [

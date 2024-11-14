@@ -1,52 +1,51 @@
-import { createServer } from 'http'
-import { parse } from 'url'
-import next from 'next'
-import compression from 'compression'
-import { IncomingMessage, ServerResponse } from 'http'
+const { createServer } = require('http');
+const { parse } = require('url');
+const next = require('next');
+const compression = require('compression');
 
 // Amélioration de la gestion des variables d'environnement
-const port = parseInt(process.env.PORT || '3000', 10)
-const dev = process.env.NODE_ENV !== 'production'
-const hostname = process.env.HOSTNAME || 'localhost'
+const port: number = parseInt(process.env.PORT || '3000', 10);
+const dev: boolean = process.env.NODE_ENV !== 'production';
+const hostname: string = process.env.HOSTNAME || 'localhost';
 
 // Configuration de Next.js
 const app = next({ 
   dev,
   hostname,
   port 
-})
+});
 
-const handle = app.getRequestHandler()
+const handle = app.getRequestHandler();
 
 app.prepare()
   .then(() => {
-    const server = createServer((req: IncomingMessage, res: ServerResponse) => {
+    const server = createServer((req: any, res: any) => {
       try {
         // Activation de la compression
-        compression()(req as any, res as any, () => {
+        compression()(req, res, () => {
           // Vérification de l'URL
           if (!req.url) {
-            res.statusCode = 400
-            res.end('Bad Request')
-            return
+            res.statusCode = 400;
+            res.end('Bad Request');
+            return;
           }
 
-          const parsedUrl = parse(req.url, true)
+          const parsedUrl = parse(req.url, true);
           
           // Gestion de la requête par Next.js
-          handle(req, res, parsedUrl)
-        })
+          handle(req, res, parsedUrl);
+        });
       } catch (err) {
-        console.error('Error occurred handling request:', err)
-        res.statusCode = 500
-        res.end('Internal Server Error')
+        console.error('Error occurred handling request:', err);
+        res.statusCode = 500;
+        res.end('Internal Server Error');
       }
-    })
+    });
 
     // Gestion des erreurs du serveur
-    server.on('error', (err) => {
-      console.error('Server error:', err)
-    })
+    server.on('error', (err: Error) => {
+      console.error('Server error:', err);
+    });
 
     // Démarrage du serveur
     server.listen(port, () => {
@@ -54,10 +53,12 @@ app.prepare()
         `> Server listening at http://${hostname}:${port} as ${
           dev ? 'development' : process.env.NODE_ENV
         }`
-      )
-    })
+      );
+    });
   })
-  .catch((err) => {
-    console.error('Error during server initialization:', err)
-    process.exit(1)
-})
+  .catch((err: Error) => {
+    console.error('Error during server initialization:', err);
+    process.exit(1);
+});
+
+module.exports = app;

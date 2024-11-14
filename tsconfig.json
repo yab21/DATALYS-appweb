@@ -31,7 +31,6 @@
         "./src/components/*"
       ] // Spécifiquement pour les composants
     },
-    "forceConsistentCasingInFileNames": true,
     "typeRoots": ["./node_modules/@types", "./src/types"]
   },
   "include": [
