@@ -6,6 +6,7 @@ module.exports = {
       env: {
         NODE_ENV: "production",
         PORT: 3000,
+        HOSTNAME: "applicationweb.datalysconsulting.com",
       },
       instances: 1,
       autorestart: true,

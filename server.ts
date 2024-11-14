@@ -2,6 +2,8 @@ const { createServer } = require('http');
 const { parse } = require('url');
 const next = require('next');
 const compression = require('compression');
+const path = require('path');
+const fs = require('fs');
 
 const port: number = parseInt(process.env.PORT || '3000', 10);
 const dev: boolean = process.env.NODE_ENV !== 'production';
@@ -11,7 +13,7 @@ const app = next({
   dev,
   hostname,
   port,
-  dir: __dirname
+  dir: process.cwd()
 });
 
 const handle = app.getRequestHandler();
@@ -22,6 +24,21 @@ const startServer = async () => {
     
     const server = createServer((req: any, res: any) => {
       try {
+        const parsedUrl = parse(req.url, true);
+        const { pathname } = parsedUrl;
+
+        if (pathname.startsWith('/_next/') || 
+            pathname.startsWith('/static/') ||
+            pathname.includes('.')
+        ) {
+          const filePath = path.join(process.cwd(), '.next', pathname);
+          if (fs.existsSync(filePath)) {
+            const stream = fs.createReadStream(filePath);
+            stream.pipe(res);
+            return;
+          }
+        }
+
         compression()(req, res, () => {
           if (!req.url) {
             res.statusCode = 400;
@@ -29,7 +46,6 @@ const startServer = async () => {
             return;
           }
 
-          const parsedUrl = parse(req.url, true);
           handle(req, res, parsedUrl);
         });
       } catch (err) {
