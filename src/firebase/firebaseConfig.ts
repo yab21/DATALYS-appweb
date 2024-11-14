@@ -4,7 +4,7 @@ import { getAnalytics } from "firebase/analytics";
 import { getAuth, User } from "firebase/auth";
 import { getFirestore, doc, getDoc, collection, addDoc, serverTimestamp, DocumentData } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
-import { getMessaging, getToken, onMessage } from "firebase/messaging";
+import { getMessaging, getToken, onMessage, isSupported } from "firebase/messaging";
 import { useEffect, useState } from "react";
 
 // Your web app's Firebase configuration
@@ -30,9 +30,21 @@ const db = getFirestore(app); // Firestore si nécessaire
 const storage = getStorage(app); // Storage si nécessaire
 
 let messaging: any = null;
-if (typeof window !== "undefined") {
-  messaging = getMessaging(app);
-}
+
+const initializeMessaging = async () => {
+  if (typeof window !== "undefined") {
+    try {
+      const isMessagingSupported = await isSupported();
+      if (isMessagingSupported) {
+        messaging = getMessaging(app);
+        return messaging;
+      }
+    } catch (error) {
+      console.log('Firebase messaging not supported in this environment');
+    }
+  }
+  return null;
+};
 
 // Ajoutez cette interface pour le type de projet
 interface ProjectData extends DocumentData {
@@ -61,40 +73,44 @@ export const createNotification = async (
 
 // Fonction pour obtenir le token FCM
 export const requestFCMToken = async (): Promise<string | null> => {
-  if (typeof window !== "undefined" && messaging) {
-    try {
-      const permission = await Notification.requestPermission();
-      if (permission === "granted") {
-        const token = await getToken(messaging, { 
-          vapidKey: "BFaXd4OytA6IpbDILdtWk_GjmBUk4Iwd9t5-L1tc4A1K6N8x9owSfSv1ylB-oeRWuksMnQj9sXIx6D_9XNfE5w8" 
-        });
-        console.log("FCM Token obtained:", token);
-        return token;
-      } else {
-        console.log("Notification permission denied");
-        return null;
-      }
-    } catch (error) {
-      console.error("Error obtaining FCM Token:", error);
+  try {
+    const messagingInstance = await initializeMessaging();
+    if (!messagingInstance) {
+      console.log('Messaging not supported');
       return null;
     }
+
+    const permission = await Notification.requestPermission();
+    if (permission === "granted") {
+      const token = await getToken(messagingInstance, { 
+        vapidKey: vapidKey 
+      });
+      return token;
+    }
+    return null;
+  } catch (error) {
+    console.log('Error requesting FCM token:', error);
+    return null;
   }
-  return null;
 };
 
 // Fonction pour écouter les messages en premier plan
 export const onMessageListener = () => {
-  if (typeof window !== "undefined" && messaging) {
-    return new Promise((resolve) => {
+  return new Promise((resolve) => {
+    if (messaging) {
       onMessage(messaging, (payload) => {
         resolve(payload);
       });
-    });
-  }
-  return Promise.resolve(null);
+    } else {
+      resolve(null);
+    }
+  });
 };
 
-export { auth, db, storage, app, analytics, messaging };
+// Initialiser le messaging au démarrage
+initializeMessaging().catch(console.error);
+
+export { auth, db, storage, app, analytics };
 
 const fetchProject = async (projectId: string): Promise<ProjectData | null> => {
   const user = auth.currentUser;
