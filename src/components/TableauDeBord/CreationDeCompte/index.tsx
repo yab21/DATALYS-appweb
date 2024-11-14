@@ -5,7 +5,14 @@ import Breadcrumb from "@/components/TableauDeBord/Breadcrumbs/Breadcrumb";
 import { Button } from "@nextui-org/button";
 import { Input, Checkbox } from "@nextui-org/react";
 import { db } from "@/firebase/firebaseConfig";
-import { collection, setDoc, doc, getDocs, query, where } from "firebase/firestore";
+import {
+  collection,
+  setDoc,
+  doc,
+  getDocs,
+  query,
+  where,
+} from "firebase/firestore";
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { createNotification } from "@/firebase/firebaseConfig";
@@ -43,7 +50,10 @@ const CreerUnCompte = () => {
     setFormData({ ...formData, isAdmin: e.target.checked });
   };
 
-  const uploadProfileImage = async (file: File, userId: string): Promise<string> => {
+  const uploadProfileImage = async (
+    file: File,
+    userId: string,
+  ): Promise<string> => {
     const storage = getStorage();
     const storageRef = ref(storage, `profileImages/${userId}`);
     await uploadBytes(storageRef, file);
@@ -99,7 +109,7 @@ const CreerUnCompte = () => {
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         formData.email,
-        formData.password
+        formData.password,
       );
       const newUser = userCredential.user;
 
@@ -107,7 +117,10 @@ const CreerUnCompte = () => {
       let profileImageUrl = "/images/user.png";
       if (formData.profileImage) {
         try {
-          profileImageUrl = await uploadProfileImage(formData.profileImage, newUser.uid);
+          profileImageUrl = await uploadProfileImage(
+            formData.profileImage,
+            newUser.uid,
+          );
         } catch (error) {
           console.error("Erreur lors de l'upload de l'image:", error);
         }
@@ -131,31 +144,40 @@ const CreerUnCompte = () => {
 
       // Notifier les administrateurs
       const adminsSnapshot = await getDocs(
-        query(collection(db, "users"), where("isAdmin", "==", true))
+        query(collection(db, "users"), where("isAdmin", "==", true)),
       );
 
-      // Créer les notifications avec l'ID de l'utilisateur actuel
-      const notificationPromises = adminsSnapshot.docs.map(async (adminDoc) => {
-        await createNotification(
-          adminDoc.id,
-          {
-            title: "Nouveau compte créé",
-            body: `créé un nouveau compte pour ${formData.firstName} ${formData.lastName} (${formData.username})`,
-            link: "/tableaudebord/utilisateur/voir"
-          },
-          currentUser.uid
-        );
-      });
+      // Créer les notifications de manière plus robuste
+      if (adminsSnapshot.docs.length > 0) {
+        const notificationPromises = adminsSnapshot.docs.map((adminDoc) => {
+          return createNotification(
+            adminDoc.id,
+            {
+              title: "Nouveau compte créé",
+              body: `créé un nouveau compte pour ${formData.firstName} ${formData.lastName} (${formData.username})`,
+              link: "/tableaudebord/utilisateur/voir",
+            },
+            currentUser.uid,
+          ).catch((error) => {
+            console.error(
+              "Erreur lors de la création de la notification:",
+              error,
+            );
+          });
+        });
 
-      await Promise.all(notificationPromises);
+        await Promise.allSettled(notificationPromises);
+      }
+
       alert("Utilisateur créé avec succès !");
-
     } catch (error: any) {
       if (error.code === "auth/email-already-in-use") {
         setError("Cette adresse e-mail est déjà utilisée.");
       } else {
         console.error("Erreur lors de la création de l'utilisateur :", error);
-        setError("Erreur lors de la création de l'utilisateur. Veuillez réessayer.");
+        setError(
+          "Erreur lors de la création de l'utilisateur. Veuillez réessayer.",
+        );
       }
     } finally {
       setLoading(false);
@@ -207,7 +229,7 @@ const CreerUnCompte = () => {
                 onChange={handleChange}
                 required
               />
-             
+
               <Input
                 type="text"
                 label="Adresse e-mail"
@@ -283,7 +305,7 @@ const CreerUnCompte = () => {
                 name="profileImage"
                 onChange={handleFileChange}
               />
-               <Checkbox
+              <Checkbox
                 isSelected={formData.isAdmin}
                 onChange={handleRoleChange}
                 color="primary"

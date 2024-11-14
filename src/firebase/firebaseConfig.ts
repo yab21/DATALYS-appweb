@@ -1,8 +1,8 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
-import { getAuth } from "firebase/auth";
-import { getFirestore, doc, getDoc, collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { getAuth, User } from "firebase/auth";
+import { getFirestore, doc, getDoc, collection, addDoc, serverTimestamp, DocumentData } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import { getMessaging, getToken, onMessage } from "firebase/messaging";
 import { useEffect, useState } from "react";
@@ -34,57 +34,28 @@ if (typeof window !== "undefined") {
   messaging = getMessaging(app);
 }
 
+// Ajoutez cette interface pour le type de projet
+interface ProjectData extends DocumentData {
+  authorizedUsers: string[];
+  // Ajoutez d'autres champs selon votre structure de projet
+}
+
 // Fonction améliorée pour créer une notification
 export const createNotification = async (
-  recipientId: string, 
-  notification: {
-    title: string;
-    body: string;
-    link?: string;
-  },
-  actionUserId: string
+  userId: string,
+  notification: { title: string; body: string; link: string },
+  createdBy: string
 ) => {
   try {
-    if (!actionUserId) {
-      console.error("ID de l'utilisateur qui fait l'action manquant");
-      return;
-    }
-
-    // Récupérer les informations de l'utilisateur qui fait l'action
-    const actionUserDoc = await getDoc(doc(db, "users", actionUserId));
-    if (!actionUserDoc.exists()) {
-      console.error("Utilisateur qui fait l'action non trouvé");
-      return;
-    }
-
-    const actionUserData = actionUserDoc.data();
-    if (!actionUserData?.firstName || !actionUserData?.lastName) {
-      console.error("Données utilisateur incomplètes");
-      return;
-    }
-
-    let notificationBody = notification.body;
-
-    // Si le destinataire est différent de l'utilisateur qui fait l'action
-    if (recipientId !== actionUserId) {
-      // Format: "P. Nom a créé..." (sans le verbe dans notification.body)
-      const userInitials = `${actionUserData.firstName.charAt(0)}. ${actionUserData.lastName}`;
-      // Le message notification.body ne doit plus contenir le verbe "avez"
-      notificationBody = `${userInitials} ${notificationBody}`;
-    } else {
-      // Format: "Vous avez créé..."
-      notificationBody = `Vous avez ${notificationBody}`;
-    }
-
-    const notificationsRef = collection(db, "users", recipientId, "notifications");
+    const notificationsRef = collection(db, "users", userId, "notifications");
     await addDoc(notificationsRef, {
       ...notification,
-      body: notificationBody,
-      timestamp: serverTimestamp(),
+      createdBy,
+      createdAt: new Date(),
       read: false,
     });
   } catch (error) {
-    console.error("Erreur lors de la création de la notification:", error);
+    console.error("Error creating notification:", error);
   }
 };
 
@@ -97,14 +68,14 @@ export const requestFCMToken = async (): Promise<string | null> => {
         const token = await getToken(messaging, { 
           vapidKey: "BFaXd4OytA6IpbDILdtWk_GjmBUk4Iwd9t5-L1tc4A1K6N8x9owSfSv1ylB-oeRWuksMnQj9sXIx6D_9XNfE5w8" 
         });
-        console.log("FCM Token obtenu:", token);
+        console.log("FCM Token obtained:", token);
         return token;
       } else {
-        console.log("Permission de notification refusée");
+        console.log("Notification permission denied");
         return null;
       }
     } catch (error) {
-      console.error("Erreur lors de l'obtention du FCM Token:", error);
+      console.error("Error obtaining FCM Token:", error);
       return null;
     }
   }
@@ -125,7 +96,7 @@ export const onMessageListener = () => {
 
 export { auth, db, storage, app, analytics, messaging };
 
-const fetchProject = async (projectId) => {
+const fetchProject = async (projectId: string): Promise<ProjectData | null> => {
   const user = auth.currentUser;
   if (!user) {
     console.error("Utilisateur non authentifié");
@@ -136,8 +107,13 @@ const fetchProject = async (projectId) => {
   const docSnap = await getDoc(docRef);
 
   if (docSnap.exists()) {
-    const projectData = docSnap.data();
-    if (projectData.authorizedUsers.includes(user.uid) || user.admin) {
+    const projectData = docSnap.data() as ProjectData;
+    // Vérifiez les permissions via une requête séparée pour obtenir le statut admin
+    const userDocRef = doc(db, "users", user.uid);
+    const userDocSnap = await getDoc(userDocRef);
+    const isAdmin = userDocSnap.exists() ? userDocSnap.data()?.isAdmin : false;
+
+    if (projectData.authorizedUsers.includes(user.uid) || isAdmin) {
       return projectData;
     } else {
       console.error("Accès refusé");
@@ -147,4 +123,17 @@ const fetchProject = async (projectId) => {
     console.error("Projet non trouvé");
     return null;
   }
+};
+
+// Add this helper function
+export const initializeFirebaseMessaging = () => {
+  if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+    try {
+      return getMessaging(app);
+    } catch (error) {
+      console.log('Firebase messaging not supported');
+      return null;
+    }
+  }
+  return null;
 };

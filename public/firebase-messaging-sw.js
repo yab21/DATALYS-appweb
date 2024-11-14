@@ -1,8 +1,18 @@
-// Import scripts for Firebase and Firebase Messaging
-importScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js');
-importScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js');
+importScripts(
+  "https://www.gstatic.com/firebasejs/9.19.1/firebase-app-compat.js",
+);
+importScripts(
+  "https://www.gstatic.com/firebasejs/9.19.1/firebase-messaging-compat.js",
+);
 
-// Initialize the Firebase app in the service worker by passing in the messagingSenderId
+self.addEventListener("install", (event) => {
+  console.log("Service Worker installing.");
+});
+
+self.addEventListener("activate", (event) => {
+  console.log("Service Worker activating.");
+});
+
 firebase.initializeApp({
   apiKey: "AIzaSyDdzrpDT9iifZD7r_1wVKl3e2aO4Qp6ZcY",
   authDomain: "datalys-consulting.firebaseapp.com",
@@ -10,20 +20,24 @@ firebase.initializeApp({
   storageBucket: "datalys-consulting.appspot.com",
   messagingSenderId: "374891323631",
   appId: "1:374891323631:web:2517ab2666832cc0a53b1a",
-  measurementId: "G-MRGRBCZQHV"
 });
 
-// Retrieve an instance of Firebase Messaging so that it can handle background messages
 const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage((payload) => {
-  console.log('[firebase-messaging-sw.js] Received background message ', payload);
-  // Customize notification here
-  const notificationTitle = payload.notification.title;
+  console.log("Received background message:", payload);
+
+  const notificationTitle =
+    payload.notification?.title || "Nouvelle notification";
   const notificationOptions = {
-    body: payload.notification.body,
-    icon: './images/fav.png'
+    body: payload.notification?.body || "",
+    icon: "/images/icon-192x192.png",
+    badge: "/images/badge-72x72.png",
+    data: payload.data,
   };
 
-  self.registration.showNotification(notificationTitle, notificationOptions);
+  return self.registration.showNotification(
+    notificationTitle,
+    notificationOptions,
+  );
 });
