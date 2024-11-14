@@ -7,6 +7,7 @@ import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "@/firebase/firebaseConfig";
 import { getAuth, signOut } from "firebase/auth";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 const DropdownUser = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -63,10 +64,13 @@ const DropdownUser = () => {
         href="#"
       >
         <span className="h-12 w-12 rounded-full">
-          <img
+          <Image
             src={userData.profileImage}
             alt="User"
-            className="h-full w-full rounded-full object-cover"
+            width={32}
+            height={32}
+            className="rounded-full"
+            unoptimized
           />
         </span>
 
@@ -98,10 +102,13 @@ const DropdownUser = () => {
           <div className="dark:border-strokedark flex flex-col gap-4 border-b border-stroke px-4 py-3">
             <div className="flex items-center gap-3">
               <div className="h-12 w-12 rounded-full">
-                <img
+                <Image
                   src={userData.profileImage}
                   alt="User"
-                  className="h-full w-full rounded-full object-cover"
+                  width={32}
+                  height={32}
+                  className="rounded-full"
+                  unoptimized
                 />
               </div>
               <div>

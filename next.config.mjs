@@ -22,9 +22,50 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
+    domains: [
+      "firebasestorage.googleapis.com",
+      "lh3.googleusercontent.com",
+      "applicationweb.datalysconsulting.com",
+    ],
     unoptimized: true,
   },
-  // output: "export",
+  swcMinify: true,
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          {
+            key: "X-Content-Type-Options",
+            value: "nosniff",
+          },
+          {
+            key: "X-Frame-Options",
+            value: "SAMEORIGIN",
+          },
+          {
+            key: "X-XSS-Protection",
+            value: "1; mode=block",
+          },
+        ],
+      },
+    ];
+  },
+  async redirects() {
+    return [];
+  },
+  async rewrites() {
+    return [
+      {
+        source: "/api/:path*",
+        destination: "/api/:path*",
+      },
+      {
+        source: "/.well-known/firebase-messaging-sw.js",
+        destination: "/firebase-messaging-sw.js",
+      },
+    ];
+  },
 };
 
 export default nextConfig;
