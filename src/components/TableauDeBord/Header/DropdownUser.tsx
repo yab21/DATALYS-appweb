@@ -7,15 +7,17 @@ import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "@/firebase/firebaseConfig";
 import { getAuth, signOut } from "firebase/auth";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 const DropdownUser = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [userData, setUserData] = useState({
     firstName: "",
     lastName: "",
-    profileImage: "/images/user.png" // Image par défaut
+    profileImage: "/images/user.png", // Image par défaut
   });
   const router = useRouter();
+  const [imageError, setImageError] = useState(false);
 
   // Fonction pour récupérer les informations utilisateur depuis Firestore
   useEffect(() => {
@@ -31,11 +33,14 @@ const DropdownUser = () => {
             setUserData({
               firstName: data.firstName || "",
               lastName: data.lastName || "",
-              profileImage: data.profileImage || "/images/user.png"
+              profileImage: data.profileImage || "/images/user.png",
             });
           }
         } catch (error) {
-          console.error("Erreur lors de la récupération des données utilisateur:", error);
+          console.error(
+            "Erreur lors de la récupération des données utilisateur:",
+            error,
+          );
         }
       }
     };
@@ -60,14 +65,19 @@ const DropdownUser = () => {
         href="#"
       >
         <span className="h-12 w-12 rounded-full">
-          <img
-            src={userData.profileImage}
-            alt="User"
-            className="h-full w-full rounded-full object-cover"
+          <Image
+            src={imageError ? "/images/default-avatar.png" : "/images/user.png"}
+            alt="User Profile"
+            width={50}
+            height={50}
+            priority={true}
+            className="rounded-full"
+            loading="eager"
+            onError={() => setImageError(true)}
           />
         </span>
 
-        <span className="flex items-center gap-2 font-medium text-dark dark:text-dark-6">
+        <span className="flex items-center gap-2 font-medium text-dark dark:text-white">
           <span className="hidden lg:block">
             {userData.firstName.charAt(0)}. {userData.lastName}
           </span>
@@ -91,14 +101,23 @@ const DropdownUser = () => {
       </Link>
 
       {dropdownOpen && (
-        <div className="absolute right-0 mt-4 flex w-62.5 flex-col rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-          <div className="flex flex-col gap-4 border-b border-stroke px-4 py-3 dark:border-strokedark">
+        <div className="absolute right-0 mt-4 flex w-62.5 flex-col rounded-sm bg-white shadow-1 dark:bg-gray-dark dark:shadow-card">
+          <div className="dark:border-strokedark flex flex-col gap-4 border-b border-stroke px-4 py-3">
             <div className="flex items-center gap-3">
               <div className="h-12 w-12 rounded-full">
-                <img
-                  src={userData.profileImage}
-                  alt="User"
-                  className="h-full w-full rounded-full object-cover"
+                <Image
+                  src={
+                    imageError
+                      ? "/images/default-avatar.png"
+                      : "/images/user.png"
+                  }
+                  alt="User Profile"
+                  width={50}
+                  height={50}
+                  priority={true}
+                  className="rounded-full"
+                  loading="eager"
+                  onError={() => setImageError(true)}
                 />
               </div>
               <div>

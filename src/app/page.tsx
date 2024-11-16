@@ -1,7 +1,8 @@
-import AllUsers from "@/components/TousLesUtilisateurs";
+import React from "react";
 import { Metadata } from "next";
 import { NextUIProvider } from "@nextui-org/react";
-import React from "react";
+import Connexion from "@/components/Connexion";
+import Image from "next/image";
 
 export const metadata: Metadata = {
   title: "DATALYS Consulting application web",
@@ -12,7 +13,7 @@ export default function Home() {
   return (
     <>
       <NextUIProvider>
-        <AllUsers />
+        <Connexion />
       </NextUIProvider>
     </>
   );

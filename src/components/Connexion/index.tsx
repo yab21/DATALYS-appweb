@@ -5,7 +5,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { Input } from "@nextui-org/react";
 import { Button } from "@nextui-org/button";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+} from "firebase/auth";
 import { useRouter } from "next/navigation";
 
 const Connexion: React.FC = () => {
@@ -21,7 +25,9 @@ const Connexion: React.FC = () => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         // Si un utilisateur est connecté, rediriger vers le tableau de bord
-        console.log("Utilisateur déjà connecté, redirection vers le tableau de bord...");
+        console.log(
+          "Utilisateur déjà connecté, redirection vers le tableau de bord...",
+        );
         router.push("/tableaudebord");
       }
     });
@@ -140,13 +146,7 @@ const Connexion: React.FC = () => {
                 {loading ? "Connexion..." : "Connexion"}
               </Button>
             </form>
-            <Link
-              className="mt-1 flex justify-start font-thin text-dark"
-              href="/"
-            >
-              Accéder aux différents utilisateurs.
-            </Link>
-            <div className="flex justify-center px-3 pb-4 pt-5">
+            <div className="mt-1 flex justify-center px-3 pb-4 pt-5">
               <p className="text-dark">
                 All Rights Reserved by
                 <Link

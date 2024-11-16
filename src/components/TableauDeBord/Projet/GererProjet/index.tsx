@@ -21,7 +21,15 @@ import {
 import { getAuth } from "firebase/auth";
 import Breadcrumb from "@/components/TableauDeBord/Breadcrumbs/Breadcrumb";
 import { db } from "@/firebase/firebaseConfig";
-import { collection, getDocs, deleteDoc, doc, getDoc, query, where } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  deleteDoc,
+  doc,
+  getDoc,
+  query,
+  where,
+} from "firebase/firestore";
 
 interface Project {
   id: string;
@@ -71,7 +79,10 @@ const GestionProjet = () => {
       }
       return null;
     } catch (error) {
-      console.error("Erreur lors de la récupération des données utilisateur:", error);
+      console.error(
+        "Erreur lors de la récupération des données utilisateur:",
+        error,
+      );
       return null;
     }
   };
@@ -95,30 +106,35 @@ const GestionProjet = () => {
       const projectList = querySnapshot.docs
         .map((doc) => {
           const projectData = doc.data();
-          
+
           // Vérification des autorisations
           if (!projectData.authorizedUsers && !user.isAdmin) {
-            console.log(`Project ${doc.id} skipped: no authorizedUsers field and user is not admin`);
+            console.log(
+              `Project ${doc.id} skipped: no authorizedUsers field and user is not admin`,
+            );
             return null;
           }
 
-          const isAuthorized = user.isAdmin || 
-            (projectData.authorizedUsers && 
-             Array.isArray(projectData.authorizedUsers) && 
-             projectData.authorizedUsers.includes(user.id));
+          const isAuthorized =
+            user.isAdmin ||
+            (projectData.authorizedUsers &&
+              Array.isArray(projectData.authorizedUsers) &&
+              projectData.authorizedUsers.includes(user.id));
 
           console.log(`Project ${doc.id} authorization check:`, {
             isAdmin: user.isAdmin,
             hasAuthorizedUsers: !!projectData.authorizedUsers,
             isUserAuthorized: projectData.authorizedUsers?.includes(user.id),
-            finalDecision: isAuthorized
+            finalDecision: isAuthorized,
           });
 
-          return isAuthorized ? {
-            id: doc.id,
-            ...projectData,
-            createdAt: projectData.createdAt.toDate(),
-          } as Project : null;
+          return isAuthorized
+            ? ({
+                id: doc.id,
+                ...projectData,
+                createdAt: projectData.createdAt.toDate(),
+              } as Project)
+            : null;
         })
         .filter((project): project is Project => project !== null);
 
@@ -132,10 +148,13 @@ const GestionProjet = () => {
 
   useEffect(() => {
     if (currentUser) {
-      const filtered = projects.filter((project) =>
-        project.intitule.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        project.chefDeProjet.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        project.societe.toLowerCase().includes(searchTerm.toLowerCase())
+      const filtered = projects.filter(
+        (project) =>
+          project.intitule.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          project.chefDeProjet
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          project.societe.toLowerCase().includes(searchTerm.toLowerCase()),
       );
       setFilteredProjects(filtered);
     }
@@ -168,7 +187,7 @@ const GestionProjet = () => {
   const indexOfFirstProject = indexOfLastProject - projectsPerPage;
   const currentProjects = filteredProjects.slice(
     indexOfFirstProject,
-    indexOfLastProject
+    indexOfLastProject,
   );
 
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
@@ -183,10 +202,12 @@ const GestionProjet = () => {
       try {
         const projectDoc = await getDoc(doc(db, "projects", projectToDelete));
         const projectData = projectDoc.data();
-        
+
         // Vérification des autorisations avant la suppression
-        const isAuthorized = currentUser.isAdmin || 
-          (projectData?.authorizedUsers && projectData.authorizedUsers.includes(currentUser.id));
+        const isAuthorized =
+          currentUser.isAdmin ||
+          (projectData?.authorizedUsers &&
+            projectData.authorizedUsers.includes(currentUser.id));
 
         if (!isAuthorized) {
           console.error("Non autorisé à supprimer ce projet");
@@ -196,23 +217,29 @@ const GestionProjet = () => {
 
         // 1. Supprimer tous les fichiers associés au projet
         const filesRef = collection(db, "files");
-        const filesQuery = query(filesRef, where("projectId", "==", projectToDelete));
+        const filesQuery = query(
+          filesRef,
+          where("projectId", "==", projectToDelete),
+        );
         const filesSnapshot = await getDocs(filesQuery);
-        
+
         console.log(`Suppression de ${filesSnapshot.size} fichiers...`);
-        const filesDeletions = filesSnapshot.docs.map(fileDoc => 
-          deleteDoc(doc(db, "files", fileDoc.id))
+        const filesDeletions = filesSnapshot.docs.map((fileDoc) =>
+          deleteDoc(doc(db, "files", fileDoc.id)),
         );
         await Promise.all(filesDeletions);
 
         // 2. Supprimer tous les dossiers associés au projet
         const foldersRef = collection(db, "folders");
-        const foldersQuery = query(foldersRef, where("projectId", "==", projectToDelete));
+        const foldersQuery = query(
+          foldersRef,
+          where("projectId", "==", projectToDelete),
+        );
         const foldersSnapshot = await getDocs(foldersQuery);
-        
+
         console.log(`Suppression de ${foldersSnapshot.size} dossiers...`);
-        const foldersDeletions = foldersSnapshot.docs.map(folderDoc => 
-          deleteDoc(doc(db, "folders", folderDoc.id))
+        const foldersDeletions = foldersSnapshot.docs.map((folderDoc) =>
+          deleteDoc(doc(db, "folders", folderDoc.id)),
         );
         await Promise.all(foldersDeletions);
 
@@ -222,17 +249,20 @@ const GestionProjet = () => {
 
         // 4. Mettre à jour l'interface
         setFilteredProjects(
-          filteredProjects.filter((project) => project.id !== projectToDelete)
+          filteredProjects.filter((project) => project.id !== projectToDelete),
         );
         setProjects(
-          projects.filter((project) => project.id !== projectToDelete)
+          projects.filter((project) => project.id !== projectToDelete),
         );
-        
+
         console.log("Suppression complète terminée avec succès");
         onClose();
         setProjectToDelete(null);
       } catch (error) {
-        console.error("Erreur lors de la suppression du projet et de ses données :", error);
+        console.error(
+          "Erreur lors de la suppression du projet et de ses données :",
+          error,
+        );
       }
     }
   };
@@ -248,7 +278,7 @@ const GestionProjet = () => {
       <div className="mt-5 w-full max-w-full rounded-[10px]">
         <div className="mt-8 rounded-[10px] bg-white shadow-1 dark:bg-gray-dark dark:shadow-card">
           <div className="w-full max-w-full p-2">
-            <div className="flex w-full justify-between items-center">
+            <div className="flex w-full items-center justify-between">
               <h3 className="pt-2 text-[22px] font-medium text-dark dark:text-white">
                 Gestion de projet
               </h3>
@@ -260,41 +290,47 @@ const GestionProjet = () => {
               />
             </div>
           </div>
-          <div className="mt-4 overflow-x-auto rounded-lg border shadow-sm">
+          <div className="mt-4 rounded-lg border shadow-sm">
             <Table
               aria-label="Gestion de projet"
-              className="h-[400px] w-full overflow-y-auto scrollbar-hide"
+              className="h-full w-full overflow-y-auto scrollbar-hide"
             >
               <TableHeader>
                 <TableColumn
                   onClick={() => handleSort("intitule")}
                   className="cursor-pointer"
                 >
-                  Intitulé {sortKey === "intitule" && (sortOrder === "asc" ? "↑" : "↓")}
+                  Intitulé{" "}
+                  {sortKey === "intitule" && (sortOrder === "asc" ? "↑" : "↓")}
                 </TableColumn>
                 <TableColumn
                   onClick={() => handleSort("chefDeProjet")}
                   className="cursor-pointer"
                 >
-                  Chef de projet {sortKey === "chefDeProjet" && (sortOrder === "asc" ? "↑" : "↓")}
+                  Chef de projet{" "}
+                  {sortKey === "chefDeProjet" &&
+                    (sortOrder === "asc" ? "↑" : "↓")}
                 </TableColumn>
                 <TableColumn
                   onClick={() => handleSort("societe")}
                   className="cursor-pointer"
                 >
-                  Société {sortKey === "societe" && (sortOrder === "asc" ? "↑" : "↓")}
+                  Société{" "}
+                  {sortKey === "societe" && (sortOrder === "asc" ? "↑" : "↓")}
                 </TableColumn>
                 <TableColumn
                   onClick={() => handleSort("domaine")}
                   className="cursor-pointer"
                 >
-                  Domaine {sortKey === "domaine" && (sortOrder === "asc" ? "↑" : "↓")}
+                  Domaine{" "}
+                  {sortKey === "domaine" && (sortOrder === "asc" ? "↑" : "↓")}
                 </TableColumn>
                 <TableColumn
                   onClick={() => handleSort("createdAt")}
                   className="cursor-pointer"
                 >
-                  Date de création {sortKey === "createdAt" && (sortOrder === "asc" ? "↑" : "↓")}
+                  Date de création{" "}
+                  {sortKey === "createdAt" && (sortOrder === "asc" ? "↑" : "↓")}
                 </TableColumn>
                 <TableColumn>Action</TableColumn>
               </TableHeader>
@@ -308,7 +344,7 @@ const GestionProjet = () => {
                     <TableCell>
                       {project.createdAt.toLocaleDateString()}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="flex items-center gap-1">
                       <Button
                         onClick={() => handleView(project.id)}
                         color="success"
@@ -346,18 +382,14 @@ const GestionProjet = () => {
               total={Math.ceil(filteredProjects.length / projectsPerPage)}
               initialPage={1}
               onChange={(page) => paginate(page)}
-              className="mt-4"
+              className="flex items-center justify-center py-6"
             />
           </div>
         </div>
       </div>
 
       {/* Modal pour confirmer la suppression */}
-      <Modal
-        isOpen={isOpen}
-        onOpenChange={onClose}
-        placement="top-center"
-      >
+      <Modal isOpen={isOpen} onOpenChange={onClose} placement="top-center">
         <ModalContent>
           {(onClose) => (
             <>

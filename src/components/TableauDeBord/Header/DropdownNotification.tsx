@@ -1,10 +1,26 @@
-"use client"
+"use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { auth, db, requestFCMToken, onMessageListener } from "@/firebase/firebaseConfig";
-import { collection, addDoc, onSnapshot, query, orderBy, limit, Timestamp, doc, updateDoc, deleteDoc } from "firebase/firestore";
+import {
+  auth,
+  db,
+  requestFCMToken,
+  onMessageListener,
+} from "@/firebase/firebaseConfig";
+import {
+  collection,
+  addDoc,
+  onSnapshot,
+  query,
+  orderBy,
+  limit,
+  Timestamp,
+  doc,
+  updateDoc,
+  deleteDoc,
+} from "firebase/firestore";
 import { getMessaging, onMessage } from "firebase/messaging";
-import { 
+import {
   Button,
   Dropdown,
   DropdownTrigger,
@@ -14,7 +30,7 @@ import {
   Card,
   CardBody,
   Divider,
-  cn
+  cn,
 } from "@nextui-org/react";
 
 interface Notification {
@@ -38,14 +54,23 @@ const DropdownNotification = () => {
     const user = auth.currentUser;
     if (user) {
       try {
-        const notificationRef = doc(db, "users", user.uid, "notifications", notificationId);
+        const notificationRef = doc(
+          db,
+          "users",
+          user.uid,
+          "notifications",
+          notificationId,
+        );
         await updateDoc(notificationRef, { read: true });
-        
+
         // Mettre à jour le timestamp de dernière lecture
         const currentTimestamp = Date.now();
-        localStorage.setItem('lastReadNotification', currentTimestamp.toString());
+        localStorage.setItem(
+          "lastReadNotification",
+          currentTimestamp.toString(),
+        );
         setLastReadTimestamp(currentTimestamp);
-        
+
         // Mettre à jour l'état notifying
         checkUnreadNotifications();
       } catch (error) {
@@ -55,14 +80,16 @@ const DropdownNotification = () => {
   };
 
   const checkUnreadNotifications = (notifs: Notification[]) => {
-    const storedTimestamp = parseInt(localStorage.getItem('lastReadNotification') || '0');
-    
-    const unreadNotifs = notifs.filter(notification => {
+    const storedTimestamp = parseInt(
+      localStorage.getItem("lastReadNotification") || "0",
+    );
+
+    const unreadNotifs = notifs.filter((notification) => {
       if (!notification.timestamp) return false;
       const notifTimestamp = notification.timestamp.toDate().getTime();
       return notifTimestamp > storedTimestamp;
     });
-    
+
     setUnreadCount(unreadNotifs.length);
     setNotifying(unreadNotifs.length > 0);
   };
@@ -70,7 +97,7 @@ const DropdownNotification = () => {
   const handleDropdownOpen = () => {
     setDropdownOpen(true);
     const currentTimestamp = Date.now();
-    localStorage.setItem('lastReadNotification', currentTimestamp.toString());
+    localStorage.setItem("lastReadNotification", currentTimestamp.toString());
     setLastReadTimestamp(currentTimestamp);
     setNotifying(false);
   };
@@ -80,7 +107,9 @@ const DropdownNotification = () => {
       const user = auth.currentUser;
       if (user) {
         try {
-          const storedTimestamp = parseInt(localStorage.getItem('lastReadNotification') || '0');
+          const storedTimestamp = parseInt(
+            localStorage.getItem("lastReadNotification") || "0",
+          );
           setLastReadTimestamp(storedTimestamp);
 
           const token = await requestFCMToken();
@@ -93,19 +122,24 @@ const DropdownNotification = () => {
             });
           }
 
-          const notificationsRef = collection(db, "users", user.uid, "notifications");
+          const notificationsRef = collection(
+            db,
+            "users",
+            user.uid,
+            "notifications",
+          );
           const notificationsQuery = query(
             notificationsRef,
             orderBy("timestamp", "desc"),
-            limit(10)
+            limit(10),
           );
 
           const unsubscribe = onSnapshot(notificationsQuery, (snapshot) => {
-            const newNotifications = snapshot.docs.map(doc => ({
+            const newNotifications = snapshot.docs.map((doc) => ({
               id: doc.id,
-              ...doc.data()
+              ...doc.data(),
             })) as Notification[];
-            
+
             setNotifications(newNotifications);
             checkUnreadNotifications(newNotifications);
           });
@@ -119,10 +153,10 @@ const DropdownNotification = () => {
                 body: payload.notification.body || "",
                 timestamp: Timestamp.now(),
                 read: false,
-                link: payload.data?.link
+                link: payload.data?.link,
               };
-              
-              setNotifications(prev => {
+
+              setNotifications((prev) => {
                 const updatedNotifications = [newNotification, ...prev];
                 checkUnreadNotifications(updatedNotifications);
                 return updatedNotifications;
@@ -150,7 +184,10 @@ const DropdownNotification = () => {
 
   const getNotificationTimestamp = (notification: Notification): number => {
     try {
-      if (notification.timestamp && typeof notification.timestamp.toDate === 'function') {
+      if (
+        notification.timestamp &&
+        typeof notification.timestamp.toDate === "function"
+      ) {
         return notification.timestamp.toDate().getTime();
       }
       // Si timestamp n'est pas un Timestamp Firestore, retourner 0 ou une autre valeur par défaut
@@ -161,33 +198,47 @@ const DropdownNotification = () => {
     }
   };
 
-  const deleteNotification = async (e: React.MouseEvent, notificationId: string) => {
+  const deleteNotification = async (
+    e: React.MouseEvent,
+    notificationId: string,
+  ) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     const user = auth.currentUser;
     if (user) {
       try {
-        const notificationRef = doc(db, "users", user.uid, "notifications", notificationId);
+        const notificationRef = doc(
+          db,
+          "users",
+          user.uid,
+          "notifications",
+          notificationId,
+        );
         await deleteDoc(notificationRef);
-        
+
         // Mettre à jour la liste locale des notifications
-        const updatedNotifications = notifications.filter(n => n.id !== notificationId);
+        const updatedNotifications = notifications.filter(
+          (n) => n.id !== notificationId,
+        );
         setNotifications(updatedNotifications);
-        
+
         // Recalculer le nombre de notifications non lues
         checkUnreadNotifications(updatedNotifications);
-        
+
         console.log("Notification supprimée avec succès");
       } catch (error) {
-        console.error("Erreur lors de la suppression de la notification:", error);
+        console.error(
+          "Erreur lors de la suppression de la notification:",
+          error,
+        );
       }
     }
   };
 
   return (
-    <div className="relative hidden sm:block">
-      <Dropdown 
+    <div className="relative block">
+      <Dropdown
         isOpen={dropdownOpen}
         onOpenChange={(open) => {
           if (open) {
@@ -205,7 +256,7 @@ const DropdownNotification = () => {
             className={cn(
               "relative h-12 w-12",
               "bg-default-100 hover:bg-default-200",
-              "dark:bg-default-50 dark:hover:bg-default-100"
+              "dark:bg-default-50 dark:hover:bg-default-100",
             )}
           >
             <div className="relative">
@@ -237,12 +288,16 @@ const DropdownNotification = () => {
           className="w-[360px] p-0"
           closeOnSelect={false}
         >
-          <DropdownItem key="header" textValue="Notifications" className="h-14 gap-2">
+          <DropdownItem
+            key="header"
+            textValue="Notifications"
+            className="h-14 gap-2"
+          >
             <div className="flex w-full items-center justify-between">
               <span className="text-base font-medium">Notifications</span>
               {unreadCount > 0 && (
                 <span className="rounded-full bg-danger px-2 py-0.5 text-xs text-white">
-                  {unreadCount} nouveau{unreadCount > 1 ? 'x' : ''}
+                  {unreadCount} nouveau{unreadCount > 1 ? "x" : ""}
                 </span>
               )}
             </div>
@@ -254,13 +309,13 @@ const DropdownNotification = () => {
               textValue={notification.title}
               className={cn(
                 "py-3",
-                getNotificationTimestamp(notification) > lastReadTimestamp && 
-                "bg-default-100 dark:bg-default-50"
+                getNotificationTimestamp(notification) > lastReadTimestamp &&
+                  "bg-default-100 dark:bg-default-50",
               )}
             >
               <div className="flex w-full items-start justify-between">
-                <Link 
-                  href={notification.link || "#"} 
+                <Link
+                  href={notification.link || "#"}
                   className="flex-grow"
                   onClick={() => markAsRead(notification.id)}
                 >
@@ -273,9 +328,10 @@ const DropdownNotification = () => {
                         {notification.body}
                       </p>
                       <p className="text-tiny text-default-400">
-                        {notification.timestamp && typeof notification.timestamp.toDate === 'function'
+                        {notification.timestamp &&
+                        typeof notification.timestamp.toDate === "function"
                           ? notification.timestamp.toDate().toLocaleString()
-                          : 'Date inconnue'}
+                          : "Date inconnue"}
                       </p>
                     </CardBody>
                   </Card>
@@ -287,15 +343,15 @@ const DropdownNotification = () => {
                   className="ml-2 self-start"
                   onClick={(e) => deleteNotification(e, notification.id)}
                 >
-                  <svg 
-                    xmlns="http://www.w3.org/2000/svg" 
-                    width="18" 
-                    height="18" 
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="18"
+                    height="18"
                     viewBox="0 0 24 24"
                     className="text-default-400"
                   >
-                    <path 
-                      fill="currentColor" 
+                    <path
+                      fill="currentColor"
                       d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41z"
                     />
                   </svg>

@@ -1,12 +1,31 @@
-import { clerkMiddleware } from "@clerk/nextjs/server";
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
 
-export default clerkMiddleware();
+export function middleware(request: NextRequest) {
+  const response = NextResponse.next()
+
+  // Ajout des headers de sécurité
+  response.headers.set('X-Frame-Options', 'DENY')
+  response.headers.set('X-Content-Type-Options', 'nosniff')
+  response.headers.set('Referrer-Policy', 'origin-when-cross-origin')
+  response.headers.set(
+    'Strict-Transport-Security',
+    'max-age=31536000; includeSubDomains'
+  )
+
+  // Cache-Control pour les assets statiques
+  if (request.nextUrl.pathname.startsWith('/_next/static')) {
+    response.headers.set(
+      'Cache-Control',
+      'public, max-age=31536000, immutable'
+    )
+  }
+
+  return response
+}
 
 export const config = {
   matcher: [
-    // Skip Next.js internals and all static files, unless found in search params
-    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-    // Always run for API routes
-    '/(api|trpc)(.*)',
+    '/((?!api|_next/static|_next/image|favicon.ico).*)',
   ],
-};
+}
