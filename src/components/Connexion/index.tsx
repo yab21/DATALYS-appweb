@@ -78,7 +78,7 @@ const Connexion: React.FC = () => {
           <div className="relative z-10 -mt-7 w-full max-w-md">
             <Image
               src="/images/logo/logo.png"
-              alt=""
+              alt="logo"
               width={180}
               height={120}
             />
@@ -118,9 +118,11 @@ const Connexion: React.FC = () => {
                   variant="flat"
                   placeholder="Entrer votre adresse email"
                   className="max-w-sm"
+                  size="lg"
                   onChange={(e) => setEmail(e.target.value)}
                   value={email}
                   required
+                  style={{ fontSize: "0.9rem" }}
                 />
               </div>
               <div>
@@ -131,9 +133,11 @@ const Connexion: React.FC = () => {
                   variant="flat"
                   placeholder="Entrer votre mot de passe"
                   className="max-w-sm"
+                  size="lg"
                   onChange={(e) => setPassword(e.target.value)}
                   value={password}
                   required
+                  style={{ fontSize: "0.9rem" }}
                 />
               </div>
               {error && <p className="text-red-500">{error}</p>}
@@ -146,7 +150,11 @@ const Connexion: React.FC = () => {
                 {loading ? "Connexion..." : "Connexion"}
               </Button>
             </form>
+<<<<<<< HEAD
             <div className="mt-1 flex justify-center px-3 pb-4 pt-5">
+=======
+            <div className="flex flex-wrap pb-4 pt-5">
+>>>>>>> 616a4022b68eca135ddaeb787a8e2c96c5cbedcb
               <p className="text-dark">
                 All Rights Reserved by
                 <Link

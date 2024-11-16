@@ -66,6 +66,7 @@ const DropdownUser = () => {
       >
         <span className="h-12 w-12 rounded-full">
           <Image
+<<<<<<< HEAD
             src={imageError ? "/images/default-avatar.png" : "/images/user.png"}
             alt="User Profile"
             width={50}
@@ -74,6 +75,14 @@ const DropdownUser = () => {
             className="rounded-full"
             loading="eager"
             onError={() => setImageError(true)}
+=======
+            src={userData.profileImage}
+            alt="User"
+            width={32}
+            height={32}
+            className="rounded-full"
+            unoptimized
+>>>>>>> 616a4022b68eca135ddaeb787a8e2c96c5cbedcb
           />
         </span>
 
@@ -106,6 +115,7 @@ const DropdownUser = () => {
             <div className="flex items-center gap-3">
               <div className="h-12 w-12 rounded-full">
                 <Image
+<<<<<<< HEAD
                   src={
                     imageError
                       ? "/images/default-avatar.png"
@@ -118,6 +128,14 @@ const DropdownUser = () => {
                   className="rounded-full"
                   loading="eager"
                   onError={() => setImageError(true)}
+=======
+                  src={userData.profileImage}
+                  alt="User"
+                  width={32}
+                  height={32}
+                  className="rounded-full"
+                  unoptimized
+>>>>>>> 616a4022b68eca135ddaeb787a8e2c96c5cbedcb
                 />
               </div>
               <div>

@@ -7,7 +7,11 @@ import {
   ModalBody, 
   ModalFooter, 
   Button, 
-  useDisclosure 
+  useDisclosure,
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem
 } from "@nextui-org/react";
 import { getAuth } from "firebase/auth";
 import { doc, getDoc, getFirestore, updateDoc, deleteDoc } from "firebase/firestore";
@@ -140,36 +144,48 @@ const FileItemXL: React.FC<FileItemXLProps> = ({ file, onFileDeleted }) => {
           {file.isPrivate && " 🔒"}
         </p>
         {isUserAdmin && (
-          <div className="mt-2 flex gap-2">
-            <Button
-              size="sm"
-              color="primary"
-              onPress={() => setShowRenameModal(true)}
+          <Dropdown>
+            <DropdownTrigger>
+              <Button
+                size="sm"
+                radius="full"
+                className="flex items-center justify-center bg-white dark:bg-dark-2"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    fill="none"
+                    stroke="currentColor"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M4 12a1 1 0 1 0 2 0a1 1 0 1 0-2 0m7 0a1 1 0 1 0 2 0a1 1 0 1 0-2 0m7 0a1 1 0 1 0 2 0a1 1 0 1 0-2 0"
+                  />
+                </svg>
+              </Button>
+            </DropdownTrigger>
+            <DropdownMenu
+              aria-label="File Actions"
+              className="bg-white text-dark dark:bg-dark-2 dark:text-white"
             >
-              Renommer
-            </Button>
-            <Button
-              size="sm"
-              color="secondary"
-              onPress={() => setShowMoveModal(true)}
-            >
-              Déplacer
-            </Button>
-            <Button
-              size="sm"
-              color="warning"
-              onPress={togglePrivate}
-            >
-              {file.isPrivate ? "Rendre public" : "Rendre privé"}
-            </Button>
-            <Button
-              size="sm"
-              color="danger"
-              onPress={() => setShowDeleteModal(true)}
-            >
-              Supprimer
-            </Button>
-          </div>
+              <DropdownItem key="renommer" onPress={() => setShowRenameModal(true)}>
+                Renommer
+              </DropdownItem>
+              <DropdownItem key="deplacer" onPress={() => setShowMoveModal(true)}>
+                Déplacer
+              </DropdownItem>
+              <DropdownItem key="prive" onPress={togglePrivate}>
+                {file.isPrivate ? "Rendre public" : "Rendre privé"}
+              </DropdownItem>
+              <DropdownItem key="supprimer" onPress={() => setShowDeleteModal(true)}>
+                Supprimer
+              </DropdownItem>
+            </DropdownMenu>
+          </Dropdown>
         )}
       </div>
 
