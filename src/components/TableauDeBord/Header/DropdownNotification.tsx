@@ -6,6 +6,7 @@ import {
   db,
   requestFCMToken,
   onMessageListener,
+  initializeMessaging,
 } from "@/firebase/firebaseConfig";
 import {
   collection,
@@ -19,7 +20,7 @@ import {
   updateDoc,
   deleteDoc,
 } from "firebase/firestore";
-import { getMessaging, onMessage } from "firebase/messaging";
+import { getMessaging, onMessage, getToken } from "firebase/messaging";
 import {
   Button,
   Dropdown,
@@ -31,7 +32,9 @@ import {
   CardBody,
   Divider,
   cn,
+  DropdownProps,
 } from "@nextui-org/react";
+import { ReactNode } from "react";
 
 interface Notification {
   id: string;
@@ -42,6 +45,11 @@ interface Notification {
   link?: string;
 }
 
+type DropdownMenuItemType = {
+  key: string;
+  label: ReactNode;
+};
+
 const DropdownNotification = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notifying, setNotifying] = useState(false);
@@ -49,6 +57,7 @@ const DropdownNotification = () => {
   const [fcmToken, setFcmToken] = useState<string | null>(null);
   const [lastReadTimestamp, setLastReadTimestamp] = useState<number>(0);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [messaging, setMessaging] = useState<any>(null);
 
   const markAsRead = async (notificationId: string) => {
     const user = auth.currentUser;
@@ -79,7 +88,7 @@ const DropdownNotification = () => {
     }
   };
 
-  const checkUnreadNotifications = (notifs: Notification[]) => {
+  const checkUnreadNotifications = (notifs: Notification[] = notifications) => {
     const storedTimestamp = parseInt(
       localStorage.getItem("lastReadNotification") || "0",
     );
@@ -105,13 +114,20 @@ const DropdownNotification = () => {
   useEffect(() => {
     const initializeNotifications = async () => {
       const user = auth.currentUser;
-      if (user) {
-        try {
-          const storedTimestamp = parseInt(
-            localStorage.getItem("lastReadNotification") || "0",
-          );
-          setLastReadTimestamp(storedTimestamp);
+      if (!user) return;
 
+      try {
+        const storedTimestamp = parseInt(
+          localStorage.getItem("lastReadNotification") || "0",
+        );
+        setLastReadTimestamp(storedTimestamp);
+
+        // Initialiser la messagerie
+        const messagingInstance = await initializeMessaging();
+        if (messagingInstance) {
+          setMessaging(messagingInstance);
+
+          // Demander le token
           const token = await requestFCMToken();
           if (token) {
             setFcmToken(token);
@@ -121,53 +137,53 @@ const DropdownNotification = () => {
               createdAt: new Date(),
             });
           }
-
-          const notificationsRef = collection(
-            db,
-            "users",
-            user.uid,
-            "notifications",
-          );
-          const notificationsQuery = query(
-            notificationsRef,
-            orderBy("timestamp", "desc"),
-            limit(10),
-          );
-
-          const unsubscribe = onSnapshot(notificationsQuery, (snapshot) => {
-            const newNotifications = snapshot.docs.map((doc) => ({
-              id: doc.id,
-              ...doc.data(),
-            })) as Notification[];
-
-            setNotifications(newNotifications);
-            checkUnreadNotifications(newNotifications);
-          });
-
-          const messaging = getMessaging();
-          onMessage(messaging, (payload) => {
-            if (payload.notification) {
-              const newNotification = {
-                id: Date.now().toString(),
-                title: payload.notification.title || "",
-                body: payload.notification.body || "",
-                timestamp: Timestamp.now(),
-                read: false,
-                link: payload.data?.link,
-              };
-
-              setNotifications((prev) => {
-                const updatedNotifications = [newNotification, ...prev];
-                checkUnreadNotifications(updatedNotifications);
-                return updatedNotifications;
-              });
-            }
-          });
-
-          return () => unsubscribe();
-        } catch (err) {
-          console.error("Erreur dans l'initialisation des notifications", err);
         }
+
+        const notificationsRef = collection(
+          db,
+          "users",
+          user.uid,
+          "notifications",
+        );
+        const notificationsQuery = query(
+          notificationsRef,
+          orderBy("timestamp", "desc"),
+          limit(10),
+        );
+
+        const unsubscribe = onSnapshot(notificationsQuery, (snapshot) => {
+          const newNotifications = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          })) as Notification[];
+
+          setNotifications(newNotifications);
+          checkUnreadNotifications(newNotifications);
+        });
+
+        const messaging = getMessaging();
+        onMessage(messaging, (payload) => {
+          if (payload.notification) {
+            const newNotification = {
+              id: Date.now().toString(),
+              title: payload.notification.title || "",
+              body: payload.notification.body || "",
+              timestamp: Timestamp.now(),
+              read: false,
+              link: payload.data?.link,
+            };
+
+            setNotifications((prev) => {
+              const updatedNotifications = [newNotification, ...prev];
+              checkUnreadNotifications(updatedNotifications);
+              return updatedNotifications;
+            });
+          }
+        });
+
+        return () => unsubscribe();
+      } catch (error) {
+        console.error("Erreur dans l'initialisation des notifications", error);
       }
     };
 
@@ -180,6 +196,45 @@ const DropdownNotification = () => {
     return () => {
       unsubscribeAuth();
     };
+  }, []);
+
+  useEffect(() => {
+    // Only initialize messaging on the client side
+    if (typeof window !== "undefined") {
+      try {
+        const messagingInstance = getMessaging(auth.app);
+        setMessaging(messagingInstance);
+
+        // Request permission and get token
+        const requestPermission = async () => {
+          try {
+            const permission = await Notification.requestPermission();
+            if (permission === "granted") {
+              const token = await getToken(messagingInstance, {
+                vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
+              });
+              console.log("FCM Token:", token);
+            }
+          } catch (error) {
+            console.log("Notification permission error:", error);
+          }
+        };
+
+        requestPermission();
+
+        // Handle incoming messages
+        const unsubscribe = onMessage(messagingInstance, (payload) => {
+          console.log("Received message:", payload);
+          // Handle your notification here
+        });
+
+        return () => {
+          unsubscribe();
+        };
+      } catch (error) {
+        console.log("Firebase messaging not supported in this environment");
+      }
+    }
   }, []);
 
   const getNotificationTimestamp = (notification: Notification): number => {
@@ -287,26 +342,10 @@ const DropdownNotification = () => {
           aria-label="Notifications"
           className="w-[360px] p-0"
           closeOnSelect={false}
-        >
-          <DropdownItem
-            key="header"
-            textValue="Notifications"
-            className="h-14 gap-2"
-          >
-            <div className="flex w-full items-center justify-between">
-              <span className="text-base font-medium">Notifications</span>
-              {unreadCount > 0 && (
-                <span className="rounded-full bg-danger px-2 py-0.5 text-xs text-white">
-                  {unreadCount} nouveau{unreadCount > 1 ? "x" : ""}
-                </span>
-              )}
-            </div>
-          </DropdownItem>
-
-          {notifications.map((notification) => (
+          items={notifications}
+          renderItem={(notification) => (
             <DropdownItem
               key={notification.id}
-              textValue={notification.title}
               className={cn(
                 "py-3",
                 getNotificationTimestamp(notification) > lastReadTimestamp &&
@@ -358,12 +397,79 @@ const DropdownNotification = () => {
                 </Button>
               </div>
             </DropdownItem>
-          ))}
+          )}
+        >
+          <DropdownItem key="header" className="h-14 gap-2">
+            <div className="flex w-full items-center justify-between">
+              <span className="text-base font-medium">Notifications</span>
+              {unreadCount > 0 && (
+                <span className="rounded-full bg-danger px-2 py-0.5 text-xs text-white">
+                  {unreadCount} nouveau{unreadCount > 1 ? "x" : ""}
+                </span>
+              )}
+            </div>
+          </DropdownItem>
 
-          {notifications.length === 0 && (
-            <DropdownItem textValue="Aucune notification">
+          {notifications.length === 0 ? (
+            <DropdownItem key="empty" className="py-3">
               <p className="text-default-400">Aucune notification</p>
             </DropdownItem>
+          ) : (
+            notifications.map((notification) => (
+              <DropdownItem
+                key={notification.id}
+                className={cn(
+                  "py-3",
+                  getNotificationTimestamp(notification) > lastReadTimestamp &&
+                    "bg-default-100 dark:bg-default-50",
+                )}
+              >
+                <div className="flex w-full items-start justify-between">
+                  <Link
+                    href={notification.link || "#"}
+                    className="flex-grow"
+                    onClick={() => markAsRead(notification.id)}
+                  >
+                    <Card shadow="none" className="bg-transparent">
+                      <CardBody className="gap-1 p-0">
+                        <p className="text-small font-medium">
+                          {notification.title}
+                        </p>
+                        <p className="text-tiny text-default-400">
+                          {notification.body}
+                        </p>
+                        <p className="text-tiny text-default-400">
+                          {notification.timestamp &&
+                          typeof notification.timestamp.toDate === "function"
+                            ? notification.timestamp.toDate().toLocaleString()
+                            : "Date inconnue"}
+                        </p>
+                      </CardBody>
+                    </Card>
+                  </Link>
+                  <Button
+                    isIconOnly
+                    size="sm"
+                    variant="light"
+                    className="ml-2 self-start"
+                    onClick={(e) => deleteNotification(e, notification.id)}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      className="text-default-400"
+                    >
+                      <path
+                        fill="currentColor"
+                        d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41z"
+                      />
+                    </svg>
+                  </Button>
+                </div>
+              </DropdownItem>
+            ))
           )}
         </DropdownMenu>
       </Dropdown>
