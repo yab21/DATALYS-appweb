@@ -86,12 +86,14 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
             label: "Projet",
             route: "#",
             children: [
-              ...(isUserAdmin ? [{ label: "Ajouter", route: "/tableaudebord/projet/ajouter" }] : []),
+              ...(isUserAdmin
+                ? [{ label: "Ajouter", route: "/tableaudebord/projet/ajouter" }]
+                : []),
               { label: "Gérer", route: "/tableaudebord/projet/gerer" },
             ],
           },
         ],
-      }
+      },
     ];
 
     // Menu Autres

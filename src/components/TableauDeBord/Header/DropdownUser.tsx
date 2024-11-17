@@ -7,6 +7,7 @@ import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "@/firebase/firebaseConfig";
 import { getAuth, signOut } from "firebase/auth";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 const DropdownUser = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -16,6 +17,7 @@ const DropdownUser = () => {
     profileImage: "/images/user.png", // Image par défaut
   });
   const router = useRouter();
+  const [imageError, setImageError] = useState(false);
 
   // Fonction pour récupérer les informations utilisateur depuis Firestore
   useEffect(() => {
@@ -63,10 +65,24 @@ const DropdownUser = () => {
         href="#"
       >
         <span className="h-12 w-12 rounded-full">
-          <img
+          <Image
+<<<<<<< HEAD
+            src={imageError ? "/images/default-avatar.png" : "/images/user.png"}
+            alt="User Profile"
+            width={50}
+            height={50}
+            priority={true}
+            className="rounded-full"
+            loading="eager"
+            onError={() => setImageError(true)}
+=======
             src={userData.profileImage}
             alt="User"
-            className="h-full w-full rounded-full object-cover"
+            width={32}
+            height={32}
+            className="rounded-full"
+            unoptimized
+>>>>>>> 616a4022b68eca135ddaeb787a8e2c96c5cbedcb
           />
         </span>
 
@@ -94,14 +110,36 @@ const DropdownUser = () => {
       </Link>
 
       {dropdownOpen && (
+<<<<<<< HEAD
         <div className="dark:border-strokedark dark:bg-boxdark absolute right-0 mt-4 flex w-62.5 flex-col rounded-sm border border-stroke bg-white shadow-default">
+=======
+        <div className="absolute right-0 mt-4 flex w-62.5 flex-col rounded-sm bg-white shadow-1 dark:bg-gray-dark dark:shadow-card">
+>>>>>>> 2fa1fbd7cb84095b0f065b4da605c6f07ece3295
           <div className="dark:border-strokedark flex flex-col gap-4 border-b border-stroke px-4 py-3">
             <div className="flex items-center gap-3">
               <div className="h-12 w-12 rounded-full">
-                <img
+                <Image
+<<<<<<< HEAD
+                  src={
+                    imageError
+                      ? "/images/default-avatar.png"
+                      : "/images/user.png"
+                  }
+                  alt="User Profile"
+                  width={50}
+                  height={50}
+                  priority={true}
+                  className="rounded-full"
+                  loading="eager"
+                  onError={() => setImageError(true)}
+=======
                   src={userData.profileImage}
                   alt="User"
-                  className="h-full w-full rounded-full object-cover"
+                  width={32}
+                  height={32}
+                  className="rounded-full"
+                  unoptimized
+>>>>>>> 616a4022b68eca135ddaeb787a8e2c96c5cbedcb
                 />
               </div>
               <div>

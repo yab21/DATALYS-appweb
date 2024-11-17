@@ -92,7 +92,7 @@ const CreateFolderModal: React.FC<CreateFolderModalProps> = ({
               adminDoc.id,
               {
                 title: "Nouveau dossier créé",
-                body: `avez créé un nouveau dossier "${folderName}" dans le projet "${projectData.intitule}"`,
+                body: `créé un nouveau dossier "${folderName}" dans le projet "${projectData.intitule}"`,
                 link: `/tableaudebord/projet/pageprojet/${projectId}`
               },
               currentUser.uid
@@ -115,7 +115,7 @@ const CreateFolderModal: React.FC<CreateFolderModalProps> = ({
                   userId,
                   {
                     title: "Nouveau dossier disponible",
-                    body: `avez créé un nouveau dossier "${folderName}" dans le projet "${projectData.intitule}"`,
+                    body: `a créé un nouveau dossier "${folderName}" dans le projet "${projectData.intitule}"`,
                     link: `/tableaudebord/projet/pageprojet/${projectId}`
                   },
                   currentUser.uid
