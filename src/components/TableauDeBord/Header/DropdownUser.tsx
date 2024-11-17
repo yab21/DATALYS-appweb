@@ -13,7 +13,7 @@ const DropdownUser = () => {
   const [userData, setUserData] = useState({
     firstName: "",
     lastName: "",
-    profileImage: "/images/user.png" // Image par défaut
+    profileImage: "/images/user.png", // Image par défaut
   });
   const router = useRouter();
 
@@ -31,11 +31,14 @@ const DropdownUser = () => {
             setUserData({
               firstName: data.firstName || "",
               lastName: data.lastName || "",
-              profileImage: data.profileImage || "/images/user.png"
+              profileImage: data.profileImage || "/images/user.png",
             });
           }
         } catch (error) {
-          console.error("Erreur lors de la récupération des données utilisateur:", error);
+          console.error(
+            "Erreur lors de la récupération des données utilisateur:",
+            error,
+          );
         }
       }
     };
@@ -67,7 +70,7 @@ const DropdownUser = () => {
           />
         </span>
 
-        <span className="flex items-center gap-2 font-medium text-dark dark:text-dark-6">
+        <span className="flex items-center gap-2 font-medium text-dark dark:text-white">
           <span className="hidden lg:block">
             {userData.firstName.charAt(0)}. {userData.lastName}
           </span>
@@ -91,8 +94,8 @@ const DropdownUser = () => {
       </Link>
 
       {dropdownOpen && (
-        <div className="absolute right-0 mt-4 flex w-62.5 flex-col rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-          <div className="flex flex-col gap-4 border-b border-stroke px-4 py-3 dark:border-strokedark">
+        <div className="dark:border-strokedark dark:bg-boxdark absolute right-0 mt-4 flex w-62.5 flex-col rounded-sm border border-stroke bg-white shadow-default">
+          <div className="dark:border-strokedark flex flex-col gap-4 border-b border-stroke px-4 py-3">
             <div className="flex items-center gap-3">
               <div className="h-12 w-12 rounded-full">
                 <img

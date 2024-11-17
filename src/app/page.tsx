@@ -1,4 +1,4 @@
-import AllUsers from "@/components/TousLesUtilisateurs";
+import Connexion from "@/components/Connexion";
 import { Metadata } from "next";
 import { NextUIProvider } from "@nextui-org/react";
 import React from "react";
@@ -12,7 +12,7 @@ export default function Home() {
   return (
     <>
       <NextUIProvider>
-        <AllUsers />
+        <Connexion />
       </NextUIProvider>
     </>
   );

@@ -118,7 +118,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
           route: "#",
           children: [
             { label: "Voir", route: "/tableaudebord/profil/voir" },
-            { label: "Modifier", route: "/tableaudebord/profil/modifier" },
             {
               label: "Changer le mot de passe",
               route: "/tableaudebord/profil/changermotdepasse",
@@ -150,11 +149,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
         children: [
           { label: "Voir", route: "/tableaudebord/utilisateur/voir" },
           {
-            label: "Créer un compte administrateur",
-            route: "/tableaudebord/creationduncompte",
-          },
-          {
-            label: "Créer un compte client",
+            label: "Créer un compte",
             route: "/tableaudebord/creationduncompte",
           },
         ],

@@ -31,7 +31,10 @@ const VoirProfil = () => {
       console.log("Utilisateur authentifié:", user.uid);
       const db = getFirestore(app);
       const userDoc = doc(db, "users", user.uid);
-      console.log("Tentative de récupération des données pour l'utilisateur:", user.uid);
+      console.log(
+        "Tentative de récupération des données pour l'utilisateur:",
+        user.uid,
+      );
       const userSnapshot = await getDoc(userDoc);
       if (userSnapshot.exists()) {
         console.log("Données utilisateur récupérées:", userSnapshot.data());
@@ -64,7 +67,7 @@ const VoirProfil = () => {
         <div className="mt-8 rounded-[10px] bg-white shadow-1 dark:bg-gray-dark dark:shadow-card">
           <div className="container mx-auto py-8">
             <div className="grid grid-cols-12 gap-6 px-4">
-              <div className="col-span-3">
+              <div className="col-span-12 md:col-span-3">
                 <div className="rounded-lg border-stroke bg-white p-6 shadow dark:border-stroke-dark dark:bg-gray-dark">
                   <div className="flex flex-col items-center">
                     <div className="relative h-32 w-32 overflow-hidden rounded-full">
@@ -90,16 +93,18 @@ const VoirProfil = () => {
                   </div>
                 </div>
               </div>
-              <div className="col-span-9">
+              <div className="col-span-12 md:col-span-9">
                 <div className="rounded-lg border-stroke bg-white p-6 shadow dark:border-stroke-dark dark:bg-gray-dark">
                   <h2 className="mb-4 text-xl font-bold">Voir Votre profil</h2>
                   <div className="mt-4 rounded-lg shadow-sm">
                     <div className="grid grid-cols-1 gap-2 px-2 py-6 md:grid-cols-2 md:gap-4 md:py-4">
                       <p className="text-base font-extrabold tracking-wide text-dark dark:text-white">
-                        Nom: <span className="font-light">{userData.lastName}</span>
+                        Nom:{" "}
+                        <span className="font-light">{userData.lastName}</span>
                       </p>
                       <p className="text-base font-extrabold tracking-wide text-dark dark:text-white">
-                        Prénom: <span className="font-light">{userData.firstName}</span>
+                        Prénom:{" "}
+                        <span className="font-light">{userData.firstName}</span>
                       </p>
                       <p className="text-base font-extrabold tracking-wide text-dark dark:text-white">
                         Votre fonction:{" "}
@@ -111,7 +116,9 @@ const VoirProfil = () => {
                       </p>
                       <p className="text-base font-extrabold tracking-wide text-dark dark:text-white">
                         Département de la société:{" "}
-                        <span className="font-light">{userData.department}</span>
+                        <span className="font-light">
+                          {userData.department}
+                        </span>
                       </p>
                       <p className="text-base font-extrabold tracking-wide text-dark dark:text-white">
                         Adresse e-mail:{" "}
@@ -126,8 +133,8 @@ const VoirProfil = () => {
         </div>
       </div>
       {isEditing && (
-        <ModifierProfil 
-          userData={userData} 
+        <ModifierProfil
+          userData={userData}
           onClose={() => setIsEditing(false)}
           onUpdate={handleUpdate}
         />
